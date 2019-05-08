@@ -20,6 +20,7 @@
 
 #include <QDebug>
 #include <QFileDialog>
+#include <QFontDatabase>
 #include <QMimeDatabase>
 #include <QTextCodec>
 #include <QTextEdit>
@@ -29,7 +30,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    mainWidget = ui->browser;
+    m_mainWidget = ui->browser;
 
     while (ui->toolbarStuff->count()) {
         QWidget *tw = ui->toolbarStuff->takeAt(0)->widget();
@@ -70,7 +71,7 @@ bool MainWindow::load(QUrl url)
 {
     qDebug() << url;
     if (url.isRelative()) {
-        QUrl res = url.resolved(mainWidget->document()->baseUrl()); // doesn't work for local files
+        QUrl res = url.resolved(m_mainWidget->document()->baseUrl()); // doesn't work for local files
         qDebug() << url << res << res.fileName() << url.toString();
         // correct for QUrl::resolved() being broken
         if (res.fileName() != url.toString())
@@ -90,18 +91,22 @@ bool MainWindow::load(QUrl url)
             QFileInfo fi(file);
             QUrl baseUrl = QUrl::fromLocalFile(fi.absolutePath());
             qDebug() << "base URL" << baseUrl;
-            mainWidget->document()->setBaseUrl(baseUrl);
-            if (Qt::mightBeRichText(str)) {
-                mainWidget->setHtml(str);
-                success = true;
-            } else {
-                QMimeDatabase db;
-                success = true;
-                if (db.mimeTypeForFileNameAndData(f, data).name() == QLatin1String("text/markdown"))
-                    mainWidget->setMarkdown(str);
-                else
-                    mainWidget->setPlainText(QString::fromLocal8Bit(data));
+            m_mainWidget->document()->setBaseUrl(baseUrl);
+            QMimeDatabase db;
+            success = true;
+            QMimeType type = db.mimeTypeForFileNameAndData(f, data);
+            qDebug() << "mime type" << type;
+            if (type.name() == QLatin1String("text/markdown"))
+                m_mainWidget->setMarkdown(str);
+            else if (type.name() == QLatin1String("text/html"))
+                m_mainWidget->setHtml(str);
+            else if (type.name() == QLatin1String("text/plain")) {
+                m_mainWidget->setCurrentFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
+                m_mainWidget->setPlainText(QString::fromLocal8Bit(data));
             }
+            // TODO load images by writing a "loader" markdown file?
+            else
+                success = false;
         }
     } else {
         statusBar()->showMessage(tr("remote loading is not yet implemented: \"%1\"").arg(url.toString()));
@@ -116,6 +121,23 @@ bool MainWindow::load(QUrl url)
     return success;
 }
 
+bool MainWindow::setBrowserStyle(QUrl url)
+{
+    // TODO same url resolution as in load()
+    if (url.isLocalFile()) {
+        qDebug() << "setting style" << url;
+        QFile file(url.toLocalFile());
+        if (file.open(QFile::ReadOnly)) {
+            QByteArray data = file.readAll();
+            m_mainWidget->document()->setDefaultStyleSheet(QString::fromLatin1(data));
+            return true;
+        } else {
+            qWarning() << "failed to load stylesheet" << url;
+        }
+    }
+    return false;
+}
+
 void MainWindow::on_actionGo_back_triggered()
 {
     // ui->browser->backward(); // doesn't work
@@ -127,5 +149,6 @@ void MainWindow::on_actionGo_back_triggered()
 
 void MainWindow::on_browser_backwardAvailable(bool a)
 {
+    Q_UNUSED(a)
 //    ui->actionGo_back->setEnabled(a);
 }

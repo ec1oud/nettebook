@@ -17,15 +17,44 @@
 
 #include "mainwindow.h"
 #include <QApplication>
+#include <QCommandLineOption>
+#include <QCommandLineParser>
+#include <QDebug>
 #include <QUrl>
 
 int main(int argc, char *argv[])
 {
-    QApplication a(argc, argv);
+    QApplication app(argc, argv);
+
+    app.setApplicationName("NetteBook");
+    app.setOrganizationDomain("nettebook.org");
+    QCoreApplication::setApplicationVersion(QLatin1String("0.0.1"));
+
+    QCommandLineParser parser;
+//    parser.setOptionsAfterPositionalArgumentsMode(QCommandLineParser::ParseAsPositionalArguments);
+    const QCommandLineOption helpOption = parser.addHelpOption();
+    const QCommandLineOption versionOption = parser.addVersionOption();
+
+//    QCommandLineOption cssOption({"s", "css"},
+    QCommandLineOption cssOption(QStringList() << QStringLiteral("s") << QStringLiteral("css"),
+            QCoreApplication::translate("main", "Use the given CSS content style file."), QStringLiteral("path"));
+    parser.addOption(cssOption);
+
+    if (!parser.parse(QCoreApplication::arguments())) {
+        qWarning() << parser.errorText();
+        exit(1);
+    }
+    if (parser.isSet(versionOption))
+        parser.showVersion();
+    if (parser.isSet(helpOption))
+        parser.showHelp();
+
     MainWindow w;
-    if (argc > 1)
-        w.load(QUrl::fromLocalFile(a.arguments().last()));
+    if (parser.isSet(cssOption))
+        w.setBrowserStyle(QUrl::fromLocalFile(parser.value(cssOption)));
+    if (parser.positionalArguments().count() > 0)
+        w.load(QUrl::fromLocalFile(parser.positionalArguments().last()));
     w.show();
 
-    return a.exec();
+    return app.exec();
 }

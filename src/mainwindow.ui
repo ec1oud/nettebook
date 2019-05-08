@@ -96,7 +96,8 @@
   </action>
   <action name="actionGo_back">
    <property name="icon">
-    <iconset theme="back"/>
+    <iconset theme="back">
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Go back</string>
@@ -115,5 +116,25 @@
   </customwidget>
  </customwidgets>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>browser</sender>
+   <signal>anchorClicked(QUrl)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>load(QUrl)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>136</x>
+     <y>202</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>230</x>
+     <y>276</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>load(QUrl)</slot>
+ </slots>
 </ui>

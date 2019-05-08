@@ -66,8 +66,19 @@ void MainWindow::on_actionOpen_triggered()
     load(fileDialog.selectedUrls().first());
 }
 
-bool MainWindow::load(const QUrl &url)
+bool MainWindow::load(QUrl url)
 {
+    qDebug() << url;
+    if (url.isRelative()) {
+        QUrl res = url.resolved(mainWidget->document()->baseUrl()); // doesn't work for local files
+        qDebug() << url << res << res.fileName() << url.toString();
+        // correct for QUrl::resolved() being broken
+        if (res.fileName() != url.toString())
+            res = QUrl(res.toString() + QLatin1Char('/') + url.toString());
+        qDebug() << url << res << res.fileName() << url.toString();
+        url = res;
+    }
+
     bool success = false;
     if (url.isLocalFile()) {
         QString f = url.toLocalFile();
@@ -76,7 +87,9 @@ bool MainWindow::load(const QUrl &url)
             QByteArray data = file.readAll();
             QTextCodec *codec = Qt::codecForHtml(data);
             QString str = codec->toUnicode(data);
-            QUrl baseUrl = (f.front() == QLatin1Char(':') ? QUrl(f) : QUrl::fromLocalFile(f)).adjusted(QUrl::RemoveFilename);
+            QFileInfo fi(file);
+            QUrl baseUrl = QUrl::fromLocalFile(fi.absolutePath());
+            qDebug() << "base URL" << baseUrl;
             mainWidget->document()->setBaseUrl(baseUrl);
             if (Qt::mightBeRichText(str)) {
                 mainWidget->setHtml(str);
@@ -91,19 +104,25 @@ bool MainWindow::load(const QUrl &url)
             }
         }
     } else {
-        statusBar()->showMessage(tr("remote loading is not yet implemented"));
+        statusBar()->showMessage(tr("remote loading is not yet implemented: \"%1\"").arg(url.toString()));
         return false;
     }
-    if (success)
+    if (success) {
+        m_history.push(url);
         statusBar()->showMessage(tr("Opened \"%1\"").arg(url.toString()));
-    else
+    } else {
         statusBar()->showMessage(tr("Could not open \"%1\"").arg(url.toString()));
+    }
     return success;
 }
 
 void MainWindow::on_actionGo_back_triggered()
 {
-    ui->browser->backward();
+    // ui->browser->backward(); // doesn't work
+    if (m_history.count() > 1) {
+        m_history.pop(); // lose the current file
+        load(m_history.pop());
+    }
 }
 
 void MainWindow::on_browser_backwardAvailable(bool a)

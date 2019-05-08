@@ -19,6 +19,8 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QStack>
+#include <QUrl>
 
 namespace Ui {
 class MainWindow;
@@ -35,7 +37,7 @@ public:
     ~MainWindow();
 
 public slots:
-    bool load(const QUrl &url);
+    bool load(QUrl url);
 
 private slots:
     void on_actionQuit_triggered();
@@ -46,6 +48,7 @@ private slots:
 private:
     Ui::MainWindow *ui;
     QTextEdit *mainWidget;
+    QStack<QUrl> m_history; // correct for QTextBrowser history being broken (only for markdown?)
 };
 
 #endif // MAINWINDOW_H

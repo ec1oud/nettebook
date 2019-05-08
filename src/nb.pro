@@ -12,10 +12,12 @@ CONFIG += c++11
 
 SOURCES += \
         main.cpp \
-        mainwindow.cpp
+        mainwindow.cpp \
+    markdownbrowser.cpp
 
 HEADERS += \
-        mainwindow.h
+        mainwindow.h \
+    markdownbrowser.h
 
 FORMS += \
         mainwindow.ui

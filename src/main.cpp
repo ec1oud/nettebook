@@ -17,11 +17,14 @@
 
 #include "mainwindow.h"
 #include <QApplication>
+#include <QUrl>
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
     MainWindow w;
+    if (argc > 1)
+        w.load(QUrl::fromLocalFile(a.arguments().last()));
     w.show();
 
     return a.exec();

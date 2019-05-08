@@ -15,37 +15,15 @@
 **
 ****************************************************************************/
 
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#ifndef MARKDOWNBROWSER_H
+#define MARKDOWNBROWSER_H
 
-#include <QMainWindow>
+#include <QTextBrowser>
 
-namespace Ui {
-class MainWindow;
-}
-
-class QTextEdit;
-
-class MainWindow : public QMainWindow
+class MarkdownBrowser : public QTextBrowser
 {
-    Q_OBJECT
-
 public:
-    explicit MainWindow(QWidget *parent = nullptr);
-    ~MainWindow();
-
-public slots:
-    bool load(const QUrl &url);
-
-private slots:
-    void on_actionQuit_triggered();
-    void on_actionOpen_triggered();
-    void on_actionGo_back_triggered();
-    void on_browser_backwardAvailable(bool a);
-
-private:
-    Ui::MainWindow *ui;
-    QTextEdit *mainWidget;
+    MarkdownBrowser(QWidget *parent = nullptr);
 };
 
-#endif // MAINWINDOW_H
+#endif // MARKDOWNBROWSER_H

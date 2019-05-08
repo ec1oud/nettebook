@@ -15,37 +15,10 @@
 **
 ****************************************************************************/
 
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#include "markdownbrowser.h"
 
-#include <QMainWindow>
-
-namespace Ui {
-class MainWindow;
-}
-
-class QTextEdit;
-
-class MainWindow : public QMainWindow
+MarkdownBrowser::MarkdownBrowser(QWidget *parent)
+    : QTextBrowser(parent)
 {
-    Q_OBJECT
 
-public:
-    explicit MainWindow(QWidget *parent = nullptr);
-    ~MainWindow();
-
-public slots:
-    bool load(const QUrl &url);
-
-private slots:
-    void on_actionQuit_triggered();
-    void on_actionOpen_triggered();
-    void on_actionGo_back_triggered();
-    void on_browser_backwardAvailable(bool a);
-
-private:
-    Ui::MainWindow *ui;
-    QTextEdit *mainWidget;
-};
-
-#endif // MAINWINDOW_H
+}

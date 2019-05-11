@@ -24,12 +24,15 @@
 #include <QMimeDatabase>
 #include <QTextCodec>
 #include <QTextEdit>
+#include <iostream>
+#include <sstream>
 
 static const QString ipfsScheme = QStringLiteral("ipfs");
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MainWindow)
+    ui(new Ui::MainWindow),
+    m_ipfsClient("localhost", 5001)
 {
     ui->setupUi(this);
     m_mainWidget = ui->browser;
@@ -71,52 +74,56 @@ void MainWindow::on_actionOpen_triggered()
 
 bool MainWindow::load(QString url)
 {
-    qDebug() << url;
-    QUrl urlForm = QUrl::fromUserInput(url);
+    QUrl urlForm = QUrl(url);
+    qDebug() << url << urlForm << "base" << m_baseIsIPFS << m_baseUrl << "relative?" << urlForm.isRelative();
     if (urlForm.isRelative()) {
-        QUrl res = urlForm.resolved(m_mainWidget->document()->baseUrl()); // doesn't work for local files
-        qDebug() << url << res << res.fileName() << urlForm.toString();
-        // correct for QUrl::resolved() being broken
-        if (res.fileName() != urlForm.toString())
-            res = QUrl(res.toString() + QLatin1Char('/') + urlForm.toString());
-        qDebug() << url << res << res.fileName() << urlForm.toString();
-        urlForm = res;
-        ui->urlField->setText(urlForm.toString());
+        if (m_baseIsIPFS) {
+            url = m_baseUrl + QLatin1Char('/') + url;
+            ui->urlField->setText(url);
+        } else {
+            QUrl res = urlForm.resolved(m_mainWidget->document()->baseUrl()); // doesn't work for local files
+            qDebug() << url << res << res.fileName() << urlForm.toString();
+            // correct for QUrl::resolved() being broken
+            if (res.fileName() != urlForm.toString())
+                res = QUrl(res.toString() + QLatin1Char('/') + urlForm.toString());
+            qDebug() << url << res << res.fileName() << urlForm.toString();
+            urlForm = res;
+            ui->urlField->setText(urlForm.toString());
+        }
     } else {
         ui->urlField->setText(url);
     }
+    m_baseIsIPFS = false;
     bool success = false;
+    int ipfsHashIndex = url.indexOf(QLatin1String("Qm"));
     if (urlForm.isLocalFile()) {
         QString f = urlForm.toLocalFile();
         QFile file(f);
         if (QFile::exists(f) && file.open(QFile::ReadOnly)) {
             QByteArray data = file.readAll();
-            QTextCodec *codec = Qt::codecForHtml(data);
-            QString str = codec->toUnicode(data);
             QFileInfo fi(file);
             QUrl baseUrl = QUrl::fromLocalFile(fi.absolutePath());
             qDebug() << "base URL" << baseUrl;
             m_mainWidget->document()->setBaseUrl(baseUrl);
-            QMimeDatabase db;
-            success = true;
-            QMimeType type = db.mimeTypeForFileNameAndData(f, data);
-            qDebug() << "mime type" << type;
-            if (type.name() == QLatin1String("text/markdown"))
-                m_mainWidget->setMarkdown(str);
-            else if (type.name() == QLatin1String("text/html"))
-                m_mainWidget->setHtml(str);
-            else if (type.name() == QLatin1String("text/plain")) {
-                m_mainWidget->setCurrentFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
-                m_mainWidget->setPlainText(QString::fromLocal8Bit(data));
-            }
-            // TODO load images by writing a "loader" markdown file?
-            else
-                success = false;
+            QMimeType type = m_mimeDb.mimeTypeForFileNameAndData(f, data);
+            success = loadContent(data, type);
         }
-    } else if (urlForm.scheme() == ipfsScheme || url.startsWith(QLatin1String("Qm"))) {
-        qDebug() << "ipfs get" << url;
+    } else if (ipfsHashIndex >= 0) {
+        m_baseIsIPFS = true;
+        if (urlForm.scheme().isEmpty())
+            urlForm.setScheme(ipfsScheme);
+        QUrl base = urlForm.adjusted(QUrl::RemoveFilename);
+        int slashIndex = url.indexOf(QLatin1Char('/'), ipfsHashIndex);
+        m_baseUrl = url.left(slashIndex);
+        qDebug() << "ipfs get" << url << "base" << base << m_baseUrl;
+        m_mainWidget->document()->setBaseUrl(base); // doesn't seem to help
+        std::stringstream contents;
+        m_ipfsClient.FilesGet(url.toLatin1().toStdString(), &contents);
+        QByteArray data = QByteArray::fromStdString(contents.str());
+        QMimeType type = m_mimeDb.mimeTypeForFileNameAndData(url, data);
+        success = loadContent(data, type);
     } else {
-        statusBar()->showMessage(tr("remote loading is not yet implemented: \"%1\"").arg(url));
+        statusBar()->showMessage(tr("scheme is not yet implemented: \"%1\"").arg(url));
         return false;
     }
     if (success) {
@@ -130,7 +137,31 @@ bool MainWindow::load(QString url)
 
 bool MainWindow::loadUrl(QUrl url)
 {
+    qDebug() << url;
     return load(url.toString());
+}
+
+bool MainWindow::loadContent(const QByteArray &content, QMimeType type)
+{
+    bool success = true;
+    QMimeDatabase db;
+    if (!type.isValid())
+        type = db.mimeTypeForData(content);
+    qDebug() << "mime type" << type;
+    if (type.name() == QLatin1String("text/markdown")) {
+        m_mainWidget->setMarkdown(QString::fromUtf8(content));
+    } else if (type.name() == QLatin1String("text/html") || type.name() == QLatin1String("application/xhtml+xml")) {
+        QTextCodec *codec = Qt::codecForHtml(content);
+        QString str = codec->toUnicode(content);
+        m_mainWidget->setHtml(str);
+    } else if (type.name() == QLatin1String("text/plain")) {
+        m_mainWidget->setCurrentFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
+        m_mainWidget->setPlainText(QString::fromLocal8Bit(content));
+    }
+    // TODO load images by writing a "loader" markdown file?
+    else
+        success = false;
+    return success;
 }
 
 bool MainWindow::setBrowserStyle(QUrl url)

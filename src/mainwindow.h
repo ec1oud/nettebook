@@ -19,8 +19,11 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QMimeDatabase>
+#include <QMimeType>
 #include <QStack>
 #include <QUrl>
+#include <ipfs/client.h>
 
 namespace Ui {
 class MainWindow;
@@ -39,6 +42,7 @@ public:
 public slots:
     bool load(QString url);
     bool loadUrl(QUrl url);
+    bool loadContent(const QByteArray &content, QMimeType type = QMimeType());
     bool setBrowserStyle(QUrl url);
 
 private slots:
@@ -53,6 +57,10 @@ private:
     Ui::MainWindow *ui;
     QTextEdit *m_mainWidget;
     QStack<QString> m_history; // correct for QTextBrowser history being broken (only for markdown?)
+    QString m_baseUrl;
+    QMimeDatabase m_mimeDb;
+    ipfs::Client m_ipfsClient;
+    bool m_baseIsIPFS = false;
 };
 
 #endif // MAINWINDOW_H

@@ -121,7 +121,7 @@
    <sender>browser</sender>
    <signal>anchorClicked(QUrl)</signal>
    <receiver>MainWindow</receiver>
-   <slot>load(QUrl)</slot>
+   <slot>loadUrl(QUrl)</slot>
    <hints>
     <hint type="sourcelabel">
      <x>136</x>
@@ -135,6 +135,6 @@
   </connection>
  </connections>
  <slots>
-  <slot>load(QUrl)</slot>
+  <slot>loadUrl(QUrl)</slot>
  </slots>
 </ui>

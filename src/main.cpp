@@ -53,7 +53,7 @@ int main(int argc, char *argv[])
     if (parser.isSet(cssOption))
         w.setBrowserStyle(QUrl::fromLocalFile(parser.value(cssOption)));
     if (parser.positionalArguments().count() > 0)
-        w.load(QUrl::fromLocalFile(parser.positionalArguments().last()));
+        w.load(parser.positionalArguments().last());
     w.show();
 
     return app.exec();

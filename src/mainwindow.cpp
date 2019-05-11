@@ -25,6 +25,8 @@
 #include <QTextCodec>
 #include <QTextEdit>
 
+static const QString ipfsScheme = QStringLiteral("ipfs");
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -64,25 +66,28 @@ void MainWindow::on_actionOpen_triggered()
                                   << "text/plain");
     if (fileDialog.exec() != QDialog::Accepted)
         return;
-    load(fileDialog.selectedUrls().first());
+    load(fileDialog.selectedFiles().first());
 }
 
-bool MainWindow::load(QUrl url)
+bool MainWindow::load(QString url)
 {
     qDebug() << url;
-    if (url.isRelative()) {
-        QUrl res = url.resolved(m_mainWidget->document()->baseUrl()); // doesn't work for local files
-        qDebug() << url << res << res.fileName() << url.toString();
+    QUrl urlForm = QUrl::fromUserInput(url);
+    if (urlForm.isRelative()) {
+        QUrl res = urlForm.resolved(m_mainWidget->document()->baseUrl()); // doesn't work for local files
+        qDebug() << url << res << res.fileName() << urlForm.toString();
         // correct for QUrl::resolved() being broken
-        if (res.fileName() != url.toString())
-            res = QUrl(res.toString() + QLatin1Char('/') + url.toString());
-        qDebug() << url << res << res.fileName() << url.toString();
-        url = res;
+        if (res.fileName() != urlForm.toString())
+            res = QUrl(res.toString() + QLatin1Char('/') + urlForm.toString());
+        qDebug() << url << res << res.fileName() << urlForm.toString();
+        urlForm = res;
+        ui->urlField->setText(urlForm.toString());
+    } else {
+        ui->urlField->setText(url);
     }
-
     bool success = false;
-    if (url.isLocalFile()) {
-        QString f = url.toLocalFile();
+    if (urlForm.isLocalFile()) {
+        QString f = urlForm.toLocalFile();
         QFile file(f);
         if (QFile::exists(f) && file.open(QFile::ReadOnly)) {
             QByteArray data = file.readAll();
@@ -108,17 +113,24 @@ bool MainWindow::load(QUrl url)
             else
                 success = false;
         }
+    } else if (urlForm.scheme() == ipfsScheme || url.startsWith(QLatin1String("Qm"))) {
+        qDebug() << "ipfs get" << url;
     } else {
-        statusBar()->showMessage(tr("remote loading is not yet implemented: \"%1\"").arg(url.toString()));
+        statusBar()->showMessage(tr("remote loading is not yet implemented: \"%1\"").arg(url));
         return false;
     }
     if (success) {
         m_history.push(url);
-        statusBar()->showMessage(tr("Opened \"%1\"").arg(url.toString()));
+        statusBar()->showMessage(tr("Opened \"%1\"").arg(url));
     } else {
-        statusBar()->showMessage(tr("Could not open \"%1\"").arg(url.toString()));
+        statusBar()->showMessage(tr("Could not open \"%1\"").arg(url));
     }
     return success;
+}
+
+bool MainWindow::loadUrl(QUrl url)
+{
+    return load(url.toString());
 }
 
 bool MainWindow::setBrowserStyle(QUrl url)
@@ -151,4 +163,9 @@ void MainWindow::on_browser_backwardAvailable(bool a)
 {
     Q_UNUSED(a)
 //    ui->actionGo_back->setEnabled(a);
+}
+
+void MainWindow::on_urlField_returnPressed()
+{
+    load(ui->urlField->text());
 }

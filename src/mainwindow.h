@@ -37,7 +37,8 @@ public:
     ~MainWindow();
 
 public slots:
-    bool load(QUrl url);
+    bool load(QString url);
+    bool loadUrl(QUrl url);
     bool setBrowserStyle(QUrl url);
 
 private slots:
@@ -46,10 +47,12 @@ private slots:
     void on_actionGo_back_triggered();
     void on_browser_backwardAvailable(bool a);
 
+    void on_urlField_returnPressed();
+
 private:
     Ui::MainWindow *ui;
     QTextEdit *m_mainWidget;
-    QStack<QUrl> m_history; // correct for QTextBrowser history being broken (only for markdown?)
+    QStack<QString> m_history; // correct for QTextBrowser history being broken (only for markdown?)
 };
 
 #endif // MAINWINDOW_H

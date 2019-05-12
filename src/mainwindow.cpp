@@ -21,6 +21,9 @@
 #include <QDebug>
 #include <QFileDialog>
 #include <QFontDatabase>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <QMimeDatabase>
 #include <QTextCodec>
 #include <QTextEdit>
@@ -34,6 +37,11 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow),
     m_ipfsClient("localhost", 5001)
 {
+    for (auto m : m_mimeDb.allMimeTypes())
+        if (m.name() == QLatin1String("text/markdown")) {
+            m_markdownType = m;
+            break;
+        }
     ui->setupUi(this);
     m_mainWidget = ui->browser;
 
@@ -117,11 +125,19 @@ bool MainWindow::load(QString url)
         m_baseUrl = url.left(slashIndex);
         qDebug() << "ipfs get" << url << "base" << base << m_baseUrl;
         m_mainWidget->document()->setBaseUrl(base); // doesn't seem to help
-        std::stringstream contents;
-        m_ipfsClient.FilesGet(url.toLatin1().toStdString(), &contents);
-        QByteArray data = QByteArray::fromStdString(contents.str());
-        QMimeType type = m_mimeDb.mimeTypeForFileNameAndData(url, data);
-        success = loadContent(data, type);
+        QJsonObject ls = filesList(url).value(QLatin1String("Objects")).toObject();
+        QJsonObject firstObject = ls.value(ls.keys().first()).toObject();
+        QString typeJson = firstObject.value(QLatin1String("Type")).toString();
+        qDebug() << "data type from IPFS URL" << typeJson;
+        if (typeJson == QLatin1String("Directory")) {
+            success = loadContent(jsonDirectoryToMarkdown(firstObject), m_markdownType);
+        } else {
+            std::stringstream contents;
+            m_ipfsClient.FilesGet(url.toLatin1().toStdString(), &contents);
+            QByteArray data = QByteArray::fromStdString(contents.str());
+            QMimeType type = m_mimeDb.mimeTypeForFileNameAndData(url, data);
+            success = loadContent(data, type);
+        }
     } else {
         statusBar()->showMessage(tr("scheme is not yet implemented: \"%1\"").arg(url));
         return false;
@@ -199,4 +215,27 @@ void MainWindow::on_browser_backwardAvailable(bool a)
 void MainWindow::on_urlField_returnPressed()
 {
     load(ui->urlField->text());
+}
+
+QJsonObject MainWindow::filesList(QString url)
+{
+    ipfs::Json ls_result;
+    m_ipfsClient.FilesLs(url.toLatin1().toStdString(), &ls_result);
+    QByteArray json = QByteArray::fromStdString(ls_result.dump());
+    std::cout << "FilesLs() result:" << std::endl << ls_result.dump(2) << std::endl;
+    QJsonDocument doc = QJsonDocument::fromJson(json);
+    return doc.object();
+}
+
+QByteArray MainWindow::jsonDirectoryToMarkdown(QJsonObject j)
+{
+    QJsonArray links = j.value(QLatin1String("Links")).toArray();
+    QByteArray ret;
+    for (auto o : links) {
+        auto object = o.toObject();
+        auto hash = object.value(QLatin1String("Hash")).toString().toUtf8();
+        auto name = object.value(QLatin1String("Name")).toString().toUtf8();
+        ret += '[' + name + "](" + name + ") " + hash + "\n\n";
+    }
+    return ret;
 }

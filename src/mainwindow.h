@@ -50,8 +50,11 @@ private slots:
     void on_actionOpen_triggered();
     void on_actionGo_back_triggered();
     void on_browser_backwardAvailable(bool a);
-
     void on_urlField_returnPressed();
+
+private:
+    QJsonObject filesList(QString url);
+    QByteArray jsonDirectoryToMarkdown(QJsonObject j);
 
 private:
     Ui::MainWindow *ui;
@@ -59,6 +62,7 @@ private:
     QStack<QString> m_history; // correct for QTextBrowser history being broken (only for markdown?)
     QString m_baseUrl;
     QMimeDatabase m_mimeDb;
+    QMimeType m_markdownType;
     ipfs::Client m_ipfsClient;
     bool m_baseIsIPFS = false;
 };

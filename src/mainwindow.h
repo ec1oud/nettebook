@@ -52,6 +52,8 @@ private slots:
     void on_browser_backwardAvailable(bool a);
     void on_urlField_returnPressed();
 
+    void on_browser_highlighted(const QUrl &url);
+
 private:
     QJsonObject filesList(QString url);
     QByteArray jsonDirectoryToMarkdown(QJsonObject j);

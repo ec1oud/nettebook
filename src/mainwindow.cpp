@@ -240,3 +240,8 @@ QByteArray MainWindow::jsonDirectoryToMarkdown(QJsonObject j)
     }
     return ret;
 }
+
+void MainWindow::on_browser_highlighted(const QUrl &url)
+{
+    ui->statusBar->showMessage(url.toString());
+}

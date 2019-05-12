@@ -84,7 +84,7 @@ bool MainWindow::load(QString url)
 {
     QUrl urlForm = QUrl(url);
     qDebug() << url << urlForm << "base" << m_baseIsIPFS << m_baseUrl << "relative?" << urlForm.isRelative();
-    if (urlForm.isRelative()) {
+    if (urlForm.isRelative() && !url.startsWith(QLatin1String("Qm"))) {
         if (m_baseIsIPFS) {
             url = m_baseUrl + QLatin1Char('/') + url;
             ui->urlField->setText(url);
@@ -101,6 +101,7 @@ bool MainWindow::load(QString url)
     } else {
         ui->urlField->setText(url);
     }
+    m_history.push(ui->urlField->text());
     m_baseIsIPFS = false;
     bool success = false;
     int ipfsHashIndex = url.indexOf(QLatin1String("Qm"));
@@ -142,12 +143,10 @@ bool MainWindow::load(QString url)
         statusBar()->showMessage(tr("scheme is not yet implemented: \"%1\"").arg(url));
         return false;
     }
-    if (success) {
-        m_history.push(url);
+    if (success)
         statusBar()->showMessage(tr("Opened \"%1\"").arg(url));
-    } else {
+    else
         statusBar()->showMessage(tr("Could not open \"%1\"").arg(url));
-    }
     return success;
 }
 
@@ -202,6 +201,8 @@ void MainWindow::on_actionGo_back_triggered()
     // ui->browser->backward(); // doesn't work
     if (m_history.count() > 1) {
         m_history.pop(); // lose the current file
+        m_baseUrl.clear();
+        m_baseIsIPFS = false;
         load(m_history.pop());
     }
 }

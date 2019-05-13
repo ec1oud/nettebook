@@ -29,6 +29,7 @@
 #include <QTextEdit>
 #include <iostream>
 #include <sstream>
+#include <KIO/Job>
 
 static const QString ipfsScheme = QStringLiteral("ipfs");
 
@@ -84,16 +85,19 @@ bool MainWindow::load(QString url)
 {
     QUrl urlForm = QUrl(url);
     qDebug() << url << urlForm << "base" << m_baseIsIPFS << m_baseUrl << "relative?" << urlForm.isRelative();
+    if (url.startsWith(QLatin1String("Qm")))
+        urlForm.setScheme(ipfsScheme);
     if (urlForm.isRelative() && !url.startsWith(QLatin1String("Qm"))) {
         if (m_baseIsIPFS) {
             url = m_baseUrl + QLatin1Char('/') + url;
             ui->urlField->setText(url);
         } else {
             QUrl res = urlForm.resolved(m_mainWidget->document()->baseUrl()); // doesn't work for local files
-            qDebug() << url << res << res.fileName() << urlForm.toString();
+            qDebug() << url << "base" << m_mainWidget->document()->baseUrl() << "resolved" << res << res.fileName() << urlForm.toString();
             // correct for QUrl::resolved() being broken
-            if (res.fileName() != urlForm.toString())
-                res = QUrl(res.toString() + QLatin1Char('/') + urlForm.toString());
+//            if (res.fileName() != urlForm.toString())
+//                res = QUrl(res.toString() + QLatin1Char('/') + urlForm.toString());
+            res.setScheme("file");
             qDebug() << url << res << res.fileName() << urlForm.toString();
             urlForm = res;
             ui->urlField->setText(urlForm.toString());
@@ -140,14 +144,29 @@ bool MainWindow::load(QString url)
             success = loadContent(data, type);
         }
     } else {
-        statusBar()->showMessage(tr("scheme is not yet implemented: \"%1\"").arg(url));
-        return false;
+        m_dataAccumulator.clear();
+        KIO::Job* job = KIO::get(urlForm);
+        connect (job, SIGNAL(data(KIO::Job *, const QByteArray &)),
+                 this, SLOT(dataReceived(KIO::Job *, const QByteArray &)));
+        connect (job, SIGNAL(result(KJob*)), this, SLOT(dataReceiveDone(KJob*)));
+        success = true;
     }
     if (success)
         statusBar()->showMessage(tr("Opened \"%1\"").arg(url));
     else
         statusBar()->showMessage(tr("Could not open \"%1\"").arg(url));
     return success;
+}
+
+void MainWindow::dataReceived(KIO::Job *,const QByteArray & data )
+{
+    m_dataAccumulator.append(data);
+}
+
+void MainWindow::dataReceiveDone(KJob *)
+{
+    qDebug() << "received" << m_dataAccumulator.size();
+    loadContent(m_dataAccumulator);
 }
 
 bool MainWindow::loadUrl(QUrl url)

@@ -28,8 +28,12 @@
 namespace Ui {
 class MainWindow;
 }
+namespace KIO {
+class Job;
+}
 
 class QTextEdit;
+class KJob;
 
 class MainWindow : public QMainWindow
 {
@@ -54,6 +58,8 @@ private slots:
 
     void on_browser_highlighted(const QUrl &url);
 
+    void dataReceived(KIO::Job *, const QByteArray &data);
+    void dataReceiveDone(KJob *);
 private:
     QJsonObject filesList(QString url);
     QByteArray jsonDirectoryToMarkdown(QJsonObject j);
@@ -61,6 +67,7 @@ private:
 private:
     Ui::MainWindow *ui;
     QTextEdit *m_mainWidget;
+    QByteArray m_dataAccumulator;
     QStack<QString> m_history; // correct for QTextBrowser history being broken (only for markdown?)
     QString m_baseUrl;
     QMimeDatabase m_mimeDb;

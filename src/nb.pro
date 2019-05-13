@@ -1,4 +1,4 @@
-QT       += core gui widgets
+QT += core gui widgets network
 TARGET = nb
 TEMPLATE = app
 DEFINES += QT_DEPRECATED_WARNINGS
@@ -11,18 +11,19 @@ DEFINES += QT_DEPRECATED_WARNINGS
 CONFIG += c++11
 
 SOURCES += \
-        main.cpp \
-        mainwindow.cpp \
+    main.cpp \
+    mainwindow.cpp \
     markdownbrowser.cpp
 
 HEADERS += \
-        mainwindow.h \
+    mainwindow.h \
     markdownbrowser.h
 
 FORMS += \
-        mainwindow.ui
+    mainwindow.ui
 
-LIBS += -lipfs-api -lcurl
+INCLUDEPATH += /usr/include/KF5/KIOCore
+LIBS += -lipfs-api -lcurl -L/usr/lib/kf5 -lKF5KIOCore
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

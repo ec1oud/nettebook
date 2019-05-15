@@ -1,0 +1,34 @@
+{
+    "KDE-KIO-Protocols": {
+        "ipfs": {
+            "Class": ":internet", 
+            "Icon": "folder-remote", 
+            "ProxiedBy": "http", 
+            "X-DocPath": "kioslave5/ipfs/index.html", 
+            "copyFromFile": true, 
+            "copyToFile": true, 
+            "deleting": true, 
+            "exec": "kf5/kio/ipfs", 
+            "input": "none", 
+            "listing": [
+                "Name", 
+                "Type", 
+                "Size", 
+                "Date", 
+                "Access", 
+                "Owner", 
+                "Group", 
+                "Link", 
+                ""
+            ], 
+            "makedir": true, 
+            "maxInstances": 20, 
+            "maxInstancesPerHost": 5, 
+            "moving": true, 
+            "output": "filesystem", 
+            "protocol": "ipfs", 
+            "reading": true, 
+            "writing": true
+        }
+    }
+}

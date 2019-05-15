@@ -18,6 +18,8 @@
 #include "ipfs.h"
 #include <QCoreApplication>
 #include <QDebug>
+#include <KIO/ForwardingSlaveBase>
+#include <KConfigGroup>
 
 // Pseudo plugin class to embed meta data
 class KIOPluginForMetaData : public QObject
@@ -31,8 +33,6 @@ extern "C" Q_DECL_EXPORT int kdemain(int argc, char **argv)
     QCoreApplication app(argc, argv);
     app.setApplicationName(QStringLiteral("kio_ipfs"));
 
-//    qCDebug(lcKipfs) << "Starting";
-
     if (argc != 4) {
         fprintf(stderr, "Usage: kio_ipfs protocol domain-socket1 domain-socket2\n");
         exit(-1);
@@ -40,23 +40,34 @@ extern "C" Q_DECL_EXPORT int kdemain(int argc, char **argv)
 
     IpfsSlave slave(argv[2], argv[3]);
     slave.dispatchLoop();
-
-//    qCDebug(lcKipfs) << "Done";
     return 0;
 }
 
 IpfsSlave::IpfsSlave(const QByteArray &pool, const QByteArray &app) :
-    KIO::SlaveBase("ipfs", pool, app)
+    KIO::ForwardingSlaveBase("ipfs", pool, app)
 {
     qDebug() << pool << app;
+    // http.so doesn't seem to get the message this way
+//    setMetaData("cookies", "none");
+//    config()->writeEntry("Cookies", false);
 }
 
-void IpfsSlave::get(const QUrl &url)
+//void IpfsSlave::get(const QUrl &url)
+//{
+//    qDebug() << url;
+//    mimeType( "text/plain" );
+//    QByteArray str( "Hello_world" );
+//    data(str);
+//    finished();
+//    qDebug() << "Leaving function";
+//}
+
+bool IpfsSlave::rewriteUrl(const QUrl &url, QUrl& newUrl)
 {
-    qDebug() << url;
-    mimeType( "text/plain" );
-    QByteArray str( "Hello_world" );
-    data(str);
-    finished();
-    qDebug() << "Leaving function";
+    QUrl apiUrl = m_baseUrl;
+    apiUrl.setPath(m_baseUrl.path(QUrl::DecodeReserved) + QLatin1String("cat"));
+    apiUrl.setQuery("arg=" + url.fileName());
+    qDebug() << url << url.fileName() << apiUrl.toString(QUrl::None);
+    newUrl = apiUrl;
+    return true;
 }

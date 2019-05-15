@@ -18,13 +18,19 @@
 #ifndef IPFSSLAVE_H
 #define IPFSSLAVE_H
 
-#include <KIO/SlaveBase>
+#include <KIO/ForwardingSlaveBase>
 
-class IpfsSlave : public KIO::SlaveBase
+class IpfsSlave : public KIO::ForwardingSlaveBase
 {
 public:
     IpfsSlave(const QByteArray &pool, const QByteArray &app);
-    void get(const QUrl &url) override;
+//    void get(const QUrl &url) override;
+
+protected:
+    bool rewriteUrl(const QUrl &url, QUrl &newUrl) override;
+
+private:
+    QUrl m_baseUrl = QUrl(QLatin1String("http://localhost:5001/api/v0/"));
 };
 
 #endif // IPFSSLAVE_H

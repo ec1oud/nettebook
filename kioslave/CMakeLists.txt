@@ -19,5 +19,9 @@ set_target_properties(kio_ipfs PROPERTIES OUTPUT_NAME "ipfs")
 set_target_properties(kio_ipfs PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/kf5/kio")
 set_target_properties(kio_ipfs PROPERTIES PREFIX "")
 #install(TARGETS kio_ipfs  DESTINATION ${KDE_INSTALL_PLUGINDIR}/kf5/kio)
-install(TARGETS kio_ipfs  DESTINATION /usr/lib/x86_64-linux-gnu/qt5/plugins/kf5/kio)
-#install(TARGETS kio_ipfs  DESTINATION /usr/lib/qt/plugins/kf5/kio)
+# doesn't work, cmake says it doesn't exist even though it does
+#install(TARGETS ${CMAKE_SOURCE_DIR}/ipfs.protocol DESTINATION /usr/share/kservices5)
+# Ubuntu
+#install(TARGETS kio_ipfs  DESTINATION /usr/lib/x86_64-linux-gnu/qt5/plugins/kf5/kio)
+# Arch
+install(TARGETS kio_ipfs  DESTINATION /usr/lib/qt/plugins/kf5/kio)

@@ -18,7 +18,10 @@
 #include "ipfs.h"
 #include <QCoreApplication>
 #include <QDebug>
-#include <KIO/ForwardingSlaveBase>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <KIO/TransferJob>
 #include <KConfigGroup>
 
 // Pseudo plugin class to embed meta data
@@ -44,30 +47,84 @@ extern "C" Q_DECL_EXPORT int kdemain(int argc, char **argv)
 }
 
 IpfsSlave::IpfsSlave(const QByteArray &pool, const QByteArray &app) :
-    KIO::ForwardingSlaveBase("ipfs", pool, app)
+    KIO::SlaveBase("ipfs", pool, app)
 {
-    qDebug() << pool << app;
-    // http.so doesn't seem to get the message this way
-//    setMetaData("cookies", "none");
-//    config()->writeEntry("Cookies", false);
+    qDebug() << Q_FUNC_INFO << pool << app;
 }
 
-//void IpfsSlave::get(const QUrl &url)
-//{
-//    qDebug() << url;
-//    mimeType( "text/plain" );
-//    QByteArray str( "Hello_world" );
-//    data(str);
-//    finished();
-//    qDebug() << "Leaving function";
-//}
-
-bool IpfsSlave::rewriteUrl(const QUrl &url, QUrl& newUrl)
+void IpfsSlave::get(const QUrl &url)
 {
-    QUrl apiUrl = m_baseUrl;
-    apiUrl.setPath(m_baseUrl.path(QUrl::DecodeReserved) + QLatin1String("cat"));
-    apiUrl.setQuery("arg=" + url.fileName());
-    qDebug() << url << url.fileName() << apiUrl.toString(QUrl::None);
-    newUrl = apiUrl;
-    return true;
+    m_fileUrl = url;
+    m_apiUrl = m_baseUrl;
+    m_apiUrl.setPath(m_baseUrl.path(QUrl::DecodeReserved) + QLatin1String("cat"));
+    QString ipfsPath = url.path();
+    if (ipfsPath.startsWith(QLatin1Char('/')))
+        ipfsPath = ipfsPath.remove(0, 1);
+    m_apiUrl.setQuery("arg=" + ipfsPath);
+    qDebug() << Q_FUNC_INFO << url << url.fileName() << m_apiUrl.toString();
+
+    KIO::TransferJob *job = KIO::get(m_apiUrl, KIO::NoReload, KIO::HideProgressInfo);
+    connectTransferJob(job);
+    connect(job, SIGNAL(result(KJob*)), this, SLOT(onCatReceiveDone(KJob*)));
+    m_eventLoop.exec();
+//    error(KIO::ERR_DOES_NOT_EXIST, url.toDisplayString());
 }
+
+void IpfsSlave::listDir(const QUrl &url)
+{
+    m_apiUrl = m_baseUrl;
+    m_apiUrl.setPath(m_baseUrl.path(QUrl::DecodeReserved) + QLatin1String("ls"));
+    m_apiUrl.setQuery("arg=" + url.fileName());
+    qDebug() << Q_FUNC_INFO << url << url.fileName() << m_apiUrl.toString();
+
+    KIO::TransferJob *job = KIO::get(m_apiUrl, KIO::NoReload, KIO::HideProgressInfo);
+    connectTransferJob(job);
+    connect(job, SIGNAL(result(KJob*)), this, SLOT(onLsReceiveDone(KJob*)));
+    m_eventLoop.exec();
+}
+
+void IpfsSlave::connectTransferJob(KIO::TransferJob *job)
+{
+    connect(job, SIGNAL(data(KIO::Job *, const QByteArray &)),
+             this, SLOT(onDataReceived(KIO::Job *, const QByteArray &)));
+}
+
+void IpfsSlave::onDataReceived(KIO::Job *job, const QByteArray &data)
+{
+    Q_UNUSED(job)
+    m_dataAccumulator.append(data);
+}
+
+void IpfsSlave::onCatReceiveDone(KJob *job)
+{
+    Q_UNUSED(job)
+    QMimeType type = m_mimeDb.mimeTypeForFileNameAndData(m_fileUrl.fileName(), m_dataAccumulator);
+    qDebug() << m_fileUrl.fileName() << type;
+    mimeType(type.name());
+    data(m_dataAccumulator);
+    m_dataAccumulator.clear();
+    finished();
+}
+
+void IpfsSlave::onLsReceiveDone(KJob *job)
+{
+    Q_UNUSED(job)
+    QJsonDocument jdoc = QJsonDocument::fromJson(m_dataAccumulator);
+    m_dataAccumulator.clear();
+    QJsonArray a = jdoc.object().value(QLatin1String("Objects")).toArray();
+    QJsonArray ls = a.first().toObject().value("Links").toArray();
+    KIO::UDSEntryList entries;
+    for (int i = 0; i < ls.count(); ++i) {
+        QJsonObject eo = ls.at(i).toObject();
+        qDebug() << eo;
+        KIO::UDSEntry e;
+        e.fastInsert(KIO::UDSEntry::UDS_NAME, eo.value(QStringLiteral("Name")).toString());
+        e.fastInsert(KIO::UDSEntry::UDS_LINK_DEST, eo.value(QStringLiteral("Hash")).toString());
+        e.fastInsert(KIO::UDSEntry::UDS_SIZE, eo.value(QStringLiteral("Size")).toInt());
+        entries << e;
+    }
+    listEntries(entries);
+    finished();
+}
+
+#include "ipfs.moc"

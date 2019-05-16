@@ -7,6 +7,7 @@ configure_file(config-kioslave-ipfs.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config-k
 set(kio_ipfs_PART_SRCS
 ipfs.cpp
 )
+set(CMAKE_AUTOMOC TRUE)
 
 find_package(Qt5Core REQUIRED Core Network)
 find_package(KF5KIO 5.12.0 REQUIRED I18n KIO)

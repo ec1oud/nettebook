@@ -18,19 +18,37 @@
 #ifndef IPFSSLAVE_H
 #define IPFSSLAVE_H
 
-#include <KIO/ForwardingSlaveBase>
+#include <KIO/SlaveBase>
+#include <QEventLoop>
+#include <QMimeDatabase>
 
-class IpfsSlave : public KIO::ForwardingSlaveBase
+namespace KIO {
+class TransferJob;
+}
+
+class IpfsSlave : public QObject, public KIO::SlaveBase
 {
+    Q_OBJECT
 public:
     IpfsSlave(const QByteArray &pool, const QByteArray &app);
-//    void get(const QUrl &url) override;
+    void get(const QUrl &url) override;
+    void listDir(const QUrl &url) override;
 
 protected:
-    bool rewriteUrl(const QUrl &url, QUrl &newUrl) override;
+    void connectTransferJob(KIO::TransferJob *job);
+
+private slots:
+    void onDataReceived(KIO::Job *job, const QByteArray &data);
+    void onCatReceiveDone(KJob *job);
+    void onLsReceiveDone(KJob *job);
 
 private:
+    QMimeDatabase m_mimeDb;
+    QEventLoop m_eventLoop;
+    QByteArray m_dataAccumulator;
     QUrl m_baseUrl = QUrl(QLatin1String("http://localhost:5001/api/v0/"));
+    QUrl m_apiUrl;
+    QUrl m_fileUrl;
 };
 
 #endif // IPFSSLAVE_H

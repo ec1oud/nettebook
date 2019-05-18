@@ -24,6 +24,7 @@ class MarkdownBrowser : public QTextBrowser
 {
 public:
     MarkdownBrowser(QWidget *parent = nullptr);
+    QVariant loadResource(int type, const QUrl &name) override;
 };
 
 #endif // MARKDOWNBROWSER_H

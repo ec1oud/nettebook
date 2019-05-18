@@ -16,9 +16,16 @@
 ****************************************************************************/
 
 #include "markdownbrowser.h"
+#include <QDebug>
 
 MarkdownBrowser::MarkdownBrowser(QWidget *parent)
     : QTextBrowser(parent)
 {
 
+}
+
+QVariant MarkdownBrowser::loadResource(int type, const QUrl &name)
+{
+    qDebug() << type << name;
+    return QTextBrowser::loadResource(type, name);
 }

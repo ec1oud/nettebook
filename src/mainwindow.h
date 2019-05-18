@@ -19,7 +19,6 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <QMimeDatabase>
 #include <QMimeType>
 #include <QStack>
 #include <QUrl>
@@ -27,12 +26,9 @@
 namespace Ui {
 class MainWindow;
 }
-namespace KIO {
-class Job;
-}
 
+class Document;
 class QTextEdit;
-class KJob;
 
 class MainWindow : public QMainWindow
 {
@@ -44,9 +40,8 @@ public:
 
 public slots:
     void load(QString url);
-    void loadUrl(QUrl url);
-    bool loadContent(const QByteArray &content, QMimeType type = QMimeType());
     bool setBrowserStyle(QUrl url);
+//    void loadContent(const QByteArray &content, QMimeType type);
 
 private slots:
     void on_actionQuit_triggered();
@@ -54,25 +49,13 @@ private slots:
     void on_actionGo_back_triggered();
     void on_browser_backwardAvailable(bool a);
     void on_urlField_returnPressed();
-
     void on_browser_highlighted(const QUrl &url);
-
-    void dataReceived(KIO::Job *, const QByteArray &data);
-    void dataReceiveDone(KJob *);
-private:
-    QJsonObject filesList(QString url);
-    QByteArray jsonDirectoryToMarkdown(QJsonObject j);
 
 private:
     Ui::MainWindow *ui;
     QTextEdit *m_mainWidget;
-    QByteArray m_rawText;
+    Document *m_document;
     QStack<QString> m_history; // correct for QTextBrowser history being broken (only for markdown?)
-    QUrl m_baseUrl;
-    QUrl m_contentUrl;
-    QMimeDatabase m_mimeDb;
-    QMimeType m_markdownType;
-    bool m_baseIsIPFS = false;
 };
 
 #endif // MAINWINDOW_H

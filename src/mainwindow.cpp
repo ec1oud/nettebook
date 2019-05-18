@@ -32,6 +32,9 @@
 #include <KIO/Job>
 
 static const QString ipfsScheme = QStringLiteral("ipfs");
+static const QString fileScheme = QStringLiteral("file");
+static const QString base58HashPrefix = QStringLiteral("Qm");
+static const QString base32HashPrefix = QStringLiteral("bafybei");
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -83,7 +86,12 @@ void MainWindow::on_actionOpen_triggered()
 void MainWindow::load(QString url)
 {
     qDebug() << url;
-    loadUrl(QUrl(url));
+    // QUrl::fromUserInput knows how to guess about http and file URLs,
+    // but mangles ipfs hashes by converting them to lowercase and setting scheme to http
+    if (url.contains(base58HashPrefix) || url.contains(base32HashPrefix))
+        loadUrl(QUrl(url));
+    else
+        loadUrl(QUrl::fromUserInput(url));
 }
 
 void MainWindow::loadUrl(QUrl url)
@@ -91,13 +99,19 @@ void MainWindow::loadUrl(QUrl url)
     QString urlString = url.toString();
     qDebug() << url << urlString;
     m_contentUrl = url;
+//    int slashIndex = url.indexOf(QLatin1Char('/'), ipfsHashIndex);
+//    m_baseUrl = url.left(slashIndex);
+
     qDebug() << url << m_contentUrl << "baseUrl" << m_baseIsIPFS << m_baseUrl << "relative?" << m_contentUrl.isRelative();
-    int base58HashIndex = urlString.indexOf(QLatin1String("Qm"));
-    if (base58HashIndex >= 0)
+    int base58HashIndex = urlString.indexOf(base58HashPrefix);
+    int base32HashIndex = urlString.indexOf(base32HashPrefix);
+    if (base58HashIndex >= 0 || base32HashIndex >= 0)
         m_contentUrl.setScheme(ipfsScheme);
-    if (m_contentUrl.isRelative() && base58HashIndex < 0) {
+    else if (m_contentUrl.scheme().isEmpty())
+        m_contentUrl.setScheme(fileScheme);
+    if (m_contentUrl.isRelative() && base58HashIndex < 0 && base32HashIndex < 0) {
         if (m_baseIsIPFS) {
-            urlString = m_baseUrl + QLatin1Char('/') + urlString;
+            urlString = m_baseUrl.toString() + QLatin1Char('/') + urlString;
             ui->urlField->setText(urlString);
         } else {
             QUrl res = m_contentUrl.resolved(m_mainWidget->document()->baseUrl()); // doesn't work for local files
@@ -106,6 +120,8 @@ void MainWindow::loadUrl(QUrl url)
 //            if (res.fileName() != m_contentUrl.toString())
 //                res = QUrl(res.toString() + QLatin1Char('/') + m_contentUrl.toString());
             res.setScheme("file");
+            if (res.fileName().isEmpty())
+                res.setPath(res.path() + QLatin1Char('/') + url.fileName());
             qDebug() << url << res << res.fileName() << m_contentUrl.toString();
             m_contentUrl = res;
             ui->urlField->setText(m_contentUrl.toString());
@@ -114,8 +130,10 @@ void MainWindow::loadUrl(QUrl url)
         ui->urlField->setText(urlString);
     }
     m_history.push(ui->urlField->text());
+    m_baseUrl = m_contentUrl.adjusted(QUrl::RemoveFilename);
     m_baseIsIPFS = false;
     m_rawText.clear();
+    qDebug() << "URL for KIO:" << m_contentUrl << "baseURL for document:" << m_baseUrl;
     KIO::Job* job = KIO::get(m_contentUrl);
     connect (job, SIGNAL(data(KIO::Job *, const QByteArray &)),
              this, SLOT(dataReceived(KIO::Job *, const QByteArray &)));
@@ -140,6 +158,7 @@ bool MainWindow::loadContent(const QByteArray &content, QMimeType type)
     if (!type.isValid() || type.name() == QLatin1String("text/plain"))
         type = m_mimeDb.mimeTypeForFileNameAndData(m_contentUrl.fileName(), content);
     qDebug() << m_contentUrl.fileName() << "mime type" << type;
+    m_mainWidget->document()->setBaseUrl(m_baseUrl);
     if (type.name() == QLatin1String("text/markdown")) {
         m_mainWidget->setMarkdown(QString::fromUtf8(content));
     } else if (type.name() == QLatin1String("text/html") || type.name() == QLatin1String("application/xhtml+xml")) {

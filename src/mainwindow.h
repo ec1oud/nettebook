@@ -68,7 +68,7 @@ private:
     QTextEdit *m_mainWidget;
     QByteArray m_rawText;
     QStack<QString> m_history; // correct for QTextBrowser history being broken (only for markdown?)
-    QString m_baseUrl;
+    QUrl m_baseUrl;
     QUrl m_contentUrl;
     QMimeDatabase m_mimeDb;
     QMimeType m_markdownType;

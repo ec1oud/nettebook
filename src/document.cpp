@@ -24,25 +24,28 @@ Document::Document(QObject *parent) : QTextDocument(parent)
 
 QVariant Document::loadResource(int type, const QUrl &name)
 {
-    qDebug() << type << name;
+    qDebug() << type << name << name.scheme();
     if (name.scheme() == ipfsScheme) {
-        m_resourceReceived = false;
+        if (m_resourceLoaders.contains(name))
+            return QVariant(); // still waiting
+        if (m_loadedResources.contains(name)) {
+            QImage ret;
+            ret.loadFromData(m_loadedResources.value(name));
+//            m_loadedResources.remove(name);
+            return ret;
+        }
+        // it's the first time we've been asked: try to load it
         KIO::Job* job = KIO::get(name);
         connect (job, SIGNAL(data(KIO::Job *, const QByteArray &)),
                  this, SLOT(resourceDataReceived(KIO::Job *, const QByteArray &)));
         connect (job, SIGNAL(result(KJob*)), this, SLOT(resourceReceiveDone(KJob*)));
-    //    while (!m_resourceReceived) {
-    ////qDebug() << ".";
-    //        qApp->processEvents();
-    //        usleep(1000);
-    //    }
-    //    QImage ret;
-    //    ret.loadFromData(m_rawResource);
-    //    return ret;
+        m_resourceLoaders.insert(name, job);
+//qDebug() << name << "got job" << job;
         return QVariant();
-    } else {
-        return QTextDocument::loadResource(type, name);
     }
+    QVariant ret = QTextDocument::loadResource(type, name);
+    qDebug() << name << "QTD gave us" << ret;
+    return ret;
 }
 
 void Document::loadUrl(QUrl url)
@@ -95,16 +98,25 @@ void Document::dataReceiveDone(KJob *)
     loadContent(m_rawText);
 }
 
-void Document::resourceDataReceived(KIO::Job *,const QByteArray & data )
+void Document::resourceDataReceived(KIO::Job *job, const QByteArray & data)
 {
-    qDebug() << "received" << data.size();
-    m_rawResource.append(data);
+    QUrl url = m_resourceLoaders.key(job);
+    // TODO check data for error messages
+//qDebug() << job << "received" << data.size() << url;
+    if (m_loadedResources.contains(url))
+        m_loadedResources[url].append(data);
+    else
+        m_loadedResources.insert(url, data);
 }
 
-void Document::resourceReceiveDone(KJob *)
+void Document::resourceReceiveDone(KJob *job)
 {
-    qDebug() << "received" << m_rawResource.size();
-    m_resourceReceived = true;
+    QUrl url = m_resourceLoaders.key(job);
+    qDebug() << "for" << url.toString() << "got" << m_loadedResources.value(url).size() << "bytes";
+    m_resourceLoaders.remove(url);
+    emit documentLayoutChanged();
+    if (m_resourceLoaders.isEmpty())
+        qDebug() << "all resources loaded";
 }
 
 bool Document::loadContent(const QByteArray &content, QMimeType type)

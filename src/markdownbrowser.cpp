@@ -26,6 +26,7 @@ MarkdownBrowser::MarkdownBrowser(QWidget *parent)
 
 QVariant MarkdownBrowser::loadResource(int type, const QUrl &name)
 {
-    qDebug() << type << name;
-    return QTextBrowser::loadResource(type, name);
+    QVariant ret = QTextBrowser::loadResource(type, name);
+    qDebug() << type << name << ret;
+    return ret;
 }

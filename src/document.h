@@ -2,9 +2,10 @@
 #define DOCUMENT_H
 
 #include <QObject>
-#include <QTextDocument>
 #include <QMimeDatabase>
 #include <QMimeType>
+#include <QTextDocument>
+#include <QUrl>
 
 namespace KIO {
 class Job;
@@ -42,10 +43,10 @@ private:
     QMimeDatabase m_mimeDb;
     QMimeType m_markdownType;
     QByteArray m_rawText;
-    QByteArray m_rawResource;
     QUrl m_contentUrl;
     QUrl m_baseUrl; // redundant, but remembers temporarily from one source to the next
-    bool m_resourceReceived = false;
+    QHash<QUrl, KJob*> m_resourceLoaders;
+    QHash<QUrl, QByteArray> m_loadedResources;
 };
 
 #endif // DOCUMENT_H

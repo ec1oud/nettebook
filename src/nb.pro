@@ -23,7 +23,7 @@ FORMS += \
     mainwindow.ui
 
 INCLUDEPATH += /usr/include/KF5/KIOCore
-LIBS += -lipfs-api -lcurl -L/usr/lib/kf5 -lKF5KIOCore
+LIBS += -L/usr/lib/kf5 -lKF5KIOCore
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

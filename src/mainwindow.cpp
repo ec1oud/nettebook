@@ -35,8 +35,7 @@ static const QString ipfsScheme = QStringLiteral("ipfs");
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MainWindow),
-    m_ipfsClient("localhost", 5001)
+    ui(new Ui::MainWindow)
 {
     for (auto m : m_mimeDb.allMimeTypes())
         if (m.name() == QLatin1String("text/markdown")) {
@@ -81,107 +80,66 @@ void MainWindow::on_actionOpen_triggered()
     load(fileDialog.selectedFiles().first());
 }
 
-bool MainWindow::load(QString url)
+void MainWindow::load(QString url)
 {
-    QUrl urlForm = QUrl(url);
-    qDebug() << url << urlForm << "base" << m_baseIsIPFS << m_baseUrl << "relative?" << urlForm.isRelative();
-    if (url.startsWith(QLatin1String("Qm")))
-        urlForm.setScheme(ipfsScheme);
-    if (urlForm.isRelative() && !url.startsWith(QLatin1String("Qm"))) {
+    qDebug() << url;
+    loadUrl(QUrl(url));
+}
+
+void MainWindow::loadUrl(QUrl url)
+{
+    QString urlString = url.toString();
+    qDebug() << url << urlString;
+    m_contentUrl = url;
+    qDebug() << url << m_contentUrl << "baseUrl" << m_baseIsIPFS << m_baseUrl << "relative?" << m_contentUrl.isRelative();
+    int base58HashIndex = urlString.indexOf(QLatin1String("Qm"));
+    if (base58HashIndex >= 0)
+        m_contentUrl.setScheme(ipfsScheme);
+    if (m_contentUrl.isRelative() && base58HashIndex < 0) {
         if (m_baseIsIPFS) {
-            url = m_baseUrl + QLatin1Char('/') + url;
-            ui->urlField->setText(url);
+            urlString = m_baseUrl + QLatin1Char('/') + urlString;
+            ui->urlField->setText(urlString);
         } else {
-            QUrl res = urlForm.resolved(m_mainWidget->document()->baseUrl()); // doesn't work for local files
-            qDebug() << url << "base" << m_mainWidget->document()->baseUrl() << "resolved" << res << res.fileName() << urlForm.toString();
+            QUrl res = m_contentUrl.resolved(m_mainWidget->document()->baseUrl()); // doesn't work for local files
+            qDebug() << url << "base" << m_mainWidget->document()->baseUrl() << "resolved" << res << res.fileName() << m_contentUrl.toString();
             // correct for QUrl::resolved() being broken
-//            if (res.fileName() != urlForm.toString())
-//                res = QUrl(res.toString() + QLatin1Char('/') + urlForm.toString());
+//            if (res.fileName() != m_contentUrl.toString())
+//                res = QUrl(res.toString() + QLatin1Char('/') + m_contentUrl.toString());
             res.setScheme("file");
-            qDebug() << url << res << res.fileName() << urlForm.toString();
-            urlForm = res;
-            ui->urlField->setText(urlForm.toString());
+            qDebug() << url << res << res.fileName() << m_contentUrl.toString();
+            m_contentUrl = res;
+            ui->urlField->setText(m_contentUrl.toString());
         }
     } else {
-        ui->urlField->setText(url);
+        ui->urlField->setText(urlString);
     }
     m_history.push(ui->urlField->text());
     m_baseIsIPFS = false;
-    bool success = false;
-    int ipfsHashIndex = url.indexOf(QLatin1String("Qm"));
-    if (urlForm.isLocalFile()) {
-        QString f = urlForm.toLocalFile();
-        QFile file(f);
-        if (QFile::exists(f) && file.open(QFile::ReadOnly)) {
-            QByteArray data = file.readAll();
-            QFileInfo fi(file);
-            QUrl baseUrl = QUrl::fromLocalFile(fi.absolutePath());
-            qDebug() << "base URL" << baseUrl;
-            m_mainWidget->document()->setBaseUrl(baseUrl);
-            QMimeType type = m_mimeDb.mimeTypeForFileNameAndData(f, data);
-            success = loadContent(data, type);
-        }
-    } else if (ipfsHashIndex >= 0) {
-        m_baseIsIPFS = true;
-        if (urlForm.scheme().isEmpty())
-            urlForm.setScheme(ipfsScheme);
-        QUrl base = urlForm.adjusted(QUrl::RemoveFilename);
-        int slashIndex = url.indexOf(QLatin1Char('/'), ipfsHashIndex);
-        m_baseUrl = url.left(slashIndex);
-        qDebug() << "ipfs get" << url << "base" << base << m_baseUrl;
-        m_mainWidget->document()->setBaseUrl(base); // doesn't seem to help
-        QJsonObject ls = filesList(url).value(QLatin1String("Objects")).toObject();
-        QJsonObject firstObject = ls.value(ls.keys().first()).toObject();
-        QString typeJson = firstObject.value(QLatin1String("Type")).toString();
-        qDebug() << "data type from IPFS URL" << typeJson;
-        if (typeJson == QLatin1String("Directory")) {
-            success = loadContent(jsonDirectoryToMarkdown(firstObject), m_markdownType);
-        } else {
-            std::stringstream contents;
-            m_ipfsClient.FilesGet(url.toLatin1().toStdString(), &contents);
-            QByteArray data = QByteArray::fromStdString(contents.str());
-            QMimeType type = m_mimeDb.mimeTypeForFileNameAndData(url, data);
-            success = loadContent(data, type);
-        }
-    } else {
-        m_dataAccumulator.clear();
-        KIO::Job* job = KIO::get(urlForm);
-        connect (job, SIGNAL(data(KIO::Job *, const QByteArray &)),
-                 this, SLOT(dataReceived(KIO::Job *, const QByteArray &)));
-        connect (job, SIGNAL(result(KJob*)), this, SLOT(dataReceiveDone(KJob*)));
-        success = true;
-    }
-    if (success)
-        statusBar()->showMessage(tr("Opened \"%1\"").arg(url));
-    else
-        statusBar()->showMessage(tr("Could not open \"%1\"").arg(url));
-    return success;
+    m_rawText.clear();
+    KIO::Job* job = KIO::get(m_contentUrl);
+    connect (job, SIGNAL(data(KIO::Job *, const QByteArray &)),
+             this, SLOT(dataReceived(KIO::Job *, const QByteArray &)));
+    connect (job, SIGNAL(result(KJob*)), this, SLOT(dataReceiveDone(KJob*)));
 }
 
 void MainWindow::dataReceived(KIO::Job *,const QByteArray & data )
 {
-    m_dataAccumulator.append(data);
+    m_rawText.append(data);
 }
 
 void MainWindow::dataReceiveDone(KJob *)
 {
-    qDebug() << "received" << m_dataAccumulator.size();
-    loadContent(m_dataAccumulator);
-}
-
-bool MainWindow::loadUrl(QUrl url)
-{
-    qDebug() << url;
-    return load(url.toString());
+    qDebug() << "received" << m_rawText.size();
+    loadContent(m_rawText);
 }
 
 bool MainWindow::loadContent(const QByteArray &content, QMimeType type)
 {
     bool success = true;
-    QMimeDatabase db;
-    if (!type.isValid())
-        type = db.mimeTypeForData(content);
-    qDebug() << "mime type" << type;
+    // Stupidly m_mimeDb.mimeTypeForData(content) can't recognize markdown.  With the filename it works.
+    if (!type.isValid() || type.name() == QLatin1String("text/plain"))
+        type = m_mimeDb.mimeTypeForFileNameAndData(m_contentUrl.fileName(), content);
+    qDebug() << m_contentUrl.fileName() << "mime type" << type;
     if (type.name() == QLatin1String("text/markdown")) {
         m_mainWidget->setMarkdown(QString::fromUtf8(content));
     } else if (type.name() == QLatin1String("text/html") || type.name() == QLatin1String("application/xhtml+xml")) {
@@ -195,6 +153,10 @@ bool MainWindow::loadContent(const QByteArray &content, QMimeType type)
     // TODO load images by writing a "loader" markdown file?
     else
         success = false;
+    if (success)
+        statusBar()->showMessage(tr("Opened \"%1\"").arg(m_contentUrl.toString()));
+    else
+        statusBar()->showMessage(tr("Could not open \"%1\"").arg(m_contentUrl.toString()));
     return success;
 }
 
@@ -239,12 +201,17 @@ void MainWindow::on_urlField_returnPressed()
 
 QJsonObject MainWindow::filesList(QString url)
 {
+    // TODO load JSON file list via KIO
+    /*
     ipfs::Json ls_result;
     m_ipfsClient.FilesLs(url.toLatin1().toStdString(), &ls_result);
     QByteArray json = QByteArray::fromStdString(ls_result.dump());
     std::cout << "FilesLs() result:" << std::endl << ls_result.dump(2) << std::endl;
     QJsonDocument doc = QJsonDocument::fromJson(json);
     return doc.object();
+    */
+    Q_UNUSED(url)
+    return QJsonObject();
 }
 
 QByteArray MainWindow::jsonDirectoryToMarkdown(QJsonObject j)

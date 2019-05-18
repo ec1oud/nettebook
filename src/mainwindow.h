@@ -23,7 +23,6 @@
 #include <QMimeType>
 #include <QStack>
 #include <QUrl>
-#include <ipfs/client.h>
 
 namespace Ui {
 class MainWindow;
@@ -44,8 +43,8 @@ public:
     ~MainWindow();
 
 public slots:
-    bool load(QString url);
-    bool loadUrl(QUrl url);
+    void load(QString url);
+    void loadUrl(QUrl url);
     bool loadContent(const QByteArray &content, QMimeType type = QMimeType());
     bool setBrowserStyle(QUrl url);
 
@@ -67,12 +66,12 @@ private:
 private:
     Ui::MainWindow *ui;
     QTextEdit *m_mainWidget;
-    QByteArray m_dataAccumulator;
+    QByteArray m_rawText;
     QStack<QString> m_history; // correct for QTextBrowser history being broken (only for markdown?)
     QString m_baseUrl;
+    QUrl m_contentUrl;
     QMimeDatabase m_mimeDb;
     QMimeType m_markdownType;
-    ipfs::Client m_ipfsClient;
     bool m_baseIsIPFS = false;
 };
 

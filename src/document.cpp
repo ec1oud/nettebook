@@ -24,9 +24,9 @@ Document::Document(QObject *parent) : QTextDocument(parent)
 
 QVariant Document::loadResource(int type, const QUrl &name)
 {
-    qDebug() << static_cast<QTextDocument::ResourceType>(type) << name <<
-             (m_resourceLoaders.contains(name) ? "waiting for it" :
-             (m_loadedResources.contains(name) ? "from cache" : "new request"));
+//    qDebug() << static_cast<QTextDocument::ResourceType>(type) << name <<
+//             (m_resourceLoaders.contains(name) ? "waiting for it" :
+//             (m_loadedResources.contains(name) ? "from cache" : "new request"));
     if (m_resourceLoaders.contains(name))
         return QVariant(); // still waiting
     if (m_loadedResources.contains(name))
@@ -106,6 +106,8 @@ void Document::resourceReceiveDone(KJob *job)
 {
     QUrl url = m_resourceLoaders.key(job);
     qDebug() << "for" << url.toString() << "got" << m_loadedResources.value(url).size() << "bytes";
+    if (!m_loadedResources.value(url).size())
+        m_loadedResources[url].append(tr("%1: empty document").arg(url.toString()).toUtf8());
     m_resourceLoaders.remove(url);
     emit documentLayoutChanged();
     if (m_resourceLoaders.isEmpty()) {

@@ -15,8 +15,11 @@
 **
 ****************************************************************************/
 
+#include "document.h"
 #include "markdownbrowser.h"
 #include <QDebug>
+#include <QApplication>
+#include <QThread>
 
 MarkdownBrowser::MarkdownBrowser(QWidget *parent)
     : QTextBrowser(parent)
@@ -26,7 +29,12 @@ MarkdownBrowser::MarkdownBrowser(QWidget *parent)
 
 QVariant MarkdownBrowser::loadResource(int type, const QUrl &name)
 {
-    QVariant ret = QTextBrowser::loadResource(type, name);
-    qDebug() << type << name << ret;
+    QVariant ret = static_cast<Document *>(document())->loadResource(type, name);
+    qDebug() << type << name << (ret.isNull() ? "fetching" : "got it");
+    while (ret.isNull()) {
+        ret = static_cast<Document *>(document())->loadResource(type, name);
+        qApp->processEvents();
+        QThread::usleep(1000); // TODO is that the best we can do to wait for resources?
+    }
     return ret;
 }

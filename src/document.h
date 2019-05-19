@@ -48,6 +48,8 @@ private:
     QUrl m_baseUrl; // redundant, but remembers temporarily from one source to the next
     QHash<QUrl, KJob*> m_resourceLoaders;
     QHash<QUrl, QByteArray> m_loadedResources;
+
+    friend class MarkdownBrowser;
 };
 
 #endif // DOCUMENT_H

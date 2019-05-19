@@ -21,6 +21,7 @@
 #include <QMainWindow>
 #include <QMimeType>
 #include <QStack>
+#include <QTextBrowser>
 #include <QUrl>
 
 namespace Ui {
@@ -46,16 +47,15 @@ public slots:
 private slots:
     void on_actionQuit_triggered();
     void on_actionOpen_triggered();
-    void on_actionGo_back_triggered();
+    void on_actionBack_triggered();
     void on_browser_backwardAvailable(bool a);
     void on_urlField_returnPressed();
     void on_browser_highlighted(const QUrl &url);
 
 private:
     Ui::MainWindow *ui;
-    QTextEdit *m_mainWidget;
+    QTextBrowser *m_mainWidget;
     Document *m_document;
-    QStack<QString> m_history; // correct for QTextBrowser history being broken (only for markdown?)
 };
 
 #endif // MAINWINDOW_H

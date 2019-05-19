@@ -87,9 +87,9 @@ void MainWindow::load(QString url)
     // QUrl::fromUserInput knows how to guess about http and file URLs,
     // but mangles ipfs hashes by converting them to lowercase and setting scheme to http
     if (url.contains(base58HashPrefix) || url.contains(base32HashPrefix))
-        m_document->loadUrl(QUrl(url));
+        m_mainWidget->setSource(QUrl(url));
     else
-        m_document->loadUrl(QUrl::fromUserInput(url));
+        m_mainWidget->setSource(QUrl::fromUserInput(url));
 }
 
 bool MainWindow::setBrowserStyle(QUrl url)
@@ -109,40 +109,14 @@ bool MainWindow::setBrowserStyle(QUrl url)
     return false;
 }
 
-//void MainWindow::loadContent(const QByteArray &content, QMimeType type)
-//{
-//    bool success = true;
-//    if (type.name() == QLatin1String("text/markdown")) {
-//        m_mainWidget->setMarkdown(QString::fromUtf8(content));
-//    } else if (type.name() == QLatin1String("text/html") || type.name() == QLatin1String("application/xhtml+xml")) {
-//        QTextCodec *codec = Qt::codecForHtml(content);
-//        QString str = codec->toUnicode(content);
-//        m_mainWidget->setHtml(str);
-//    } else if (type.name() == QLatin1String("text/plain")) {
-//        m_mainWidget->setCurrentFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
-//        m_mainWidget->setPlainText(QString::fromLocal8Bit(content));
-//    }
-//    else
-//        success = false;
-//    if (success)
-//        statusBar()->showMessage(tr("Opened \"%1\"").arg(m_contentUrl.toString()));
-//    else
-//        statusBar()->showMessage(tr("Could not open \"%1\"").arg(m_contentUrl.toString()));
-//}
-
-void MainWindow::on_actionGo_back_triggered()
+void MainWindow::on_actionBack_triggered()
 {
-    // ui->browser->backward(); // doesn't work
-    if (m_history.count() > 1) {
-        m_history.pop(); // lose the current file
-        load(m_history.pop());
-    }
+    m_mainWidget->backward();
 }
 
 void MainWindow::on_browser_backwardAvailable(bool a)
 {
-    Q_UNUSED(a)
-//    ui->actionGo_back->setEnabled(a);
+    ui->actionBack->setEnabled(a);
 }
 
 void MainWindow::on_urlField_returnPressed()
@@ -154,3 +128,4 @@ void MainWindow::on_browser_highlighted(const QUrl &url)
 {
     ui->statusBar->showMessage(url.toString());
 }
+

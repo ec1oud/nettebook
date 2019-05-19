@@ -24,7 +24,18 @@ Document::Document(QObject *parent) : QTextDocument(parent)
 
 QVariant Document::loadResource(int type, const QUrl &name)
 {
-//    qDebug() << static_cast<QTextDocument::ResourceType>(type) << name <<
+    Q_UNUSED(type) // we always return QByteArray and the caller knows what to do (?)
+    QUrl url(name);
+    QString urlString = url.toString();
+    int base58HashIndex = urlString.indexOf(base58HashPrefix);
+    int base32HashIndex = urlString.indexOf(base32HashPrefix);
+    if (base58HashIndex >= 0 || base32HashIndex >= 0)
+        url.setScheme(ipfsScheme);
+    if (url.isRelative() && base58HashIndex < 0 && base32HashIndex < 0) {
+        qDebug() << "resolving relative URL" << url << "base" << baseUrl() << "meta" << metaInformation(DocumentUrl);
+        url = baseUrl().resolved(url);
+    }
+//    qDebug() << static_cast<QTextDocument::ResourceType>(type) << name << url <<
 //             (m_resourceLoaders.contains(name) ? "waiting for it" :
 //             (m_loadedResources.contains(name) ? "from cache" : "new request"));
     if (m_resourceLoaders.contains(name))
@@ -41,6 +52,7 @@ QVariant Document::loadResource(int type, const QUrl &name)
     return QVariant();
 }
 
+// QTextBrowser::setSource() bypasses this
 void Document::loadUrl(QUrl url)
 {
     QString urlString = url.toString();

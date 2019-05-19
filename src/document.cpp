@@ -15,11 +15,6 @@ static const QString base32HashPrefix = QStringLiteral("bafybei");
 
 Document::Document(QObject *parent) : QTextDocument(parent)
 {
-    for (auto m : m_mimeDb.allMimeTypes())
-        if (m.name() == QLatin1String("text/markdown")) {
-            m_markdownType = m;
-            break;
-        }
 }
 
 QVariant Document::loadResource(int type, const QUrl &name)
@@ -52,57 +47,6 @@ QVariant Document::loadResource(int type, const QUrl &name)
     return QVariant();
 }
 
-// QTextBrowser::setSource() bypasses this
-void Document::loadUrl(QUrl url)
-{
-    QString urlString = url.toString();
-    qDebug() << url << urlString;
-    m_contentUrl = url;
-
-    qDebug() << url << m_contentUrl << "baseUrl" << m_baseUrl << "relative?" << m_contentUrl.isRelative();
-    int base58HashIndex = urlString.indexOf(base58HashPrefix);
-    int base32HashIndex = urlString.indexOf(base32HashPrefix);
-    if (base58HashIndex >= 0 || base32HashIndex >= 0)
-        m_contentUrl.setScheme(ipfsScheme);
-    else if (m_contentUrl.scheme().isEmpty())
-        m_contentUrl.setScheme(fileScheme);
-    if (m_contentUrl.isRelative() && base58HashIndex < 0 && base32HashIndex < 0) {
-        QUrl res = m_contentUrl.resolved(baseUrl()); // doesn't work for local files
-        qDebug() << url << "base" << baseUrl() << "resolved" << res << res.fileName() << m_contentUrl.toString();
-        res.setScheme("file");
-        if (res.fileName().isEmpty())
-            res.setPath(res.path() + QLatin1Char('/') + url.fileName());
-        qDebug() << url << res << res.fileName() << m_contentUrl.toString();
-        m_contentUrl = res;
-    }
-    m_baseUrl = m_contentUrl.adjusted(QUrl::RemoveFilename);
-    qDebug() << "URL for KIO:" << m_contentUrl << "baseURL for document:" << m_baseUrl;
-    KIO::Job* job = KIO::get(m_contentUrl);
-    connect (job, SIGNAL(data(KIO::Job *, const QByteArray &)),
-             this, SLOT(dataReceived(KIO::Job *, const QByteArray &)));
-    connect (job, SIGNAL(result(KJob*)), this, SLOT(dataReceiveDone(KJob*)));
-}
-
-/*!
-    \return the last URL to be loaded via loadUrl()
-*/
-QUrl Document::contentUrl()
-{
-    return m_contentUrl;
-}
-
-void Document::dataReceived(KIO::Job *,const QByteArray & data )
-{
-//    qDebug() << "received" << data.size();
-    m_rawText.append(data);
-}
-
-void Document::dataReceiveDone(KJob *)
-{
-    qDebug() << "received" << m_rawText.size();
-    loadContent(m_rawText);
-}
-
 void Document::resourceDataReceived(KIO::Job *job, const QByteArray & data)
 {
     QUrl url = m_resourceLoaders.key(job);
@@ -126,34 +70,6 @@ void Document::resourceReceiveDone(KJob *job)
         emit allResourcesLoaded();
         qDebug() << "all resources loaded";
     }
-}
-
-bool Document::loadContent(const QByteArray &content, QMimeType type)
-{
-    bool success = true;
-    // Stupidly m_mimeDb.mimeTypeForData(content) can't recognize markdown.  With the filename it works.
-    if (!type.isValid() || type.name() == QLatin1String("text/plain"))
-        type = m_mimeDb.mimeTypeForFileNameAndData(m_contentUrl.fileName(), content);
-    qDebug() << m_contentUrl.fileName() << "mime type" << type;
-    setBaseUrl(m_baseUrl);
-    if (type.name() == QLatin1String("text/markdown")) {
-        setMarkdown(QString::fromUtf8(content));
-    } else if (type.name() == QLatin1String("text/html") || type.name() == QLatin1String("application/xhtml+xml")) {
-        QTextCodec *codec = Qt::codecForHtml(content);
-        QString str = codec->toUnicode(content);
-        setHtml(str);
-    } else if (type.name() == QLatin1String("text/plain")) {
-//        m_mainWidget->setCurrentFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
-        setPlainText(QString::fromLocal8Bit(content));
-    }
-    // TODO load images by writing a "loader" markdown file?
-    else
-        success = false;
-    if (success)
-        emit status(tr("Opened \"%1\"").arg(m_contentUrl.toString()));
-    else
-        emit status(tr("Could not open \"%1\"").arg(m_contentUrl.toString()));
-    return success;
 }
 
 QJsonObject Document::filesList(QString url)

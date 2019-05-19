@@ -51,6 +51,9 @@ private slots:
     void on_browser_backwardAvailable(bool a);
     void on_urlField_returnPressed();
     void on_browser_highlighted(const QUrl &url);
+    void on_actionToggleEditMode_toggled(bool edit);
+    void on_actionSave_triggered();
+    void on_actionSave_As_triggered();
 
 private:
     Ui::MainWindow *ui;

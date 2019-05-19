@@ -24,6 +24,9 @@ HEADERS += \
 FORMS += \
     mainwindow.ui
 
+RESOURCES += \
+    resources/resources.qrc
+
 INCLUDEPATH += /usr/include/KF5/KIOCore
 LIBS += -L/usr/lib/kf5 -lKF5KIOCore -lKF5CoreAddons
 

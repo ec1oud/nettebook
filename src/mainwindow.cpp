@@ -55,6 +55,18 @@ MainWindow::MainWindow(QWidget *parent) :
     }
     delete ui->toolbarStuff;
     ui->toolbarStuff = nullptr;
+
+    while (ui->editToolbarStuff->count()) {
+        QWidget *tw = ui->editToolbarStuff->takeAt(0)->widget();
+        if (!tw)
+            continue;
+        tw->setAttribute(Qt::WA_AcceptTouchEvents);
+        ui->editToolBar->addWidget(tw);
+    }
+    delete ui->editToolbarStuff;
+    ui->editToolbarStuff = nullptr;
+
+    on_actionToggleEditMode_toggled(false);
 }
 
 MainWindow::~MainWindow()
@@ -91,6 +103,37 @@ void MainWindow::load(QString url)
         m_mainWidget->setSource(QUrl(url), directory ? QTextDocument::MarkdownResource : QTextDocument::UnknownResource);
     else
         m_mainWidget->setSource(QUrl::fromUserInput(url), directory ? QTextDocument::MarkdownResource : QTextDocument::UnknownResource);
+}
+
+void MainWindow::on_actionSave_triggered()
+{
+    qDebug() << m_mainWidget->source();
+    m_document->saveAs(m_mainWidget->source());
+}
+
+void MainWindow::on_actionSave_As_triggered()
+{
+    qDebug() << m_mainWidget->source();
+    QFileDialog fileDialog(this, tr("Save as..."));
+    fileDialog.setAcceptMode(QFileDialog::AcceptSave);
+    fileDialog.setDirectoryUrl(m_document->baseUrl());
+    QStringList mimeTypes;
+    mimeTypes
+#if QT_CONFIG(textmarkdownwriter)
+        << "text/markdown"
+#endif
+        << "text/html"
+#if QT_CONFIG(textodfwriter)
+        << "application/vnd.oasis.opendocument.text"
+#endif
+        << "text/plain";
+    fileDialog.setMimeTypeFilters(mimeTypes);
+#if QT_CONFIG(textmarkdownwriter)
+    fileDialog.setDefaultSuffix("md");
+#endif
+    if (fileDialog.exec() != QDialog::Accepted)
+        return;
+    m_document->saveAs(fileDialog.selectedUrls().first(), fileDialog.selectedMimeTypeFilter());
 }
 
 bool MainWindow::setBrowserStyle(QUrl url)
@@ -130,3 +173,11 @@ void MainWindow::on_browser_highlighted(const QUrl &url)
     ui->statusBar->showMessage(url.toString());
 }
 
+void MainWindow::on_actionToggleEditMode_toggled(bool edit)
+{
+    qDebug() << edit;
+    m_mainWidget->setReadOnly(!edit);
+    ui->editToolBar->setVisible(edit);
+    ui->actionSave->setVisible(edit);
+    ui->actionSave_As->setVisible(edit);
+}

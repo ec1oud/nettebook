@@ -42,6 +42,74 @@
      </layout>
     </item>
     <item>
+     <layout class="QHBoxLayout" name="editToolbarStuff">
+      <item>
+       <widget class="QComboBox" name="styleCB">
+        <item>
+         <property name="text">
+          <string>Heading</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Plain</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Block Quote</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Code Block</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>• List Item</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>◦ List Item</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>▫ List Item</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>☒ Task Item</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>☐ Task Item</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>1) Numbered Item</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item>
+       <widget class="QSpinBox" name="headingLevelSB">
+        <property name="minimum">
+         <number>1</number>
+        </property>
+        <property name="maximum">
+         <number>6</number>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
      <widget class="MarkdownBrowser" name="browser"/>
     </item>
    </layout>
@@ -60,6 +128,9 @@
      <string>File</string>
     </property>
     <addaction name="actionOpen"/>
+    <addaction name="actionSave"/>
+    <addaction name="actionSave_As"/>
+    <addaction name="actionToggleEditMode"/>
     <addaction name="actionQuit"/>
    </widget>
    <widget class="QMenu" name="menuView">
@@ -79,13 +150,32 @@
     <bool>false</bool>
    </attribute>
    <addaction name="actionOpen"/>
+   <addaction name="actionSave"/>
+   <addaction name="actionToggleEditMode"/>
    <addaction name="actionBack"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
+  <widget class="QToolBar" name="editToolBar">
+   <property name="windowTitle">
+    <string>toolBar</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>true</bool>
+   </attribute>
+   <addaction name="actionEmphasis"/>
+   <addaction name="actionStrongEmphasis"/>
+   <addaction name="actionStrikeOut"/>
+   <addaction name="actionMonospace"/>
+   <addaction name="actionIndent"/>
+   <addaction name="actionUnindent"/>
+  </widget>
   <action name="actionOpen">
    <property name="icon">
-    <iconset theme="document-open">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset theme="document-open" resource="resources/resources.qrc">
+     <normaloff>:/32/document-open.png</normaloff>:/32/document-open.png</iconset>
    </property>
    <property name="text">
     <string>Open</string>
@@ -108,14 +198,152 @@
   </action>
   <action name="actionBack">
    <property name="icon">
-    <iconset theme="back">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset theme="back" resource="resources/resources.qrc">
+     <normaloff>:/32/go-previous.png</normaloff>:/32/go-previous.png</iconset>
    </property>
    <property name="text">
     <string>Go back</string>
    </property>
    <property name="shortcut">
     <string>Alt+Left</string>
+   </property>
+  </action>
+  <action name="actionToggleEditMode">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset theme="document-edit" resource="resources/resources.qrc">
+     <normaloff>:/32/document-edit.png</normaloff>:/32/document-edit.png</iconset>
+   </property>
+   <property name="text">
+    <string>Toggle edit mode</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+E</string>
+   </property>
+  </action>
+  <action name="actionStrongEmphasis">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources/resources.qrc">
+     <normaloff>:/32/format-text-bold.png</normaloff>:/32/format-text-bold.png</iconset>
+   </property>
+   <property name="text">
+    <string>Strong</string>
+   </property>
+   <property name="toolTip">
+    <string>Bold</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+B</string>
+   </property>
+  </action>
+  <action name="actionEmphasis">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources/resources.qrc">
+     <normaloff>:/32/format-text-italic.png</normaloff>:/32/format-text-italic.png</iconset>
+   </property>
+   <property name="text">
+    <string>Emphasized</string>
+   </property>
+   <property name="toolTip">
+    <string>Italic</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+I</string>
+   </property>
+  </action>
+  <action name="actionStrikeOut">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources/resources.qrc">
+     <normaloff>:/32/format-text-strikethrough.png</normaloff>:/32/format-text-strikethrough.png</iconset>
+   </property>
+   <property name="text">
+    <string>Strike out</string>
+   </property>
+   <property name="toolTip">
+    <string>Cross out text</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+`</string>
+   </property>
+  </action>
+  <action name="actionIndent">
+   <property name="icon">
+    <iconset resource="resources/resources.qrc">
+     <normaloff>:/32/format-indent-more.png</normaloff>:/32/format-indent-more.png</iconset>
+   </property>
+   <property name="text">
+    <string>Indent</string>
+   </property>
+   <property name="toolTip">
+    <string>Indent more</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+]</string>
+   </property>
+  </action>
+  <action name="actionUnindent">
+   <property name="icon">
+    <iconset resource="resources/resources.qrc">
+     <normaloff>:/32/format-indent-less.png</normaloff>:/32/format-indent-less.png</iconset>
+   </property>
+   <property name="text">
+    <string>Unindent</string>
+   </property>
+   <property name="toolTip">
+    <string>Indent less</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+[</string>
+   </property>
+  </action>
+  <action name="actionMonospace">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources/resources.qrc">
+     <normaloff>:/32/format-text-mono.png</normaloff>:/32/format-text-mono.png</iconset>
+   </property>
+   <property name="text">
+    <string>Monospace</string>
+   </property>
+   <property name="toolTip">
+    <string>Code or typewriter text</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+M</string>
+   </property>
+  </action>
+  <action name="actionSave">
+   <property name="icon">
+    <iconset resource="resources/resources.qrc">
+     <normaloff>:/32/document-save.png</normaloff>:/32/document-save.png</iconset>
+   </property>
+   <property name="text">
+    <string>Save</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
+   </property>
+  </action>
+  <action name="actionSave_As">
+   <property name="icon">
+    <iconset resource="resources/resources.qrc">
+     <normaloff>:/32/document-save-as.png</normaloff>:/32/document-save-as.png</iconset>
+   </property>
+   <property name="text">
+    <string>Save As...</string>
    </property>
   </action>
  </widget>
@@ -127,7 +355,9 @@
    <header>markdownbrowser.h</header>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="resources/resources.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>browser</sender>

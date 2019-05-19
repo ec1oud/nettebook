@@ -24,7 +24,7 @@ public:
     Document(QObject *parent = nullptr);
 
     void loadUrl(QUrl url);
-    QUrl contentUrl();
+    void saveAs(const QUrl &url, const QString &mimeType = QString());
     QByteArray fileListMarkdown();
 
 signals:
@@ -39,12 +39,21 @@ private slots:
     void resourceDataReceived(KIO::Job *, const QByteArray &data);
     void resourceReceiveDone(KJob *);
     void fileListReceived(KIO::Job *job, const KIO::UDSEntryList &list);
+    void onSaveDataReq(KIO::Job *job, QByteArray &dest);
+    void onSaveDone(KJob *job);
 
 private:
+    enum ResourceTypeExt {
+        PlainTextResource = UserResource,
+        OdtResource
+    };
+
     QHash<QUrl, KJob*> m_resourceLoaders;
     QHash<QUrl, QByteArray> m_loadedResources;
     KIO::UDSEntryList m_fileList;
     QString m_errorText;
+    int m_saveType = UnknownResource;
+    bool m_saveDone = false;
 
     friend class MarkdownBrowser;
 };

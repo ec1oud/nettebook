@@ -1,0 +1,26 @@
+<RCC>
+    <qresource prefix="/">
+        <file>32/document-new.png</file>
+        <file>32/document-open.png</file>
+        <file>32/document-print-preview.png</file>
+        <file>32/document-print.png</file>
+        <file>32/document-save-as.png</file>
+        <file>32/document-save.png</file>
+        <file>32/edit-copy.png</file>
+        <file>32/edit-cut.png</file>
+        <file>32/edit-find-replace.png</file>
+        <file>32/edit-find.png</file>
+        <file>32/edit-paste.png</file>
+        <file>32/edit-redo.png</file>
+        <file>32/edit-undo.png</file>
+        <file>32/format-indent-less.png</file>
+        <file>32/format-indent-more.png</file>
+        <file>32/format-text-bold.png</file>
+        <file>32/format-text-italic.png</file>
+        <file>32/format-text-strikethrough.png</file>
+        <file>32/go-next.png</file>
+        <file>32/go-previous.png</file>
+        <file>32/document-edit.png</file>
+        <file>32/format-text-mono.png</file>
+    </qresource>
+</RCC>

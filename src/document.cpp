@@ -1,11 +1,13 @@
 #include "document.h"
 #include <QApplication>
+#include <QBuffer>
 #include <QDebug>
 #include <QImage>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QTextCodec>
+#include <QTextDocumentWriter>
 #include <KIO/Job>
 #include <KIO/ListJob>
 
@@ -18,9 +20,11 @@ Document::Document(QObject *parent) : QTextDocument(parent)
 {
 }
 
-QVariant Document::loadResource(int type, const QUrl &name)
+QVariant Document::loadResource(int t, const QUrl &name)
 {
-    Q_UNUSED(type) // we always return QByteArray and the caller knows what to do (?)
+    QTextDocument::ResourceType type = static_cast<QTextDocument::ResourceType>(t);
+    if (type == ResourceType::HtmlResource || type == ResourceType::MarkdownResource)
+        m_saveType = static_cast<QTextDocument::ResourceType>(type);
     QUrl url(name);
     QString urlString = url.toString();
     int base58HashIndex = urlString.indexOf(base58HashPrefix);
@@ -34,7 +38,7 @@ QVariant Document::loadResource(int type, const QUrl &name)
     if (m_resourceLoaders.contains(name))
         return QVariant(); // still waiting
     else
-        qDebug() << static_cast<QTextDocument::ResourceType>(type) << name << url <<
+        qDebug() << type << name << url <<
                     (m_loadedResources.contains(name) ? "from cache" : "new request");
     if (url.fileName().isEmpty()) {
         if (!m_fileList.isEmpty()) {
@@ -83,8 +87,18 @@ void Document::resourceReceiveDone(KJob *job)
 {
     QUrl url = m_resourceLoaders.key(job);
     qDebug() << "for" << url.toString() << "got" << m_loadedResources.value(url).size() << "bytes";
-    if (!m_loadedResources.value(url).size())
+    if (!m_loadedResources.value(url).size()) {
         m_loadedResources[url].append(tr("%1: empty document").arg(url.toString()).toUtf8());
+    } else {
+        QMimeType type = QMimeDatabase().mimeTypeForFileNameAndData(url.fileName(), m_loadedResources[url]);
+        qDebug() << "detected mime type" << type.name();
+        if (type.name().contains(QLatin1String("html")))
+            m_saveType = HtmlResource;
+        // not useful because Qt doesn't have an OpenDoc reader yet
+//        else if (type.name().contains(QLatin1String("opendocument")))
+//            m_saveType = OdtResource;
+        // we can't fully trust the markdown/plain text detection
+    }
     m_resourceLoaders.remove(url);
     emit documentLayoutChanged();
     emit resourceLoaded(url);
@@ -127,4 +141,55 @@ QByteArray Document::fileListMarkdown()
     }
     qDebug() << ret;
     return ret;
+}
+
+void Document::saveAs(const QUrl &url, const QString &mimeType)
+{
+    m_saveDone = false;
+    qDebug() << url << mimeType;
+    if (mimeType.contains(QLatin1String("opendocument")))
+        m_saveType = OdtResource;
+    else if (mimeType == QLatin1String("text/plain"))
+        m_saveType = PlainTextResource;
+    KIO::TransferJob *job = KIO::put(url, -1, KIO::Overwrite);
+    connect (job, SIGNAL(dataReq(KIO::Job *, QByteArray &)),
+             this, SLOT(onSaveDataReq(KIO::Job *, QByteArray &)));
+    connect (job, SIGNAL(result(KJob*)), this, SLOT(onSaveDone(KJob*)));
+}
+
+void Document::onSaveDataReq(KIO::Job *job, QByteArray &dest)
+{
+    Q_UNUSED(job)
+    if (m_saveDone)
+        return;
+    switch (m_saveType) {
+    case ResourceType::HtmlResource:
+        qDebug() << "writing HTML";
+        dest = toHtml().toLocal8Bit();
+        break;
+    case ResourceType::MarkdownResource:
+        qDebug() << "writing Markdown";
+        dest = toMarkdown().toUtf8();
+        break;
+    case PlainTextResource:
+        qDebug() << "writing plain text";
+        dest = toPlainText().toLocal8Bit();
+        break;
+    case OdtResource: {
+        qDebug() << "writing ODT";
+        QBuffer buf(&dest);
+        QTextDocumentWriter writer(&buf, "odt");
+        writer.write(this);
+    } break;
+    default:
+        qWarning() << "saving" << m_saveType << "isn't implemented";
+        break;
+    }
+    m_saveDone = true;
+}
+
+void Document::onSaveDone(KJob *job)
+{
+    Q_UNUSED(job)
+    qDebug();
 }

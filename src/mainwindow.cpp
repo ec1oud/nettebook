@@ -42,6 +42,10 @@ MainWindow::MainWindow(QWidget *parent) :
     m_mainWidget = ui->browser;
     m_mainWidget->setDocument(m_document);
 
+    // after all resources for a document are loaded, make the QTextBrowser call its d->relayoutDocument()
+    connect(m_document, &Document::allResourcesLoaded,
+            [=]() { m_mainWidget->setDocument(m_document); });
+
     while (ui->toolbarStuff->count()) {
         QWidget *tw = ui->toolbarStuff->takeAt(0)->widget();
         if (!tw)

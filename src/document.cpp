@@ -81,7 +81,7 @@ QUrl Document::contentUrl()
 
 void Document::dataReceived(KIO::Job *,const QByteArray & data )
 {
-    qDebug() << "received" << data.size();
+//    qDebug() << "received" << data.size();
     m_rawText.append(data);
 }
 
@@ -108,8 +108,10 @@ void Document::resourceReceiveDone(KJob *job)
     qDebug() << "for" << url.toString() << "got" << m_loadedResources.value(url).size() << "bytes";
     m_resourceLoaders.remove(url);
     emit documentLayoutChanged();
-    if (m_resourceLoaders.isEmpty())
+    if (m_resourceLoaders.isEmpty()) {
+        emit allResourcesLoaded();
         qDebug() << "all resources loaded";
+    }
 }
 
 bool Document::loadContent(const QByteArray &content, QMimeType type)

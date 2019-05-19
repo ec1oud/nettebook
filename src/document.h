@@ -29,6 +29,7 @@ public:
 
 signals:
     void status(const QString &text);
+    void allResourcesLoaded();
 
 protected:
     QVariant loadResource(int type, const QUrl &name) override;

@@ -50,11 +50,11 @@ int main(int argc, char *argv[])
         parser.showHelp();
 
     MainWindow w;
-    if (parser.isSet(cssOption))
-        w.setBrowserStyle(QUrl::fromLocalFile(parser.value(cssOption)));
     if (parser.positionalArguments().count() > 0)
         w.load(parser.positionalArguments().last());
     w.show();
+    if (parser.isSet(cssOption))
+        w.setBrowserStyle(QUrl::fromLocalFile(parser.value(cssOption)));
 
     return app.exec();
 }

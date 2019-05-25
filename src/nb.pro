@@ -25,7 +25,7 @@ FORMS += \
     mainwindow.ui
 
 INCLUDEPATH += /usr/include/KF5/KIOCore
-LIBS += -L/usr/lib/kf5 -lKF5KIOCore
+LIBS += -L/usr/lib/kf5 -lKF5KIOCore -lKF5CoreAddons
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

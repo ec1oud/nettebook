@@ -23,6 +23,10 @@
 #include <QJsonObject>
 #include <KIO/TransferJob>
 #include <KConfigGroup>
+#include <KJobUiDelegate>
+
+static const QString base58HashPrefix = QStringLiteral("Qm");
+static const QString base32HashPrefix = QStringLiteral("bafybei");
 
 // Pseudo plugin class to embed meta data
 class KIOPluginForMetaData : public QObject
@@ -72,11 +76,19 @@ void IpfsSlave::get(const QUrl &url)
 
 void IpfsSlave::listDir(const QUrl &url)
 {
+    QString urlString = url.toString(QUrl::RemoveScheme);
+    int base58HashIndex = urlString.indexOf(base58HashPrefix);
+    int base32HashIndex = urlString.indexOf(base32HashPrefix);
+    if (base58HashIndex >= 0)
+        urlString = urlString.mid(base58HashIndex);
+    else if (base32HashIndex >= 0)
+        urlString = urlString.mid(base32HashIndex);
+    else while (urlString.startsWith(QLatin1Char('/')))
+        urlString = urlString.mid(1);
     m_apiUrl = m_baseUrl;
     m_apiUrl.setPath(m_baseUrl.path(QUrl::DecodeReserved) + QLatin1String("ls"));
-    m_apiUrl.setQuery("arg=" + url.fileName());
-    qDebug() << Q_FUNC_INFO << url << url.fileName() << m_apiUrl.toString();
-
+    m_apiUrl.setQuery("arg=" + urlString);
+    qDebug() << Q_FUNC_INFO << url << urlString << m_apiUrl.toString();
     KIO::TransferJob *job = KIO::get(m_apiUrl, KIO::NoReload, KIO::HideProgressInfo);
     connectTransferJob(job);
     connect(job, SIGNAL(result(KJob*)), this, SLOT(onLsReceiveDone(KJob*)));
@@ -108,19 +120,24 @@ void IpfsSlave::onCatReceiveDone(KJob *job)
 
 void IpfsSlave::onLsReceiveDone(KJob *job)
 {
-    Q_UNUSED(job)
+    if (job->error())
+        job->uiDelegate()->showErrorMessage();
     QJsonDocument jdoc = QJsonDocument::fromJson(m_dataAccumulator);
+//qDebug() << m_dataAccumulator;
     m_dataAccumulator.clear();
     QJsonArray a = jdoc.object().value(QLatin1String("Objects")).toArray();
     QJsonArray ls = a.first().toObject().value("Links").toArray();
+qDebug() << Q_FUNC_INFO << ls.count();
     KIO::UDSEntryList entries;
     for (int i = 0; i < ls.count(); ++i) {
         QJsonObject eo = ls.at(i).toObject();
-        qDebug() << eo;
+//        qDebug() << eo;
         KIO::UDSEntry e;
         e.fastInsert(KIO::UDSEntry::UDS_NAME, eo.value(QStringLiteral("Name")).toString());
         e.fastInsert(KIO::UDSEntry::UDS_LINK_DEST, eo.value(QStringLiteral("Hash")).toString());
         e.fastInsert(KIO::UDSEntry::UDS_SIZE, eo.value(QStringLiteral("Size")).toInt());
+        // TODO figure out what other file types there are; from experience it looks like 2 is a normal file, 1 is a directory
+        e.fastInsert(KIO::UDSEntry::UDS_FILE_TYPE, (eo.value(QStringLiteral("Type")).toInt() == 2 ? S_IFREG : S_IFDIR));
         entries << e;
     }
     listEntries(entries);

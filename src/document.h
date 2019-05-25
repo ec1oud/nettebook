@@ -2,10 +2,12 @@
 #define DOCUMENT_H
 
 #include <QObject>
+#include <QJsonDocument>
 #include <QMimeDatabase>
 #include <QMimeType>
 #include <QTextDocument>
 #include <QUrl>
+#include <KIO/ListJob>
 
 namespace KIO {
 class Job;
@@ -23,8 +25,7 @@ public:
 
     void loadUrl(QUrl url);
     QUrl contentUrl();
-    QJsonObject filesList(QString url);
-    QByteArray jsonDirectoryToMarkdown(QJsonObject j);
+    QByteArray fileListMarkdown();
 
 signals:
     void status(const QString &text);
@@ -36,10 +37,13 @@ protected:
 private slots:
     void resourceDataReceived(KIO::Job *, const QByteArray &data);
     void resourceReceiveDone(KJob *);
+    void fileListReceived(KIO::Job *job, const KIO::UDSEntryList &list);
 
 private:
     QHash<QUrl, KJob*> m_resourceLoaders;
     QHash<QUrl, QByteArray> m_loadedResources;
+    KIO::UDSEntryList m_fileList;
+    QString m_errorText;
 
     friend class MarkdownBrowser;
 };

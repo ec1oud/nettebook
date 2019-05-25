@@ -7,6 +7,7 @@
 #include <QJsonObject>
 #include <QTextCodec>
 #include <KIO/Job>
+#include <KIO/ListJob>
 
 static const QString ipfsScheme = QStringLiteral("ipfs");
 static const QString fileScheme = QStringLiteral("file");
@@ -30,19 +31,37 @@ QVariant Document::loadResource(int type, const QUrl &name)
         qDebug() << "resolving relative URL" << url << "base" << baseUrl() << "meta" << metaInformation(DocumentUrl);
         url = baseUrl().resolved(url);
     }
-//    qDebug() << static_cast<QTextDocument::ResourceType>(type) << name << url <<
-//             (m_resourceLoaders.contains(name) ? "waiting for it" :
-//             (m_loadedResources.contains(name) ? "from cache" : "new request"));
     if (m_resourceLoaders.contains(name))
         return QVariant(); // still waiting
-    if (m_loadedResources.contains(name))
-        return m_loadedResources.value(name);
-    // not cached, so try to load it
-    KIO::Job* job = KIO::get(name);
-    connect (job, SIGNAL(data(KIO::Job *, const QByteArray &)),
-             this, SLOT(resourceDataReceived(KIO::Job *, const QByteArray &)));
-    connect (job, SIGNAL(result(KJob*)), this, SLOT(resourceReceiveDone(KJob*)));
-    m_resourceLoaders.insert(name, job);
+    else
+        qDebug() << static_cast<QTextDocument::ResourceType>(type) << name << url <<
+                    (m_loadedResources.contains(name) ? "from cache" : "new request");
+    if (url.fileName().isEmpty()) {
+        if (!m_fileList.isEmpty()) {
+            QByteArray ret = fileListMarkdown();
+            m_fileList.clear();
+            return ret;
+        } else if (!m_errorText.isEmpty()) {
+            QString ret = m_errorText;
+            m_errorText.clear();
+            return ret;
+        }
+        m_fileList.clear();
+        KIO::ListJob* job = KIO::listDir(url);
+        connect (job, SIGNAL(entries(KIO::Job*, const KIO::UDSEntryList &)),
+                 this, SLOT(fileListReceived(KIO::Job*, const KIO::UDSEntryList &)));
+        m_resourceLoaders.insert(name, job);
+    } else {
+        if (m_loadedResources.contains(name))
+            return m_loadedResources.value(name);
+        // not cached, so try to load it
+        KIO::Job* job = KIO::get(name);
+qDebug() << "GET" << name << job;
+        connect (job, SIGNAL(data(KIO::Job *, const QByteArray &)),
+                 this, SLOT(resourceDataReceived(KIO::Job *, const QByteArray &)));
+        connect (job, SIGNAL(result(KJob*)), this, SLOT(resourceReceiveDone(KJob*)));
+        m_resourceLoaders.insert(name, job);
+    }
     // Waiting for now, but this function can't block.  We'll be nagged again soon.
     return QVariant();
 }
@@ -72,30 +91,37 @@ void Document::resourceReceiveDone(KJob *job)
     }
 }
 
-QJsonObject Document::filesList(QString url)
+void Document::fileListReceived(KIO::Job *job, const KIO::UDSEntryList &list)
 {
-    // TODO load JSON file list via KIO
-    /*
-    ipfs::Json ls_result;
-    m_ipfsClient.FilesLs(url.toLatin1().toStdString(), &ls_result);
-    QByteArray json = QByteArray::fromStdString(ls_result.dump());
-    std::cout << "FilesLs() result:" << std::endl << ls_result.dump(2) << std::endl;
-    QJsonDocument doc = QJsonDocument::fromJson(json);
-    return doc.object();
-    */
-    Q_UNUSED(url)
-    return QJsonObject();
+    QUrl url = m_resourceLoaders.key(job);
+    if (job->error()) {
+        m_errorText = job->errorString();
+        m_fileList.clear();
+    } else {
+        m_fileList = list;
+        if (list.count() == 0)
+            m_errorText = tr("no files in %1").arg(url.toString());
+        qDebug() << "got file list" << list.count() << m_fileList;
+    }
+    m_resourceLoaders.remove(url);
 }
 
-QByteArray Document::jsonDirectoryToMarkdown(QJsonObject j)
+QByteArray Document::fileListMarkdown()
 {
-    QJsonArray links = j.value(QLatin1String("Links")).toArray();
-    QByteArray ret;
-    for (auto o : links) {
-        auto object = o.toObject();
-        auto hash = object.value(QLatin1String("Hash")).toString().toUtf8();
-        auto name = object.value(QLatin1String("Name")).toString().toUtf8();
-        ret += '[' + name + "](" + name + ") " + hash + "\n\n";
+    QByteArray ret = "|File|Hash|Size|\n"
+                     "|----|----|----|\n";
+    for (const KIO::UDSEntry &f : m_fileList) {
+        auto name = f.stringValue(KIO::UDSEntry::UDS_NAME);
+        if (f.isDir())
+            name += "/";
+        auto hash = f.stringValue(KIO::UDSEntry::UDS_LINK_DEST);
+        qint64 size = f.numberValue(KIO::UDSEntry::UDS_SIZE);
+        ret += "|[" + name + "](" + name + ")|" + hash +
+                "|" + QLocale().formattedDataSize(size) +
+//                "|" + f.stringValue(KIO::UDSEntry::UDS_CREATION_TIME) +
+//                "|" + f.stringValue(KIO::UDSEntry::UDS_MIME_TYPE) +
+                "|\n";
     }
+    qDebug() << ret;
     return ret;
 }

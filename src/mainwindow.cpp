@@ -86,10 +86,11 @@ void MainWindow::load(QString url)
     qDebug() << url;
     // QUrl::fromUserInput knows how to guess about http and file URLs,
     // but mangles ipfs hashes by converting them to lowercase and setting scheme to http
+    bool directory = url.endsWith(QLatin1String("/"));
     if (url.contains(base58HashPrefix) || url.contains(base32HashPrefix))
-        m_mainWidget->setSource(QUrl(url));
+        m_mainWidget->setSource(QUrl(url), directory ? QTextDocument::MarkdownResource : QTextDocument::UnknownResource);
     else
-        m_mainWidget->setSource(QUrl::fromUserInput(url));
+        m_mainWidget->setSource(QUrl::fromUserInput(url), directory ? QTextDocument::MarkdownResource : QTextDocument::UnknownResource);
 }
 
 bool MainWindow::setBrowserStyle(QUrl url)

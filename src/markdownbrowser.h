@@ -19,12 +19,20 @@
 #define MARKDOWNBROWSER_H
 
 #include <QTextBrowser>
+#include <QTimer>
 
 class MarkdownBrowser : public QTextBrowser
 {
 public:
     MarkdownBrowser(QWidget *parent = nullptr);
     QVariant loadResource(int type, const QUrl &name) override;
+
+private slots:
+    void onResourceLoaded(QUrl url);
+    void onLoadingTimeout();
+
+private:
+    QTimer m_loadingTimeout;
 };
 
 #endif // MARKDOWNBROWSER_H

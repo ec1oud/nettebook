@@ -52,8 +52,10 @@ QVariant Document::loadResource(int type, const QUrl &name)
                  this, SLOT(fileListReceived(KIO::Job*, const KIO::UDSEntryList &)));
         m_resourceLoaders.insert(name, job);
     } else {
-        if (m_loadedResources.contains(name))
+        if (m_loadedResources.contains(name)) {
+            emit resourceLoaded(name);
             return m_loadedResources.value(name);
+        }
         // not cached, so try to load it
         KIO::Job* job = KIO::get(name);
 qDebug() << "GET" << name << job;
@@ -85,6 +87,7 @@ void Document::resourceReceiveDone(KJob *job)
         m_loadedResources[url].append(tr("%1: empty document").arg(url.toString()).toUtf8());
     m_resourceLoaders.remove(url);
     emit documentLayoutChanged();
+    emit resourceLoaded(url);
     if (m_resourceLoaders.isEmpty()) {
         emit allResourcesLoaded();
         qDebug() << "all resources loaded";

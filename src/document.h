@@ -30,6 +30,7 @@ public:
 signals:
     void status(const QString &text);
     void allResourcesLoaded();
+    void resourceLoaded(QUrl url);
 
 protected:
     QVariant loadResource(int type, const QUrl &name) override;

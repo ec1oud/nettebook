@@ -21,6 +21,7 @@
 #include <KIO/SlaveBase>
 #include <QEventLoop>
 #include <QMimeDatabase>
+#include <QNetworkAccessManager>
 
 namespace KIO {
 class TransferJob;
@@ -34,21 +35,18 @@ public:
     void get(const QUrl &url) override;
     void listDir(const QUrl &url) override;
 
-protected:
-    void connectTransferJob(KIO::TransferJob *job);
-
 private slots:
-    void onDataReceived(KIO::Job *job, const QByteArray &data);
-    void onCatReceiveDone(KJob *job);
-    void onLsReceiveDone(KJob *job);
+    void onCatReceiveDone();
+    void onLsReceiveDone();
 
 private:
     QMimeDatabase m_mimeDb;
     QEventLoop m_eventLoop;
-    QByteArray m_dataAccumulator;
     QUrl m_baseUrl = QUrl(QLatin1String("http://localhost:5001/api/v0/"));
     QUrl m_apiUrl;
     QUrl m_fileUrl;
+    QNetworkAccessManager m_nam;
+    QNetworkReply *m_reply = nullptr;
 };
 
 #endif // IPFSSLAVE_H

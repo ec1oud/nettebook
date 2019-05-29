@@ -21,6 +21,7 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QNetworkReply>
 #include <KIO/TransferJob>
 #include <KConfigGroup>
 #include <KJobUiDelegate>
@@ -66,16 +67,14 @@ void IpfsSlave::get(const QUrl &url)
         ipfsPath = ipfsPath.remove(0, 1);
     m_apiUrl.setQuery("arg=" + ipfsPath);
     qDebug() << Q_FUNC_INFO << url << url.fileName() << m_apiUrl.toString();
-
-    KIO::TransferJob *job = KIO::get(m_apiUrl, KIO::NoReload, KIO::HideProgressInfo);
-    connectTransferJob(job);
-    connect(job, SIGNAL(result(KJob*)), this, SLOT(onCatReceiveDone(KJob*)));
+    m_reply = m_nam.get(QNetworkRequest(m_apiUrl));
+    connect(m_reply, &QNetworkReply::finished, this, &IpfsSlave::onCatReceiveDone);
     m_eventLoop.exec();
-//    error(KIO::ERR_DOES_NOT_EXIST, url.toDisplayString());
 }
 
 void IpfsSlave::listDir(const QUrl &url)
 {
+    m_fileUrl = url;
     QString urlString = url.toString(QUrl::RemoveScheme);
     int base58HashIndex = urlString.indexOf(base58HashPrefix);
     int base32HashIndex = urlString.indexOf(base32HashPrefix);
@@ -89,55 +88,54 @@ void IpfsSlave::listDir(const QUrl &url)
     m_apiUrl.setPath(m_baseUrl.path(QUrl::DecodeReserved) + QLatin1String("ls"));
     m_apiUrl.setQuery("arg=" + urlString);
     qDebug() << Q_FUNC_INFO << url << urlString << m_apiUrl.toString();
-    KIO::TransferJob *job = KIO::get(m_apiUrl, KIO::NoReload, KIO::HideProgressInfo);
-    connectTransferJob(job);
-    connect(job, SIGNAL(result(KJob*)), this, SLOT(onLsReceiveDone(KJob*)));
+    m_reply = m_nam.get(QNetworkRequest(m_apiUrl));
+    connect(m_reply, &QNetworkReply::finished, this, &IpfsSlave::onLsReceiveDone);
     m_eventLoop.exec();
 }
 
-void IpfsSlave::connectTransferJob(KIO::TransferJob *job)
+void IpfsSlave::onCatReceiveDone()
 {
-    connect(job, SIGNAL(data(KIO::Job *, const QByteArray &)),
-             this, SLOT(onDataReceived(KIO::Job *, const QByteArray &)));
-}
-
-void IpfsSlave::onDataReceived(KIO::Job *job, const QByteArray &data)
-{
-    Q_UNUSED(job)
-    m_dataAccumulator.append(data);
-}
-
-void IpfsSlave::onCatReceiveDone(KJob *job)
-{
-    Q_UNUSED(job)
-    QMimeType type = m_mimeDb.mimeTypeForFileNameAndData(m_fileUrl.fileName(), m_dataAccumulator);
+    if (m_reply->error()) {
+        qDebug() << Q_FUNC_INFO << m_reply->errorString();
+        error(KIO::ERR_SLAVE_DEFINED, m_reply->errorString());
+        return;
+    }
+    QByteArray buf = m_reply->readAll();
+    m_reply->deleteLater();
+    m_reply = nullptr;
+    QMimeType type = m_mimeDb.mimeTypeForFileNameAndData(m_fileUrl.fileName(), buf);
     qDebug() << m_fileUrl.fileName() << type;
     mimeType(type.name());
-    data(m_dataAccumulator);
-    m_dataAccumulator.clear();
+    data(buf);
     finished();
 }
 
-void IpfsSlave::onLsReceiveDone(KJob *job)
+void IpfsSlave::onLsReceiveDone()
 {
-    if (job->error())
-        job->uiDelegate()->showErrorMessage();
-    QJsonDocument jdoc = QJsonDocument::fromJson(m_dataAccumulator);
-//qDebug() << m_dataAccumulator;
-    m_dataAccumulator.clear();
+    if (m_reply->error()) {
+        qDebug() << Q_FUNC_INFO << m_reply->errorString();
+        error(KIO::ERR_SLAVE_DEFINED, m_reply->errorString());
+        return;
+    }
+    QJsonDocument jdoc = QJsonDocument::fromJson(m_reply->readAll());
+    m_reply->deleteLater();
+    m_reply = nullptr;
     QJsonArray a = jdoc.object().value(QLatin1String("Objects")).toArray();
     QJsonArray ls = a.first().toObject().value("Links").toArray();
-qDebug() << Q_FUNC_INFO << ls.count();
+qDebug() << Q_FUNC_INFO << m_fileUrl << ls.count();
     KIO::UDSEntryList entries;
     for (int i = 0; i < ls.count(); ++i) {
         QJsonObject eo = ls.at(i).toObject();
 //        qDebug() << eo;
+        bool isDir = (eo.value(QStringLiteral("Type")).toInt() != 2);
         KIO::UDSEntry e;
+        e.reserve(5);
         e.fastInsert(KIO::UDSEntry::UDS_NAME, eo.value(QStringLiteral("Name")).toString());
         e.fastInsert(KIO::UDSEntry::UDS_LINK_DEST, eo.value(QStringLiteral("Hash")).toString());
         e.fastInsert(KIO::UDSEntry::UDS_SIZE, eo.value(QStringLiteral("Size")).toInt());
         // TODO figure out what other file types there are; from experience it looks like 2 is a normal file, 1 is a directory
-        e.fastInsert(KIO::UDSEntry::UDS_FILE_TYPE, (eo.value(QStringLiteral("Type")).toInt() == 2 ? S_IFREG : S_IFDIR));
+        e.fastInsert(KIO::UDSEntry::UDS_FILE_TYPE, isDir ? S_IFDIR : S_IFREG);
+        e.fastInsert(KIO::UDSEntry::UDS_ACCESS, isDir ? S_IRWXU | S_IRWXG | S_IRWXO : S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH);
         entries << e;
     }
     listEntries(entries);

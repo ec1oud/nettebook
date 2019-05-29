@@ -34,10 +34,12 @@ public:
     IpfsSlave(const QByteArray &pool, const QByteArray &app);
     void get(const QUrl &url) override;
     void listDir(const QUrl &url) override;
+    void stat(const QUrl &url) override;
 
 private slots:
     void onCatReceiveDone();
     void onLsReceiveDone();
+    void onStatReceiveDone();
 
 private:
     QMimeDatabase m_mimeDb;

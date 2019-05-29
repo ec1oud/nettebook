@@ -93,6 +93,31 @@ void IpfsSlave::listDir(const QUrl &url)
     m_eventLoop.exec();
 }
 
+void IpfsSlave::stat(const QUrl &url)
+{
+    m_fileUrl = url;
+    QString urlString = url.toString(QUrl::RemoveScheme);
+    int base58HashIndex = urlString.indexOf(base58HashPrefix);
+    int base32HashIndex = urlString.indexOf(base32HashPrefix);
+    if (base58HashIndex >= 0)
+        urlString = urlString.mid(base58HashIndex);
+    else if (base32HashIndex >= 0)
+        urlString = urlString.mid(base32HashIndex);
+    else while (urlString.startsWith(QLatin1Char('/')))
+        urlString = urlString.mid(1);
+    if (urlString.isEmpty()) {
+        error(KIO::ERR_DOES_NOT_EXIST, url.toString());
+        return;
+    }
+    m_apiUrl = m_baseUrl;
+    m_apiUrl.setPath(m_baseUrl.path(QUrl::DecodeReserved) + QLatin1String("files/stat"));
+    m_apiUrl.setQuery("arg=/ipfs/" + urlString);
+    qDebug() << Q_FUNC_INFO << this << url << urlString << m_apiUrl.toString();
+    m_reply = m_nam.get(QNetworkRequest(m_apiUrl));
+    connect(m_reply, &QNetworkReply::finished, this, &IpfsSlave::onStatReceiveDone);
+    m_eventLoop.exec();
+}
+
 void IpfsSlave::onCatReceiveDone()
 {
     if (m_reply->error()) {
@@ -108,6 +133,7 @@ void IpfsSlave::onCatReceiveDone()
     mimeType(type.name());
     data(buf);
     finished();
+    m_eventLoop.exit();
 }
 
 void IpfsSlave::onLsReceiveDone()
@@ -140,6 +166,43 @@ qDebug() << Q_FUNC_INFO << m_fileUrl << ls.count();
     }
     listEntries(entries);
     finished();
+    m_eventLoop.exit();
+}
+
+void IpfsSlave::onStatReceiveDone()
+{
+    if (m_reply->error()) {
+        qDebug() << Q_FUNC_INFO << m_reply->errorString();
+        error(KIO::ERR_SLAVE_DEFINED, m_reply->errorString());
+        return;
+    }
+    qDebug() << Q_FUNC_INFO << this << m_fileUrl;
+    QJsonObject jo = QJsonDocument::fromJson(m_reply->readAll()).object();
+    m_reply->deleteLater();
+    m_reply = nullptr;
+    QJsonValue msg = jo.value(QLatin1String("Message"));
+    if (!msg.isUndefined()) {
+        int code = jo.value(QStringLiteral("Code")).toInt();
+        switch (code) {
+        case 0: // for ipfs:/// : "path must contain at least one component"
+            error(KIO::ERR_IS_DIRECTORY, msg.toString());
+            return;
+        default:
+            error(KIO::ERR_SLAVE_DEFINED, msg.toString());
+            return;
+        }
+    }
+    bool isDir = (jo.value(QStringLiteral("Type")).toString() == QLatin1String("directory"));
+    KIO::UDSEntry e;
+    e.reserve(4);
+    e.fastInsert(KIO::UDSEntry::UDS_NAME, m_fileUrl.toString());
+    e.fastInsert(KIO::UDSEntry::UDS_SIZE, jo.value(QStringLiteral("Size")).toInt()); // or CumulativeSize?
+    e.fastInsert(KIO::UDSEntry::UDS_FILE_TYPE, isDir ? S_IFDIR : S_IFREG);
+    e.fastInsert(KIO::UDSEntry::UDS_ACCESS, isDir ? S_IRWXU | S_IRWXG | S_IRWXO : S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH);
+    // TODO there should be more
+    statEntry(e);
+    finished();
+    m_eventLoop.exit();
 }
 
 #include "ipfs.moc"

@@ -42,9 +42,11 @@ public:
 public slots:
     void load(QString url);
     bool setBrowserStyle(QUrl url);
-//    void loadContent(const QByteArray &content, QMimeType type);
+    void setEditMode(bool mode = true);
 
 private slots:
+    void currentCharFormatChanged(const QTextCharFormat &format);
+    void cursorPositionChanged();
     void on_actionQuit_triggered();
     void on_actionOpen_triggered();
     void on_actionBack_triggered();
@@ -55,10 +57,39 @@ private slots:
     void on_actionSave_triggered();
     void on_actionSave_As_triggered();
 
+    void on_actionStrongEmphasis_toggled(bool a);
+    void on_actionEmphasis_toggled(bool a);
+    void on_actionStrikeOut_toggled(bool a);
+    void on_actionMonospace_toggled(bool a);
+    void on_actionIndent_triggered();
+    void on_actionUnindent_triggered();
+    void on_styleCB_activated(int index);
+    void on_headingLevelSB_valueChanged(int headingLevel);
+
+private:
+    void mergeFormatOnWordOrSelection(const QTextCharFormat &format);
+    void modifyIndentation(int amount);
+
+    // to be kept in sync with items in ui->styleCB
+    enum class Style {
+        Heading = 0,
+        Paragraph,
+        BlockQuote,
+        CodeBlock,
+        BulletDisc,
+        BulletCircle,
+        BulletSquare,
+        Checked,
+        Unchecked,
+        Numbered
+    };
+
 private:
     Ui::MainWindow *ui;
     QTextBrowser *m_mainWidget;
     Document *m_document;
+    QFont m_monoFont;
+    bool m_programmaticUiSetting = false;
 };
 
 #endif // MAINWINDOW_H

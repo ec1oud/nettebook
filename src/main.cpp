@@ -35,10 +35,13 @@ int main(int argc, char *argv[])
     const QCommandLineOption helpOption = parser.addHelpOption();
     const QCommandLineOption versionOption = parser.addVersionOption();
 
-//    QCommandLineOption cssOption({"s", "css"},
     QCommandLineOption cssOption(QStringList() << QStringLiteral("s") << QStringLiteral("css"),
             QCoreApplication::translate("main", "Use the given CSS content style file."), QStringLiteral("path"));
     parser.addOption(cssOption);
+
+    QCommandLineOption editOption(QStringList() << QStringLiteral("e") << QStringLiteral("edit"),
+            QCoreApplication::translate("main", "Open the file in edit mode."));
+    parser.addOption(editOption);
 
     if (!parser.parse(QCoreApplication::arguments())) {
         qWarning() << parser.errorText();
@@ -55,6 +58,8 @@ int main(int argc, char *argv[])
     w.show();
     if (parser.isSet(cssOption))
         w.setBrowserStyle(QUrl::fromLocalFile(parser.value(cssOption)));
+    if (parser.isSet(editOption))
+        w.setEditMode(true);
 
     return app.exec();
 }

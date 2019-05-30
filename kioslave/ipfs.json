@@ -3,7 +3,6 @@
         "ipfs": {
             "Class": ":internet", 
             "Icon": "folder-remote", 
-            "ProxiedBy": "http", 
             "X-DocPath": "kioslave5/ipfs/index.html", 
             "copyFromFile": true, 
             "copyToFile": true, 
@@ -14,7 +13,6 @@
                 "Name", 
                 "Type", 
                 "Size", 
-                "Date", 
                 "Access", 
                 "Owner", 
                 "Group", 
@@ -25,7 +23,7 @@
             "maxInstances": 20, 
             "maxInstancesPerHost": 5, 
             "moving": true, 
-            "output": "filesystem", 
+            "output": "none", 
             "protocol": "ipfs", 
             "reading": true, 
             "writing": true

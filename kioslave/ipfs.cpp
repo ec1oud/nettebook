@@ -21,6 +21,7 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QHttpPart>
 #include <QNetworkReply>
 #include <KIO/TransferJob>
 #include <KConfigGroup>
@@ -118,6 +119,64 @@ void IpfsSlave::stat(const QUrl &url)
     m_eventLoop.exec();
 }
 
+void IpfsSlave::put(const QUrl &url, int permissions, KIO::JobFlags flags)
+{
+    m_fileUrl = url;
+    QString urlString = url.toString(QUrl::RemoveScheme);
+    int base58HashIndex = urlString.indexOf(base58HashPrefix);
+    int base32HashIndex = urlString.indexOf(base32HashPrefix);
+    if (base58HashIndex >= 0)
+        urlString = urlString.mid(base58HashIndex);
+    else if (base32HashIndex >= 0)
+        urlString = urlString.mid(base32HashIndex);
+    else while (urlString.startsWith(QLatin1Char('/')))
+        urlString = urlString.mid(1);
+    if (urlString.isEmpty()) {
+        error(KIO::ERR_DOES_NOT_EXIST, url.toString());
+        return;
+    }
+    m_apiUrl = m_baseUrl;
+    m_apiUrl.setPath(m_baseUrl.path(QUrl::DecodeReserved) + QLatin1String("files/write"));
+    m_apiUrl.setQuery("arg=/ipfs/" + urlString + "&create=true&truncate=true&cid-version=1");
+
+    QByteArray acc;
+    int result;
+    // Loop until we got 0 (end of data)
+    do {
+        QByteArray buffer;
+        dataReq();
+        result = readData(buffer);
+        acc.append(buffer);
+    } while (result > 0);
+    qDebug() << Q_FUNC_INFO << url << permissions << flags << urlString << m_apiUrl.toString()
+             << "type" << metaData("content-type") << "len" << acc.length();
+//    qDebug() << allMetaData();
+
+    if (result < 0) {
+        qDebug() << Q_FUNC_INFO << "error";
+        ::exit(255);
+    }
+    if (!acc.length()) {
+        qDebug() << Q_FUNC_INFO << "no data to write";
+        ::exit(255);
+    }
+
+    QNetworkRequest req(m_apiUrl);
+    QHttpMultiPart *multiPart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
+    QHttpPart textPart;
+    QString type = metaData("content-type");
+    if (type.isEmpty())
+        type = QLatin1String("text/plain");
+    textPart.setHeader(QNetworkRequest::ContentTypeHeader, type);
+    textPart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"file\""));
+    textPart.setBody(acc);
+    multiPart->append(textPart);
+    m_reply = m_nam.post(req, multiPart);
+    multiPart->setParent(m_reply); // delete the multiPart with the reply
+    connect(m_reply, &QNetworkReply::finished, this, &IpfsSlave::onPutDone);
+    m_eventLoop.exec();
+}
+
 void IpfsSlave::onCatReceiveDone()
 {
     if (m_reply->error()) {
@@ -202,6 +261,22 @@ void IpfsSlave::onStatReceiveDone()
     // TODO there should be more
     statEntry(e);
     finished();
+    m_eventLoop.exit();
+}
+
+void IpfsSlave::onPutDone()
+{
+    if (m_reply->error()) {
+        qDebug() << Q_FUNC_INFO << m_reply->errorString();
+        error(KIO::ERR_SLAVE_DEFINED, m_reply->errorString());
+    } else {
+        qDebug() << Q_FUNC_INFO << m_reply->rawHeaderPairs(); // << m_reply->rawHeaderList();
+        for (auto h : m_reply->rawHeaderList())
+            qDebug() << h << m_reply->rawHeader(h);
+        finished();
+    }
+    m_reply->deleteLater();
+    m_reply = nullptr;
     m_eventLoop.exit();
 }
 

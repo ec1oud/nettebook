@@ -2,8 +2,8 @@
 exec=kf5/kio/ipfs
 protocol=ipfs
 input=none
-output=filesystem
-listing=Name,Type,Size,Date,AccessDate,CreationDate,Access,Owner,Group,Link
+output=none
+listing=Name,Type,Size,Access,Owner,Group,Link
 reading=true
 writing=true
 makedir=true

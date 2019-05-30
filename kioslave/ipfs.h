@@ -35,11 +35,13 @@ public:
     void get(const QUrl &url) override;
     void listDir(const QUrl &url) override;
     void stat(const QUrl &url) override;
+    void put(const QUrl &url, int permissions, KIO::JobFlags flags) override;
 
 private slots:
     void onCatReceiveDone();
     void onLsReceiveDone();
     void onStatReceiveDone();
+    void onPutDone();
 
 private:
     QMimeDatabase m_mimeDb;

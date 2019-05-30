@@ -147,11 +147,17 @@ void Document::saveAs(const QUrl &url, const QString &mimeType)
 {
     m_saveDone = false;
     qDebug() << url << mimeType;
+    QString mt = mimeType;
     if (mimeType.contains(QLatin1String("opendocument")))
         m_saveType = OdtResource;
     else if (mimeType == QLatin1String("text/plain"))
         m_saveType = PlainTextResource;
+    else if (m_saveType == ResourceType::HtmlResource)
+        mt = QLatin1String("application/xhtml+xml");
+    else if (m_saveType == ResourceType::MarkdownResource)
+        mt = QLatin1String("text/markdown");
     KIO::TransferJob *job = KIO::put(url, -1, KIO::Overwrite);
+    job->addMetaData("content-type", mt);
     connect (job, SIGNAL(dataReq(KIO::Job *, QByteArray &)),
              this, SLOT(onSaveDataReq(KIO::Job *, QByteArray &)));
     connect (job, SIGNAL(result(KJob*)), this, SLOT(onSaveDone(KJob*)));

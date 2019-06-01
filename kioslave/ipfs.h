@@ -44,6 +44,9 @@ private slots:
     void onPutDone();
 
 private:
+    QString apiPath(const QUrl &url);
+
+private:
     QMimeDatabase m_mimeDb;
     QEventLoop m_eventLoop;
     QUrl m_baseUrl = QUrl(QLatin1String("http://localhost:5001/api/v0/"));

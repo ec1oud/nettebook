@@ -29,6 +29,8 @@
 
 static const QString base58HashPrefix = QStringLiteral("Qm");
 static const QString base32HashPrefix = QStringLiteral("bafybei");
+static const QString unixfsPrefix = QStringLiteral("local");
+static const QChar slash = QLatin1Char('/');
 
 // Pseudo plugin class to embed meta data
 class KIOPluginForMetaData : public QObject
@@ -61,12 +63,17 @@ IpfsSlave::IpfsSlave(const QByteArray &pool, const QByteArray &app) :
 void IpfsSlave::get(const QUrl &url)
 {
     m_fileUrl = url;
+    QString urlString = apiPath(url);
+    if (urlString.isEmpty()) {
+        error(KIO::ERR_DOES_NOT_EXIST, url.toString());
+        return;
+    }
+    bool unixFs = urlString.startsWith(slash + unixfsPrefix);
+    if (unixFs)
+        urlString = urlString.mid(6);
     m_apiUrl = m_baseUrl;
-    m_apiUrl.setPath(m_baseUrl.path(QUrl::DecodeReserved) + QLatin1String("cat"));
-    QString ipfsPath = url.path();
-    if (ipfsPath.startsWith(QLatin1Char('/')))
-        ipfsPath = ipfsPath.remove(0, 1);
-    m_apiUrl.setQuery("arg=" + ipfsPath);
+    m_apiUrl.setPath(m_baseUrl.path(QUrl::DecodeReserved) + (unixFs ?  QLatin1String("files/read") : QLatin1String("cat")));
+    m_apiUrl.setQuery("arg=" + urlString);
     qDebug() << Q_FUNC_INFO << url << url.fileName() << m_apiUrl.toString();
     m_reply = m_nam.get(QNetworkRequest(m_apiUrl));
     connect(m_reply, &QNetworkReply::finished, this, &IpfsSlave::onCatReceiveDone);
@@ -76,17 +83,15 @@ void IpfsSlave::get(const QUrl &url)
 void IpfsSlave::listDir(const QUrl &url)
 {
     m_fileUrl = url;
-    QString urlString = url.toString(QUrl::RemoveScheme);
-    int base58HashIndex = urlString.indexOf(base58HashPrefix);
-    int base32HashIndex = urlString.indexOf(base32HashPrefix);
-    if (base58HashIndex >= 0)
-        urlString = urlString.mid(base58HashIndex);
-    else if (base32HashIndex >= 0)
-        urlString = urlString.mid(base32HashIndex);
-    else while (urlString.startsWith(QLatin1Char('/')))
-        urlString = urlString.mid(1);
+    QString urlString = apiPath(url);
+    bool unixFs = urlString.startsWith(slash + unixfsPrefix);
+    if (unixFs)
+        urlString = urlString.mid(6);
     m_apiUrl = m_baseUrl;
-    m_apiUrl.setPath(m_baseUrl.path(QUrl::DecodeReserved) + QLatin1String("ls"));
+    // files/ls happens to work for both local unixfs and for hashes
+    // but files/ls doesn't provide type, size, or hash - a bug perhaps?
+    m_apiUrl.setPath(m_baseUrl.path(QUrl::DecodeReserved) +
+                     (unixFs ? QLatin1String("files/ls") : QLatin1String("ls")));
     m_apiUrl.setQuery("arg=" + urlString);
     qDebug() << Q_FUNC_INFO << url << urlString << m_apiUrl.toString();
     m_reply = m_nam.get(QNetworkRequest(m_apiUrl));
@@ -97,20 +102,17 @@ void IpfsSlave::listDir(const QUrl &url)
 void IpfsSlave::stat(const QUrl &url)
 {
     m_fileUrl = url;
-    QString urlString = url.toString(QUrl::RemoveScheme);
-    int base58HashIndex = urlString.indexOf(base58HashPrefix);
-    int base32HashIndex = urlString.indexOf(base32HashPrefix);
-    if (base58HashIndex >= 0)
-        urlString = urlString.mid(base58HashIndex);
-    else if (base32HashIndex >= 0)
-        urlString = urlString.mid(base32HashIndex);
-    else while (urlString.startsWith(QLatin1Char('/')))
-        urlString = urlString.mid(1);
+    QString urlString = apiPath(url);
     if (urlString.isEmpty()) {
         error(KIO::ERR_DOES_NOT_EXIST, url.toString());
         return;
     }
+    bool unixFs = urlString.startsWith(slash + unixfsPrefix);
+    if (unixFs)
+        urlString = urlString.mid(6);
     m_apiUrl = m_baseUrl;
+    // files/stat may have been intended for unixfs, but happens to work just as well with hashes.
+    // It always provides more info than block/stat, and block/stat doesn't work with unixfs.
     m_apiUrl.setPath(m_baseUrl.path(QUrl::DecodeReserved) + QLatin1String("files/stat"));
     m_apiUrl.setQuery("arg=/ipfs/" + urlString);
     qDebug() << Q_FUNC_INFO << this << url << urlString << m_apiUrl.toString();
@@ -122,22 +124,17 @@ void IpfsSlave::stat(const QUrl &url)
 void IpfsSlave::put(const QUrl &url, int permissions, KIO::JobFlags flags)
 {
     m_fileUrl = url;
-    QString urlString = url.toString(QUrl::RemoveScheme);
-    int base58HashIndex = urlString.indexOf(base58HashPrefix);
-    int base32HashIndex = urlString.indexOf(base32HashPrefix);
-    if (base58HashIndex >= 0)
-        urlString = urlString.mid(base58HashIndex);
-    else if (base32HashIndex >= 0)
-        urlString = urlString.mid(base32HashIndex);
-    else while (urlString.startsWith(QLatin1Char('/')))
-        urlString = urlString.mid(1);
+    QString urlString = apiPath(url);
     if (urlString.isEmpty()) {
         error(KIO::ERR_DOES_NOT_EXIST, url.toString());
         return;
     }
+    bool unixFs = urlString.startsWith(slash + unixfsPrefix);
+    if (unixFs)
+        urlString = urlString.mid(6);
     m_apiUrl = m_baseUrl;
     m_apiUrl.setPath(m_baseUrl.path(QUrl::DecodeReserved) + QLatin1String("files/write"));
-    m_apiUrl.setQuery("arg=/ipfs/" + urlString + "&create=true&truncate=true&cid-version=1");
+    m_apiUrl.setQuery("arg=" + urlString + "&create=true&truncate=true&cid-version=1");
 
     QByteArray acc;
     int result;
@@ -205,14 +202,19 @@ void IpfsSlave::onLsReceiveDone()
     QJsonDocument jdoc = QJsonDocument::fromJson(m_reply->readAll());
     m_reply->deleteLater();
     m_reply = nullptr;
-    QJsonArray a = jdoc.object().value(QLatin1String("Objects")).toArray();
-    QJsonArray ls = a.first().toObject().value("Links").toArray();
+    QJsonArray ls;
+    if (jdoc.object().value(QLatin1String("Objects")) != QJsonValue::Undefined) {
+        QJsonArray a = jdoc.object().value(QLatin1String("Objects")).toArray();
+        ls = a.first().toObject().value("Links").toArray();
+    } else if (jdoc.object().value(QLatin1String("Entries")) != QJsonValue::Undefined) {
+        ls = jdoc.object().value(QLatin1String("Entries")).toArray();
+    }
 qDebug() << Q_FUNC_INFO << m_fileUrl << ls.count();
     KIO::UDSEntryList entries;
     for (int i = 0; i < ls.count(); ++i) {
         QJsonObject eo = ls.at(i).toObject();
 //        qDebug() << eo;
-        bool isDir = (eo.value(QStringLiteral("Type")).toInt() != 2);
+        bool isDir = (eo.value(QStringLiteral("Type")).toInt() == 1);
         KIO::UDSEntry e;
         e.reserve(5);
         e.fastInsert(KIO::UDSEntry::UDS_NAME, eo.value(QStringLiteral("Name")).toString());
@@ -278,6 +280,23 @@ void IpfsSlave::onPutDone()
     m_reply->deleteLater();
     m_reply = nullptr;
     m_eventLoop.exit();
+}
+
+QString IpfsSlave::apiPath(const QUrl &url)
+{
+    QString urlString = url.toString(QUrl::RemoveScheme);
+    int base58HashIndex = urlString.indexOf(base58HashPrefix);
+    int base32HashIndex = urlString.indexOf(base32HashPrefix);
+    int unixFsPrefixIndex = urlString.indexOf(unixfsPrefix);
+    if (base58HashIndex >= 0)
+        urlString = urlString.mid(base58HashIndex);
+    else if (base32HashIndex >= 0)
+        urlString = urlString.mid(base32HashIndex);
+    else if (unixFsPrefixIndex >= 0)
+        urlString = slash + urlString.mid(unixFsPrefixIndex);
+    else while (urlString.startsWith(slash))
+        urlString = urlString.mid(1);
+    return urlString;
 }
 
 #include "ipfs.moc"

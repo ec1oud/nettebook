@@ -44,6 +44,7 @@ private slots:
     void onPutDone();
 
 private:
+    QString ipnsLookup(const QString &path);
     QString apiPath(const QUrl &url);
 
 private:

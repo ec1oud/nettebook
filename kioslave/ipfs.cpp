@@ -30,6 +30,7 @@
 static const QString base58HashPrefix = QStringLiteral("Qm");
 static const QString base32HashPrefix = QStringLiteral("bafybei");
 static const QString unixfsPrefix = QStringLiteral("local");
+static const QString ipnsPrefix = QStringLiteral("/ipns/");
 static const QChar slash = QLatin1Char('/');
 
 // Pseudo plugin class to embed meta data
@@ -282,9 +283,37 @@ void IpfsSlave::onPutDone()
     m_eventLoop.exit();
 }
 
+QString IpfsSlave::ipnsLookup(const QString &path)
+{
+    m_apiUrl = m_baseUrl;
+    // http://localhost:5001/api/v0/name/resolve?arg=<name>&recursive=true&nocache=<value>&dht-record-count=<value>&dht-timeout=<value>&stream=<value>
+    m_apiUrl.setPath(m_baseUrl.path(QUrl::DecodeReserved) + QLatin1String("name/resolve"));
+    m_apiUrl.setQuery("arg=" + path + "&dht-timeout=3s");
+    qDebug() << Q_FUNC_INFO << path << m_apiUrl.toString();
+    m_reply = m_nam.get(QNetworkRequest(m_apiUrl));
+    connect(m_reply, &QNetworkReply::finished, [=]() { m_eventLoop.exit(); } );
+    m_eventLoop.exec();
+    QJsonObject jo = QJsonDocument::fromJson(m_reply->readAll()).object();
+    m_reply->deleteLater();
+    m_reply = nullptr;
+    qDebug() << jo;
+    QJsonValue ret = jo.value(QLatin1String("Path"));
+    if (ret.isUndefined())
+        return QString();
+    return ret.toString();
+}
+
 QString IpfsSlave::apiPath(const QUrl &url)
 {
     QString urlString = url.toString(QUrl::RemoveScheme);
+    int ipnsPrefixIndex = urlString.indexOf(ipnsPrefix);
+    if (ipnsPrefixIndex >= 0) {
+        urlString = urlString.mid(ipnsPrefixIndex);
+        // CIDv1 doesn't actually work for ipns yet, but let's hope it will eventually
+        if (urlString.indexOf(base32HashPrefix, ipnsPrefixIndex) > 0 ||
+                urlString.indexOf(base58HashPrefix, ipnsPrefixIndex) > 0)
+            urlString = ipnsLookup(urlString);
+    }
     int base58HashIndex = urlString.indexOf(base58HashPrefix);
     int base32HashIndex = urlString.indexOf(base32HashPrefix);
     int unixFsPrefixIndex = urlString.indexOf(unixfsPrefix);

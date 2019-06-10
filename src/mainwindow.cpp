@@ -53,6 +53,7 @@ MainWindow::MainWindow(QWidget *parent) :
     // after all resources for a document are loaded, make the QTextBrowser call its d->relayoutDocument()
     connect(m_document, &Document::allResourcesLoaded,
             [=]() { m_mainWidget->setDocument(m_document); });
+    connect(m_document, &Document::saved, this, &MainWindow::updateUrlField);
 
     while (ui->toolbarStuff->count()) {
         QWidget *tw = ui->toolbarStuff->takeAt(0)->widget();
@@ -144,6 +145,11 @@ void MainWindow::on_actionSave_As_triggered()
     m_document->saveAs(fileDialog.selectedUrls().first(), fileDialog.selectedMimeTypeFilter());
 }
 
+void MainWindow::on_actionSave_to_IPFS_triggered()
+{
+    m_document->saveToIpfs();
+}
+
 bool MainWindow::setBrowserStyle(QUrl url)
 {
     // TODO same url resolution as in load()
@@ -164,6 +170,11 @@ bool MainWindow::setBrowserStyle(QUrl url)
 void MainWindow::setEditMode(bool mode)
 {
     ui->actionToggleEditMode->setChecked(mode);
+}
+
+void MainWindow::updateUrlField(QUrl url)
+{
+    ui->urlField->setText(url.toString());
 }
 
 void MainWindow::currentCharFormatChanged(const QTextCharFormat &format)
@@ -297,6 +308,7 @@ void MainWindow::on_actionToggleEditMode_toggled(bool edit)
     ui->editToolBar->setVisible(edit);
     ui->actionSave->setVisible(edit);
     ui->actionSave_As->setVisible(edit);
+    ui->actionSave_to_IPFS->setVisible(edit);
 }
 
 void MainWindow::on_actionStrongEmphasis_toggled(bool a)

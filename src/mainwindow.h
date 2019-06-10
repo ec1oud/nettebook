@@ -43,6 +43,7 @@ public slots:
     void load(QString url);
     bool setBrowserStyle(QUrl url);
     void setEditMode(bool mode = true);
+    void updateUrlField(QUrl url);
 
 private slots:
     void currentCharFormatChanged(const QTextCharFormat &format);
@@ -56,6 +57,7 @@ private slots:
     void on_actionToggleEditMode_toggled(bool edit);
     void on_actionSave_triggered();
     void on_actionSave_As_triggered();
+    void on_actionSave_to_IPFS_triggered();
 
     void on_actionStrongEmphasis_toggled(bool a);
     void on_actionEmphasis_toggled(bool a);

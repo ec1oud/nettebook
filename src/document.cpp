@@ -163,6 +163,33 @@ void Document::saveAs(const QUrl &url, const QString &mimeType)
     connect (job, SIGNAL(result(KJob*)), this, SLOT(onSaveDone(KJob*)));
 }
 
+/*!
+    Save to a new file, and emit saved() to provide the hash when done.
+*/
+void Document::saveToIpfs()
+{
+    m_saveDone = false;
+    QString mt;
+    switch (m_saveType) {
+    case HtmlResource:
+        mt = QLatin1String("application/xhtml+xml");
+        break;
+    case PlainTextResource:
+        mt = QLatin1String("text/plain");
+        break;
+    default:
+        mt = QLatin1String("text/markdown");
+        m_saveType = ResourceType::MarkdownResource;
+        break;
+    }
+    QUrl url("ipfs:///");
+    m_transferJob = KIO::put(url, -1, KIO::Overwrite);
+    m_transferJob->addMetaData("content-type", mt);
+    connect (m_transferJob, SIGNAL(dataReq(KIO::Job *, QByteArray &)),
+             this, SLOT(onSaveDataReq(KIO::Job *, QByteArray &)));
+    connect (m_transferJob, SIGNAL(result(KJob*)), this, SLOT(onSaveDone(KJob*)));
+}
+
 void Document::onSaveDataReq(KIO::Job *job, QByteArray &dest)
 {
     Q_UNUSED(job)
@@ -197,5 +224,16 @@ void Document::onSaveDataReq(KIO::Job *job, QByteArray &dest)
 void Document::onSaveDone(KJob *job)
 {
     Q_UNUSED(job)
-    qDebug();
+    if (m_transferJob) {
+        QString hash = m_transferJob->metaData().value(QLatin1String("Hash"), QString());
+        qDebug() << m_transferJob->metaData();
+        if (!hash.isEmpty()) {
+            QUrl url(QLatin1String("ipfs:///") + hash);
+            emit saved(url);
+        }
+    } else {
+        qDebug() << m_transferJob->url();
+        emit saved(m_transferJob->url());
+    }
+    m_transferJob = nullptr;
 }

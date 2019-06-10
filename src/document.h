@@ -11,6 +11,7 @@
 
 namespace KIO {
 class Job;
+class TransferJob;
 }
 
 class Document;
@@ -25,12 +26,14 @@ public:
 
     void loadUrl(QUrl url);
     void saveAs(const QUrl &url, const QString &mimeType = QString());
+    void saveToIpfs();
     QByteArray fileListMarkdown();
 
 signals:
     void status(const QString &text);
     void allResourcesLoaded();
     void resourceLoaded(QUrl url);
+    void saved(QUrl url);
 
 protected:
     QVariant loadResource(int type, const QUrl &name) override;
@@ -52,6 +55,7 @@ private:
     QHash<QUrl, QByteArray> m_loadedResources;
     KIO::UDSEntryList m_fileList;
     QString m_errorText;
+    KIO::TransferJob *m_transferJob = nullptr;
     int m_saveType = UnknownResource;
     bool m_saveDone = false;
 

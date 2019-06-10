@@ -55,6 +55,7 @@ private:
     QUrl m_fileUrl;
     QNetworkAccessManager m_nam;
     QNetworkReply *m_reply = nullptr;
+    bool m_newObject = false;
 };
 
 #endif // IPFSSLAVE_H

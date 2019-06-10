@@ -126,16 +126,26 @@ void IpfsSlave::put(const QUrl &url, int permissions, KIO::JobFlags flags)
 {
     m_fileUrl = url;
     QString urlString = apiPath(url);
+qDebug() << url << urlString << permissions << flags;
+    m_newObject = false;
     if (urlString.isEmpty()) {
-        error(KIO::ERR_DOES_NOT_EXIST, url.toString());
-        return;
+        if (url.scheme() == QLatin1String("ipfs")) {
+            m_apiUrl = m_baseUrl;
+            m_apiUrl.setPath(m_baseUrl.path(QUrl::DecodeReserved) + QLatin1String("add"));
+            qDebug() << "writing new object" << m_apiUrl;
+            m_newObject = true;
+        } else {
+            error(KIO::ERR_DOES_NOT_EXIST, url.toString());
+            return;
+        }
+    } else {
+        bool unixFs = urlString.startsWith(slash + unixfsPrefix);
+        if (unixFs)
+            urlString = urlString.mid(6);
+        m_apiUrl = m_baseUrl;
+        m_apiUrl.setPath(m_baseUrl.path(QUrl::DecodeReserved) + QLatin1String("files/write"));
+        m_apiUrl.setQuery("arg=" + urlString + "&create=true&truncate=true&cid-version=1");
     }
-    bool unixFs = urlString.startsWith(slash + unixfsPrefix);
-    if (unixFs)
-        urlString = urlString.mid(6);
-    m_apiUrl = m_baseUrl;
-    m_apiUrl.setPath(m_baseUrl.path(QUrl::DecodeReserved) + QLatin1String("files/write"));
-    m_apiUrl.setQuery("arg=" + urlString + "&create=true&truncate=true&cid-version=1");
 
     QByteArray acc;
     int result;
@@ -270,12 +280,18 @@ void IpfsSlave::onStatReceiveDone()
 void IpfsSlave::onPutDone()
 {
     if (m_reply->error()) {
-        qDebug() << Q_FUNC_INFO << m_reply->errorString();
+        qWarning() << Q_FUNC_INFO << m_reply->errorString();
         error(KIO::ERR_SLAVE_DEFINED, m_reply->errorString());
     } else {
         qDebug() << Q_FUNC_INFO << m_reply->rawHeaderPairs(); // << m_reply->rawHeaderList();
         for (auto h : m_reply->rawHeaderList())
             qDebug() << h << m_reply->rawHeader(h);
+        QJsonDocument doc = QJsonDocument::fromJson(m_reply->readAll());
+        qDebug() << doc.object();
+        if (m_newObject) {
+            setMetaData(QLatin1String("Hash"), doc.object().value(QLatin1String("Hash")).toString());
+            emit infoMessage(QLatin1String("Saved ") + doc.object().value(QLatin1String("Hash")).toString());
+        }
         finished();
     }
     m_reply->deleteLater();

@@ -20,6 +20,7 @@
 
 #include <QMainWindow>
 #include <QMimeType>
+#include <QNetworkAccessManager>
 #include <QStack>
 #include <QTextBrowser>
 #include <QUrl>
@@ -68,6 +69,8 @@ private slots:
     void on_styleCB_activated(int index);
     void on_headingLevelSB_valueChanged(int headingLevel);
 
+    void on_actionConvert_CID_v0_to_v1_triggered();
+
 private:
     void mergeFormatOnWordOrSelection(const QTextCharFormat &format);
     void modifyIndentation(int amount);
@@ -91,6 +94,9 @@ private:
     QTextBrowser *m_mainWidget;
     Document *m_document;
     QFont m_monoFont;
+    QNetworkAccessManager m_nam;
+    QUrl m_apiBaseUrl = QUrl(QLatin1String("http://localhost:5001/api/v0/"));
+    int m_hashBegin = 0, m_hashEnd = 0;
     bool m_programmaticUiSetting = false;
 };
 

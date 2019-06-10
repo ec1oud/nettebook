@@ -22,7 +22,10 @@
 #include <QDebug>
 #include <QFileDialog>
 #include <QFontDatabase>
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <QMimeDatabase>
+#include <QNetworkReply>
 #include <QTextCodec>
 #include <QTextDocumentFragment>
 #include <QTextEdit>
@@ -105,6 +108,7 @@ void MainWindow::on_actionOpen_triggered()
 void MainWindow::load(QString url)
 {
     qDebug() << url;
+    ui->urlField->setText(url);
     // QUrl::fromUserInput knows how to guess about http and file URLs,
     // but mangles ipfs hashes by converting them to lowercase and setting scheme to http
     bool directory = url.endsWith(QLatin1String("/"));
@@ -472,4 +476,25 @@ void MainWindow::on_actionIndent_triggered()
 void MainWindow::on_actionUnindent_triggered()
 {
     modifyIndentation(-1);
+}
+
+void MainWindow::on_actionConvert_CID_v0_to_v1_triggered()
+{
+    QString text = ui->urlField->text();
+    m_hashBegin = text.indexOf(base58HashPrefix);
+    if (m_hashBegin >= 0) {
+        m_hashEnd = m_hashBegin + 46;
+        QUrl apiUrl = m_apiBaseUrl;
+        apiUrl.setPath(m_apiBaseUrl.path(QUrl::DecodeReserved) + QLatin1String("cid/base32"));
+        apiUrl.setQuery("arg=" + text.mid(m_hashBegin, 46));
+        QNetworkReply *reply = m_nam.get(QNetworkRequest(apiUrl));
+        connect(reply, &QNetworkReply::finished, [=]() {
+            QJsonObject jo = QJsonDocument::fromJson(reply->readAll()).object();
+qDebug() << jo;
+            reply->deleteLater();
+            QString cid = jo.value(QLatin1String("Formatted")).toString();
+            QString newText(text);
+            ui->urlField->setText(newText.replace(m_hashBegin, 46, cid));
+        });
+    }
 }

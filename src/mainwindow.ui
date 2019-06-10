@@ -140,8 +140,15 @@
     </property>
     <addaction name="actionBack"/>
    </widget>
+   <widget class="QMenu" name="menuTools">
+    <property name="title">
+     <string>Tools</string>
+    </property>
+    <addaction name="actionConvert_CID_v0_to_v1"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuView"/>
+   <addaction name="menuTools"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">
@@ -350,6 +357,11 @@
   <action name="actionSave_to_IPFS">
    <property name="text">
     <string>Save to IPFS</string>
+   </property>
+  </action>
+  <action name="actionConvert_CID_v0_to_v1">
+   <property name="text">
+    <string>Convert CID v0 to v1</string>
    </property>
   </action>
  </widget>

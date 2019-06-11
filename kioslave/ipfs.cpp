@@ -90,10 +90,9 @@ void IpfsSlave::listDir(const QUrl &url)
         urlString = urlString.mid(6);
     m_apiUrl = m_baseUrl;
     // files/ls happens to work for both local unixfs and for hashes
-    // but files/ls doesn't provide type, size, or hash - a bug perhaps?
     m_apiUrl.setPath(m_baseUrl.path(QUrl::DecodeReserved) +
                      (unixFs ? QLatin1String("files/ls") : QLatin1String("ls")));
-    m_apiUrl.setQuery("arg=" + urlString);
+    m_apiUrl.setQuery(QLatin1String("arg=") + urlString + QLatin1String("&l=true"));
     qDebug() << Q_FUNC_INFO << url << urlString << m_apiUrl.toString();
     m_reply = m_nam.get(QNetworkRequest(m_apiUrl));
     connect(m_reply, &QNetworkReply::finished, this, &IpfsSlave::onLsReceiveDone);

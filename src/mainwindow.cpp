@@ -52,6 +52,8 @@ MainWindow::MainWindow(QWidget *parent) :
             this, &MainWindow::currentCharFormatChanged);
     connect(m_mainWidget, &QTextEdit::cursorPositionChanged,
             this, &MainWindow::cursorPositionChanged);
+    connect(m_mainWidget, &QTextBrowser::anchorClicked,
+            this, &MainWindow::updateUrlField);
 
     // after all resources for a document are loaded, make the QTextBrowser call its d->relayoutDocument()
     connect(m_document, &Document::allResourcesLoaded,
@@ -288,6 +290,7 @@ void MainWindow::modifyIndentation(int amount)
 void MainWindow::on_actionBack_triggered()
 {
     m_mainWidget->backward();
+    updateUrlField(m_mainWidget->source());
 }
 
 void MainWindow::on_browser_backwardAvailable(bool a)

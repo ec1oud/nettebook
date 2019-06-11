@@ -25,11 +25,8 @@ class MarkdownBrowser : public QTextBrowser
 {
 public:
     MarkdownBrowser(QWidget *parent = nullptr);
+    void setSource(const QUrl &name) override;
     QVariant loadResource(int type, const QUrl &name) override;
-
-private slots:
-    void onResourceLoaded(QUrl url);
-    void onLoadingTimeout();
 
 private:
     QTimer m_loadingTimeout;

@@ -121,6 +121,7 @@ void Document::fileListReceived(KIO::Job *job, const KIO::UDSEntryList &list)
         qDebug() << "got file list" << list.count() << m_fileList;
     }
     m_resourceLoaders.remove(url);
+    emit resourceLoaded(url);
 }
 
 QByteArray Document::fileListMarkdown()

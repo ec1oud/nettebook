@@ -24,23 +24,26 @@
 MarkdownBrowser::MarkdownBrowser(QWidget *parent)
     : QTextBrowser(parent)
 {
+}
 
+void MarkdownBrowser::setSource(const QUrl &name)
+{
+    if (name.fileName().isEmpty()) // directory listing will be markdown
+        QTextBrowser::setSource(name, QTextDocument::MarkdownResource);
+    else
+        QTextBrowser::setSource(name);
 }
 
 QVariant MarkdownBrowser::loadResource(int type, const QUrl &name)
 {
-    QVariant ret = static_cast<Document *>(document())->loadResource(type, name);
-    qDebug() << type << name << (ret.isNull() ? "fetching" : "got it");
     Document *doc = static_cast<Document *>(document());
-
-    QEventLoop loop;
-//    connect(doc, SIGNAL(resourceLoaded(QUrl)), &loop, SLOT(onResourceLoaded(QUrl)));
-//    connect(&m_loadingTimeout, SIGNAL(timeout()), &loop, SLOT(onLoadingTimeout()));
-    connect(doc, SIGNAL(resourceLoaded(QUrl)), &loop, SLOT(quit()));
-    connect(&m_loadingTimeout, SIGNAL(timeout()), &loop, SLOT(quit()));
-    m_loadingTimeout.start(5000);
-    ret = doc->loadResource(type, name);
+    QVariant ret = doc->loadResource(type, name);
+    qDebug() << type << name << (ret.isNull() ? "fetching" : "got it");
     if (ret.isNull()) {
+        QEventLoop loop;
+        connect(doc, SIGNAL(resourceLoaded(QUrl)), &loop, SLOT(quit()));
+        connect(&m_loadingTimeout, SIGNAL(timeout()), &loop, SLOT(quit()));
+        m_loadingTimeout.start(5000);
         loop.exec();
         ret = doc->loadResource(type, name);
         if (ret.isNull()) {
@@ -58,14 +61,4 @@ QVariant MarkdownBrowser::loadResource(int type, const QUrl &name)
         }
     }
     return ret;
-}
-
-void MarkdownBrowser::onResourceLoaded(QUrl url)
-{
-    qDebug() << url;
-}
-
-void MarkdownBrowser::onLoadingTimeout()
-{
-    qDebug();
 }

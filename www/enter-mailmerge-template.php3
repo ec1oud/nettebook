@@ -27,7 +27,7 @@
 	}
 	echo "Template<BR>\n";
 	echo "Name: <input type=text value=\"$template_name\" size=50 name=template_name>\n";
-	echo "<TEXTAREA COLS=60 NAME=template ROWS=20 WRAP=OFF>";
+	echo "<TEXTAREA COLS=80 NAME=template ROWS=20 WRAP=OFF>";
 	echo "$template";
 	echo "</TEXTAREA><BR>\n";
 	echo "<input type=submit value=enter>\n";
@@ -39,7 +39,11 @@
 	echo "    <blockquote><pre>$owner_address</pre></blockquote></td></tr>\n";
 	echo "	<tr valign=top><td>&lt;householdNames/&gt;</td><td>Full name of recipient household, e.g. \"<tt>John, Mary and Johnny Doe</tt>\"</td></tr>\n";
 	echo "	<tr valign=top><td>&lt;address/&gt;</td><td>Recipient address</td></tr>\n";
+	echo "	<tr valign=top><td>&lt;firstName/&gt;</td><td>first name of primary recipient, e.g. \"<tt>John</tt>\"</td></tr>\n";
+	echo "	<tr valign=top><td>&lt;otherNames/&gt;</td><td>non-last names of primary recipient, e.g. \"<tt>John J.</tt>\"</td></tr>\n";
+	echo "	<tr valign=top><td>&lt;lastName/&gt;</td><td>last name of primary recipient, e.g. \"<tt>Doe</tt>\"</td></tr>\n";
 	echo "	<tr valign=top><td>&lt;line/&gt;</td><td>The current line</td></tr>\n";
+	echo "	<tr valign=top><td>&lt;lineNumber/&gt;</td><td>The current line number, counting up from zero</td></tr>\n";
 	echo "  <tr><th align=left colspan=2>Available functions:</th></tr>\n";
 	echo "	<tr valign=top><td>forEachSenderAddressLine(\"format of &lt;line/&gt;\")</td><td>output to be repeated for each line in the sender's address; within your \"format\" string, &lt;line\&gt; will be substituted with that line of the address.</td></tr>\n";
 	echo "	<tr valign=top><td>forEachAddressLine(\"format of &lt;line/&gt;\")</td><td>output to be repeated for each line in the recipient's address; within your \"format\" string, &lt;line\&gt; will be substituted with that line of the address.</td></tr>\n";

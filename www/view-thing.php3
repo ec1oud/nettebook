@@ -85,8 +85,11 @@
 	echo "<tr><td colspan=2>";
 	include 'search-relationships.inc';
 	echo "</td></tr>";
-	echo "<tr><td colspan=3 align=right><hr><a href=mailmerge-setup.php3?entity_id=$entity_id&relationship_type=$relationship_type&thing_name=";
-	echo urlencode($thing_name) . ">mail merge</a></td></tr>";
+	echo "<tr><td colspan=3 align=right><hr>";
+	echo "<a href=view-relationshipees-with-contact-methods.php3?entity_id=$entity_id>contact list</a>&nbsp;&nbsp;&nbsp;&nbsp;";
+	echo "<a href=mailmerge-setup.php3?entity_id=$entity_id&relationship_type=$relationship_type&thing_name=";
+	echo urlencode($thing_name) . ">mail merge</a>";
+	echo "</td></tr>";
 	echo "</table>\n";
 	echo "<table width=100%>\n";
 	echo "<tr bgcolor=lightyellow><th width=100% align=left>Other Relationships</th>\n";

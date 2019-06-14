@@ -24,5 +24,6 @@
 		echo "</a></td>\n";
 		echo "   <td><a href=delete-person.php3?entity_id=$row[entity_id]>delete</a></td></tr>";
 	}
+	echo "<tr><td colspan=2 align=right><hr><a href=upload-addresses.html>Upload names and addresses...</a></td></tr>\n";
 	echo "</table>\n";
 ?>

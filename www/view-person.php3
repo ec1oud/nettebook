@@ -16,14 +16,30 @@
 	$row = pg_fetch_array ($result, 0);
 	$lastname = $row[lastname];
 	$othernames = $row[othernames];
-	echo "<table width=100%><tr><td><font size=+1>$row[othernames] $row[lastname]";
+	echo "<table width=100%><tr><td valign=bottom><font size=+1>$row[othernames] $row[lastname]";
 	if ($row[suffixes])
 		echo ", $row[suffixes] ";
 	else
 		echo " ";
 	echo "</font></td>";
-	echo "<td align=right><a href=enter-person.php3?entity_id=$row[entity_id]>edit </a>";
-	echo "<a href=delete-person.php3?entity_id=$row[entity_id]>delete</a></td></table>";
+	echo "<td align=right><a href=enter-person.php3?entity_id=$row[entity_id]>edit </a> | ";
+	echo "<a href=delete-person.php3?entity_id=$row[entity_id]>delete</a><BR>\n";
+	echo "<a href=upload-incoming.php3?entity_id=$row[entity_id]>associate incoming docs...</a>\n";
+	echo "</td></tr>\n";
+	
+	$res2 = pg_Exec ($conn, "SELECT name, filename, thumbnail from image WHERE entity_id=$row[entity_id] ORDER BY type, filename");
+	if (pg_numrows($res2) > 0)
+	{
+		echo "<tr><td>\n";
+		for ($i = 0; $i < pg_numrows($res2); ++$i)
+		{
+			$r2 = pg_fetch_array ($res2, $i);
+			echo "   <a href=images/entities/$r2[filename]><img src=images/entities/$r2[thumbnail] alt=\"$r2[name]\"></a>";
+		}
+		echo "</td></tr>\n";
+	}
+
+	echo "</table>";
 	echo "<table width=100%>\n<tr bgcolor=lightyellow><th align=left width=50%>Location</th>\n";
 	echo "<th  width=50% align=left>Address</th><th align=right> <a href=enter-location.php3?entity_id=$entity_id>new</a></th></tr>\n";
 	$result = pg_Exec ($conn, "SELECT * FROM location WHERE entity_id=$entity_id");
@@ -48,6 +64,8 @@
 			$row = pg_fetch_array ($result, $rc);
 			if (strpos($row[detail], "@"))
 				echo "   <td valign=top><a href=mailto:$row[detail]>$row[detail]</a></td valign=top>\n";
+			else if (strpos(" " . $row[detail], "http:"))
+				echo "   <td valign=top><a href=$row[detail]>$row[detail]</a></td valign=top>\n";
 			else
 				echo "   <td valign=top>$row[detail]</td valign=top>\n";
 			echo "   <td>$row[type]</td>\n";
@@ -70,6 +88,7 @@
 			echo "<a href=delete-contact-method.php3?entity_id=$entity_id&detail=$detail>delete</a></td></tr>\n";
 		}
 	}
+	echo "<tr><td colspan=5 align=right><hr><a href=mailmerge-single-setup.php3?entity_id=$entity_id>mailmerge</a></td></tr>";
 	echo "</table>\n";
 	echo "<table width=100%>\n<tr bgcolor=lightyellow><th width=99% align=left>Relationships</th>\n";
 	echo "<th align=right><a href=enter-relationship.php3?entity_id=$entity_id&direction=fwd&is_thing=0>new</a></th></tr>\n";

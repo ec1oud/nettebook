@@ -1,0 +1,32 @@
+This will allow you to upload an ASCII text file containing names and 
+addresses in a format like this:
+<PRE>
+Joe A. Blow
+1234 Elm St.
+Anytown, AA 01234
+
+Jane B. Doe
+5678 Oak St.
+Anytown, AA 01235
+</pre>
+Any number of blank lines may be used to separate the name/address blocks.
+Each block must be contiguous; the name must be the first line.  The last
+word of the full name must be equivalent to a lastname which already 
+exists in nettebook; and the first word must be a substring of the 
+same record's othernames.  This will allow the middle name or middle
+initial to be present or absent and it will still work.  However if
+these criteria do not uniquely identify a record, then you will be
+warned and the address will not be inserted.<P>
+It will be assumed that anything below the first line, within each
+contiguous block of text, is all part of the same address.  This is
+a quick-and-dirty implementation; more intelligent parsers may be 
+implemented eventually.  In particular, suffixes like Jr., III etc.
+will cause this to fail... the last word is not a lastname.<P>
+Please upload the text file containing the name/address blocks:
+<center>
+<FORM ENCTYPE="multipart/form-data" ACTION="assimilate-addresses-text-list.php3" METHOD="POST">
+   <INPUT TYPE="hidden" name="MAX_FILE_SIZE" value="5000000">
+   File <INPUT NAME="userfile" size=60 TYPE="file"><BR>
+   <INPUT TYPE="submit" VALUE="Send File">
+</FORM>
+</center>

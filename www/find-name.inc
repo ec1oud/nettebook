@@ -1,3 +1,4 @@
+<?
 	function find_name($ent_id)
 	{
 		$retval = "UNKNOWN";
@@ -24,3 +25,4 @@
 			return "<a href = view-thing.php3?entity_id=$ent_id>$r[name]</a>";
 		}
 	}
+?>

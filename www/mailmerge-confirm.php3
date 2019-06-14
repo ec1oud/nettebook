@@ -98,8 +98,11 @@
 				"member_id=" . $row[entity_id] .
 				"AND thing_id=" . $entity_id;
 			$result2 = pg_Exec($conn, $query);
-			$row2 = pg_fetch_array($result2, 0);
-			$show = ($row2[location_id] == $row[location_id]);
+			if (pg_numrows($result2) > 0)
+			{
+				$row2 = pg_fetch_array($result2, 0);
+				$show = ($row2[location_id] == $row[location_id]);
+			}
 		}
 		if ($show)
 		{

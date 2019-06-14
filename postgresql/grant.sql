@@ -1,0 +1,1 @@
+grant all on thing, thing_type, contact_method, conversation, entity_comment, location, location_assoc, person, relationship_assoc, relationship_type, "user", user_prefs, list_addresses, image_type, image, output_device, mailmerge_template, mailmerge_history to "wwwdata";

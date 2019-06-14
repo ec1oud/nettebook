@@ -1,0 +1,24 @@
+Hi, thanks for downloading NetteBook!
+
+You can find out more about its purpose at www.nettebook.org.  Briefly 
+it is a PIM, and so far the contact management features are the ones that
+are implemented.  This is an alpha release, and it is free software.
+There will not be any guarantees of any kind; use it at your own risk.
+Please report any bugs you may find.
+
+NetteBook has the following requirements:
+o Web server capable of running PHP (developed on Apache)
+o PHP3 scripting language installed as a module
+o PostgreSQL database installed, and accessible to the UID that the 
+  web server is running as
+
+Soon it will probably require Java servlet support, but not in this release.
+
+Directories under this one:
+postgresql/	PostgreSQL setup info and SQL command files to create the 
+		necessary tables
+www/		HTML and PHP scripts which you should install in a 
+		suitable directory accessible to your web server; for
+		example on a Debian system, /var/www/nettebook
+crd2sql/	A C program to convert legacy Windows .crd files for
+		importing into NetteBook

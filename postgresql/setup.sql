@@ -1,0 +1,26 @@
+create sequence entity_id_s increment 1 start 1;
+create table company (name varchar(160), last_mod timestamp default 'now', entity_id int4 not null default nextval('entity_id_s') primary key, primary_comment int4);
+create table contact_method (entity_id int4 not null, location_id int4, type varchar(10), description varchar(20), detail varchar(2048), last_mod timestamp default 'now');
+create sequence conversation_id_s increment 1 start 1;
+create table conversation (owner_id int4 not null, other_id int4 not null, comment text, beginning timestamp, ending timestamp default 'now', conversation_id int4 not null default nextval('conversation_id_s') primary key);
+create sequence entity_comment_id_s increment 1 start 1;
+create table entity_comment (entity_id int4 not null, comment text, last_mod timestamp default 'now', comment_id int4 not null default nextval('entity_comment_id_s') primary key);
+create sequence gp_id_s increment 1 start 1;
+create table general_purpose (owner_id int4, category varchar(40), title varchar(80), body text, last_mod timestamp default 'now', gp_id int4 not null default nextval('gp_id_s') primary key);
+create sequence location_id_s increment 1 start 1;
+create table location (name varchar(80), description varchar(1024), address varchar(1024), entity_id int4, last_mod timestamp default 'now', location_id int4 not null default nextval('location_id_s') primary key );
+create table location_assoc (entity_id int4 not null, location_id int4 not null);
+create table person (lastname varchar(80), othernames varchar(120), suffixes varchar(40), last_mod timestamp default 'now', entity_id int4 not null default nextval('entity_id_s') primary key, primary_comment int4, primary_employer int4);
+create table relationship_assoc (one_entity int4 not null, other_entity int4 not null, type_id int4, comment text, primary key (one_entity, other_entity));
+create sequence relationship_type_id_s increment 1 start 1000;
+create table relationship_type (name varchar(40), sentence_usage varchar(80), reverse_sentence_usage varchar(80), type_id int4 not null default nextval('relationship_type_id_s') primary key);
+create table "user" (userid varchar(8) not null, password varchar(20), pda_userid varchar(20), pda_password varchar(20), pda_last_sync timestamp, entity_id int4 not null);
+create table user_prefs (entity_id int4 not null, name varchar(20), value varchar(80), type char, primary key(entity_id, name));
+grant all on company, contact_method, conversation, entity_comment, general_purpose, location, location_assoc, person, relationship_assoc, relationship_type, "user", user_prefs to wwwdata;
+insert into relationship_type values('employment', 'employs', 'works for', 1);
+insert into relationship_type values('love', 'loves', 'is loved by', 2);
+insert into relationship_type values('hate', 'hates', 'is hated by', 3);
+insert into relationship_type values('fatherhood', 'is the father of', 'is the child of', 4);
+insert into relationship_type values('motherhood', 'is the mother of', 'is the child of', 5);
+insert into relationship_type values('marriage', 'is married to', 'is the spouse of', 6);
+

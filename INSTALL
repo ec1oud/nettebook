@@ -1,0 +1,146 @@
+To install NetteBook:
+
+We assume you have installed Apache, PHP3 as an Apache module, and 
+PostgreSQL.  Apache should pre-process files that end in .php3 or 
+.phtml through the PHP module, and it should be configured to recognize
+index.phtml as a valid index file.
+
+Decide on a directory which is accessible to your web server where you want
+to install nettebook; for example /var/www/nettebook.  Then copy the web
+front-end stuff into there:
+
+mkdir /var/www/nettebook
+cp -a www/* /var/www/nettebook
+
+and make it readable by your web server (and optionally everyone else):
+
+chmod -R a+rX /var/www/nettebook
+
+Now we are ready to set up some stuff in PostgreSQL.  To make things
+more convenient, add yourself as a postgres superuser:
+
+$ su postgres  				Login as a user who has permission
+					to create postgresql users
+		
+sh-2.02$ createuser rutledge   		Substitute your usual login name
+					for rutledge
+Enter user's postgres ID -> 1
+Is user "rutledge" allowed to create databases (y/n) y
+Is user "rutledge" a superuser? (y/n) y
+WARNING: Any user who can add users can also modify the system catalog
+createuser: rutledge was successfully added
+sh-2.02$ exit
+
+Now when using your usual login you will be able to do database admin 
+stuff without having to "su" all the time.
+
+You should now be able to create and populate the database.
+
+createdb nettebook
+cd postgresql
+psql -f setup.sql nettebook 		You should now have the necessary 
+					tables.
+
+psql nettebook 				you will get a psql command prompt
+\d 					make sure all the tables are there;
+					should look like this:
+ +------------------+----------------------------------+----------+
+ |  Owner           |             Relation             |   Type   |
+ +------------------+----------------------------------+----------+
+ | rutledge         | company                          | table    |
+ | rutledge         | company_pkey                     | index    |
+ | rutledge         | contact_method                   | table    |
+ | rutledge         | conversation                     | table    |
+ | rutledge         | conversation_id_s                | sequence |
+ | rutledge         | conversation_pkey                | index    |
+ | rutledge         | entity_comment                   | table    |
+ | rutledge         | entity_comment_id_s              | sequence |
+ | rutledge         | entity_comment_pkey              | index    |
+ | rutledge         | entity_id_s                      | sequence |
+ | rutledge         | general_purpose                  | table    |
+ | rutledge         | general_purpose_gp_id_key        | index    |
+ | rutledge         | general_purpose_pkey             | index    |
+ | rutledge         | gp_id_s                          | sequence |
+ | rutledge         | location                         | table    |
+ | rutledge         | location_assoc                   | table    |
+ | rutledge         | location_id_s                    | sequence |
+ | rutledge         | location_pkey                    | index    |
+ | rutledge         | person                           | table    |
+ | rutledge         | person_pkey                      | index    |
+ | rutledge         | relationship_assoc               | table    |
+ | rutledge         | relationship_assoc_pkey          | index    |
+ | rutledge         | relationship_type                | table    |
+ | rutledge         | relationship_type_id_s           | sequence |
+ | rutledge         | relationship_type_pkey           | index    |
+ | rutledge         | user                             | table    |
+ | rutledge         | user_pkey                        | index    |
+ | rutledge         | user_prefs                       | table    |
+ +------------------+----------------------------------+----------+
+
+insert into person values ('Blow', 'Joe A.', 'PhD');
+select * from person;			
+
+					You inserted yourself as a person; 
+					output should look like this:
+
+lastname|othernames|suffixes|last_mod              |entity_id|pr...
+--------+----------+--------+----------------------+---------+----
+Blow    |Joe A.    |PhD     |1999-10-03 18:51:11-07|        1|                     
+
+So you are now "entity 1" if you were the first person inserted into 
+the database.  That is your entity_id which will be used to link all 
+other information that is related to you.  It is also the entity name
+you should use for the entity parameter to crd2sql (more on that later).
+
+To log in to nettebook, this person (you) must be registered as a 
+"user" of nettebook:
+
+insert into "user" values ('login', 'password', null, null, null, 1);
+
+substituting the login and password that you would like to use to log in,
+and substituting the "1" with your entity_id if different.
+
+Next we have to make it possible for the php scripts to access
+the nettebook database.  Make sure you have installed the php3
+postgres extension.  On Debian systems this is the php3-pgsql package.
+In php3.ini (/etc/php3/apache/php3.ini), under "Dynamic Extensions",
+add this:
+
+extension=pgsql.so
+
+Since PHP scripts run with the same UID as apache runs as, you will need
+to give that user access to PostgreSQL.  Add to pg_ident.conf 
+(on Debian, /etc/postgresql/pg_ident.conf) a line like this:
+
+webmap    www-data      wwwdata
+
+which means for the "mapping" named "webmap" the user www-data has 
+access to the database and his postgres username is wwwdata.
+
+Add the postgres user from pg_ident.conf:
+
+$ createuser wwwdata
+Enter user's postgres ID -> 2
+Is user "wwwdata" allowed to create databases (y/n) n
+Is user "wwwdata" a superuser? (y/n) n
+createuser: www-data was successfully added
+Shall I create a database for "wwwdata" (y/n) n
+
+That's about it.  PHP scripts should now have permission to access
+the database.  There is a "grant" command in postgresql/setup.sql 
+which will allow the user wwwdata to access the individual tables.
+So you should be able to access nettebook from the web now.
+Point your browser to http://localhost/nettebook/, and you should
+get a login prompt (use the username and password that you chose
+when doing the "insert into user" step above).  After you have 
+logged in you should get some icons in a frame along the left.
+If you get errors instead ("permission denied" or something) please
+try to formulate an hypothesis about which part is failing - php, 
+postgresql, the permissions on the php3 files themselves, access to
+tables in the database, etc. before posting questions on the mailing 
+list, and provide a detailed description about what happened in what
+order.  Info about subscribing to the mailing list is at 
+www.nettebook.org.
+
+An optional step:  if you have Windows cardfiles which you would like
+to import, cd to crd2sql and read the README in that directory.

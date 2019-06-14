@@ -1,0 +1,48 @@
+crd2sql.c is a simple C program which takes as input a Windows 3.1 Cardfile
+compatible .crd file and outputs sql commands to insert the information 
+from the "cards" into the "cardfile" portion of the NetteBook database
+schema.
+
+It is based on a crd2txt program by Hannu Aronsson <Hannu.Aronsson@iki.fi>.
+I simply modified it to output the SQL commands instead of plain text.
+Thanks Hannu!
+
+To compile it, use this command line:
+
+gcc crd2sql.c -o crd2sql
+
+I didn't see much point in writing a Makefile to automate that.  :-)
+The binary that comes in the tarball was compiled on my Debian "potato"
+system with gcc 2.91.66-2 and glibc 2.1.  If you have a different libc
+you will need to recompile for sure.
+
+When you run it without arguments it will tell you its usage:
+
+Usage: crd2sql file.crd person_id category
+
+"file.crd" is your original .crd file.  "person_id" is the entity ID in the
+Nettebook database that the cards will "belong" to.  To find out what
+that is, you will have to set up NetteBook, insert yourself as a "person"
+entry, give yourself access by means of a "user" entry, and then you
+can get the entity_id that the database assigned to you and use that
+as the person_id paramter to crd2sql.  "category" is the category that
+you want the cards from this file to be put into.  If you were in the
+habit of keeping multiple .crd files around for multiple purposes, then
+just use a separate category for each file and you can keep them separate
+and neatly labeled.
+
+Well when you run crd2sql with these parameters it will output sql 
+commands to stdout; so to capture them for later insertion into the
+database, pipe it to a file:
+
+crd2sql my.crd 1 phone-numbers > phone.sql
+
+for example.  For educational and sanity-checking purposes you might
+want to look at the file that was created.  Then, to insert into the 
+database you should be able to do something like
+
+psql -f phone.sql nettebook
+
+if "nettebook" is the name of the database.
+
+Have fun!

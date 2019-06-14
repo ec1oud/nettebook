@@ -1,0 +1,87 @@
+<P><B>Tradeoffs between relational databases and directory servers</b></P>
+<P>I can't decide which is more appropriate for storing "directory kind"
+of information.  On the one hand, at one point in the distant past 
+most databases were hierarchical, and relational databases evolved to
+replace them, so I think it's ironic that hierarchies are seeing a
+resurgence of interest.  Why did Microsoft choose a tree structure for
+the Registry, for example?  Why are hierarchical filesystems the most
+popular?  (And how is the Be filesystem really different?  I haven't
+had a chance to try it but I remember its relational features being
+touted early on.)  Why is the Mac resource fork also hierarchical?
+One would think that humans have some kind of instinctive preference for
+trees over tables.</P>
+<P>Of course it may be irrelevant from the object-oriented perspective;
+data really wants to be a free-form graph, with objects connected in a
+variety of ways which sometimes resemble trees, sometimes lists, sometimes
+lists of lists (aka tables) or sometimes none of the above.  But 
+object persistence is still so 
+un-standardized.  I intend to do a lot of experimenting with OO knowledge
+representation in the future, but in the mean time there is a lot of data
+waiting to be stored in more practical ways.  This is why I started work
+on <a href=index.html>NetteBook</a>.</P>
+<P>Here's how I see the breakdown:</P>
+<B>Directory service</B><BR>
+<table width=100%><tr><th>Pros</th><th>Cons</th></tr>
+<tr><td valign=top width=50%>
+<UL>
+<LI>Maybe trees are more intuitive</LI>
+<LI>Trees distribute nicely.  As with a Unix filesystem, subtrees which are 
+located elsewhere can be "mounted" or "federated" underneath any branch of
+an existing tree.</LI>
+<LI>They are very popular for "directory" kind of data, and there is a lot of legacy 
+data.</LI>
+<LI>The distributed nature is part of the design</LI>
+<LI>A lot like DNS, NIS, the Windows registry, AX.500, a typical filesystem, 
+resource fork, etc.  Trees are everywhere.</LI>
+<LI>VCards fit in well</LI>
+</UL>
+</td>
+<td valign=top width=50%>
+<UL>
+<LI>Can't represent more complex relationships as elegantly as with the relational model</LI>
+<LI>Sometimes it's possible to see the hierarchy more than one way.  If you are 
+making a tree with various foods in it, would you organize them by food group,
+by whether you like the food or not, by color, or some combination?  If you 
+want to organize by food group and color, then under each food group all 
+of the color branches will be repeated.</LI>
+<LI>The legacy uses of LDAP are restrictive, cumbersome and laden with folklore.
+Can you use node types other than the common ones?  Is this a schema change?  Where
+do you store the schema itself?  How do directories with incompatible schemae exchange
+data?</LI>
+<LI>Trees can be free form in theory but obviously it's useful to standardize some
+of the "name" tags for the data being stored in each node.  So you have ad-hoc
+semi-standards which are not documented by the directory itself.  At least in a
+relational database I know what each column stores.</LI>
+<LI>Since the tree is such a simple idea, why oh why is there no GUI tool for
+editing LDAP databases which makes it as easy as regedit on Windows?  (I know there
+are some but every one has some caveat or ugliness.)  And why are the command tools
+so complex and hard to use?</LI>
+</UL>
+</td>
+</tr></table>
+<BR>
+<B>Relational Database</B><BR>
+<table width=100%><tr><th>Pros</th><th>Cons</th></tr>
+<tr><td valign=top width=50%>
+<UL>
+<LI>ANY TREE can also be represented via tables; the universal recipe is to have a 
+"node" table which simply contains the data, an ID, and a parent ID.  A slightly
+less univeral recipe but which also works is to have a "main node type" table and
+other tables for other data types, with foreign-key IDs referring to the main nodes.</LI>
+<LI>Why couldn't you federate a relational database if the schema is homogeneous everywhere?</LI>
+<LI>Why couldn't you decide on a table-to-tree mapping and make a [subset of a] relational database available via the LDAP protocol?</LI>
+<LI>Can represent complex relationships better.  The world is not made of trees.  (It ain't
+made of tables either but...)</LI>
+</UL>
+</td>
+<td valign=top width=50%>
+<UL>
+<LI>Existing databases are centralized; they do not allow for federation/distribution, except by data replication or by doing a remote query.</LI>
+<LI>The replication mechanisms are non-standard and/or inelegant, because they were an afterthought rather than designed-in</LI>
+</UL>
+</td>
+</tr></table>
+So when I say I "hate LDAP" mostly I'm referring to the ugliness of its implementation 
+rather than to the idea of putting everything in trees.  But I think trees are 
+inferior to tables, and definitely inferior to an OO knowledge base, w.r.t. expressive
+power.  They have simplicity advantages in some applications though.

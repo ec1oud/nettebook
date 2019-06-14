@@ -1,0 +1,36 @@
+<H1>Release notes for Nettebook 0.5.0</H1>
+<P>This is the second alpha release, on Feb. 2 2000.</P>
+<P>What drove the changes this time around was my need to have a 
+mailmerge feature so I could get my Christmas cards done.  Of course
+I tried to think big as usual and make the mailmerge feature as 
+generically useful as possible.  I implemented the concept of
+"things" which are just non-person entities.
+All possible relationships are allowed between people and things.  
+Even the ones that don't make sense.
+(You can even create a "father" relationship between a gun and
+yourself... that would make you a "son of a gun".)
+Companies are now implemented as things; there is no "company"
+table anymore.  The mailmerge feature works like this:
+you can create a "thing" representing a
+group of people, and for each person, create a "membership"
+relationship between the person and the group.  Then, you can
+mailmerge the list of people (with their families and addresses)
+with an arbitrary textual template.</P>
+<P>I changed the method of connecting to the database somewhat
+after being unable to install nettebook myself on a different
+machine than the one I was developing on.  I don't
+know quite why it works on the development machine, but now it
+also works on  a fresher installation of php/apache/postgres on 
+another machine, so maybe
+it will be easier for you to install this time around also.  And
+I fleshed out a step or two that I had omitted from the installation
+instructions.</P>
+<P>The Palm conduit is still not included yet; I haven't worked on it
+since 0.4.0.  </P>
+<P>The schema has changed quite a bit, and may change more.  I hope
+your data migration issues aren't too large; I haven't written any
+utilities to automate it.  I want to try and freeze what is there
+in the next release and only add from there on rather than getting
+rid of existing tables.</P>
+<P>Well have fun, and please report your experiences with it on the
+mailing list.</P>

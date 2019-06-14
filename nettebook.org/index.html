@@ -1,0 +1,306 @@
+<table width=100%><tr><td>
+<img align=bottom src = images/nettebook-icon.gif>
+<font size=+2>NetteBook</font></td>
+<TD align=right valign=bottom><a href=#download>Download</a></td></tr></table>
+<P>...is an Open Source web-based PIM (personal information manager) under development.  </P>
+<h2>Features</h2>
+<P>So far, it's mostly for contact management.  You can use NetteBook to keep track
+of people, places, things, relationships between them, means of contacting
+them, conversations, and comments.
+There are also free-form "cards" for random bits of data.  Calendars 
+would be the next major use that will probably be added.</P>
+<P>There are many PIM applications for desktop machines, and proprietary ones
+on PDAs, but NetteBook lets you access the information via any web browser,
+as well as synchronize with the Palm PDA.  It's intended for the "power user"
+with a home web server, or for a small business, or perhaps for friends
+and family to share.</P>
+<h2>News</H2>
+<ul>
+<LI>Feb. 2, 2000 - 0.5.0 released</LI>
+<LI>Dec. 5, 1999 - got distracted; see journal entry at
+<a href=http://www.bigfoot.com/~ecloud/journal/991205.html>my home page</a></LI>
+<LI>Oct. 28, 1999 - 0.4.0, the first alpha, released</LI>
+</UL>
+<h2>Technical details</h2>
+<UL>
+<LI>Relational database back-end <font size=-1>(currently 
+<a href=http://www.postgresql.org/>PostgreSQL</a>)</font></LI>
+<LI>Web front-end <font size=-1>(Apache + PHP3)</font></LI>
+<LI>Associative model; people and things exist independently of their 
+phone numbers, addresses etc.  You can associate as many data items with 
+each person as you like.</LI>
+<LI>People and things (including companies) can have a wide variety
+of relationships - employment, ownership, membership, marriage etc.
+Membership in a "thing" which represents a vague "group" is roughly
+equivalent to categories on the Palm.</LI>
+<LI>Login authentication required for access.  May be secure if served
+from an SSL-enabled version of Apache.</LI>
+<LI>Can keep textual records of all kinds of conversations such as face-to-face,
+telephone, voicemail etc.</LI>
+<LI>Free-form "cardfile" model for random bits of information that don't
+fit into the contact management tables.</LI>
+<LI>Import module for Windows 3.1 <code>.crd</code> "cardfile" format.</LI>
+<LI>Palm conduit (currently about 40% done, using
+<a href=http://come.to/syncbuilder>SyncBuilder</a>)</LI>
+</UL>
+<h2>Planned future features</h2>
+...and improbable pipe-dreams
+<UL>
+<LI>Preferences page (change your password, Palm sync preferences like names 
+of the custom fields, do you tend to use company addresses or personal addresses on 
+combined person/company entries on your Palm, stuff like that)</LI>
+<LI>Admin page (create/delete user accounts)</LI>
+<LI>Servlet to upload a .crd file and auto-assimilate it <font size=-1>(be assured resistance will be futile)</font></LI>
+<LI>Servlet to import free-form "cards" into PIM fields in a semi-intelligent way</LI>
+<LI>Verify multi-user functionality and fix as needed</LI>
+<LI>Rewrite all PHP scripts as servlets</LI>
+<LI>Servlets to import and export vcards</LI>
+<LI>Associative multimedia</LI>
+<LI>Sync notes on the Palm with free-form cards</LI>
+<LI>Calendaring features</LI>
+<LI>Appointment reminder delivery conduits 
+(<a href=http://www.mirabilis.com>ICQ</a>, email, or telephone/pager for example)</LI>
+<LI>LDAP read/write gateway</LI>
+<LI>Genealogy features.  Already it is possible to define relationships such as
+marriage or parenthood between people, so there is little to add to the model.
+Ability to import and export <a href=http://www.gendex.com/gedcom55/55gcint.htm>GEDCOM</a> files
+would be nice.  As the multimedia features are added they will be useful for
+"family tree" web sites as well (imagine large collections of photos, audio,
+and home movies integrated into the family tree).</LI>
+<LI>Ability to index emails according to the parties involved
+and link to them from the "communications" 
+timeline, so that emails are interspersed with voicemails and other
+kinds of conversations in which the given contact was involved</LI>
+<LI>Integrate some kind of freeware voicemail system</LI>
+<LI>Integrate faxes</LI>
+<LI>Project management features</LI>
+<LI>Themes (customize the look and feel)</LI>
+<LI>Non-web-based GUI optimized for touchscreens (I want one in the living room)</LI>
+<LI><a href=tstl.html>TSTL</a>, etc. & ad nauseum</LI>
+</UL>
+<h2>Documentation</h2>
+<UL>
+<LI><a href = schema.txt>The schema</a></LI>
+<LI><a href = conduit.html>Regarding the Palm conduit</a></LI>
+</UL>
+<A name=download>
+<h2>Releases</h2>
+<UL>
+<LI><a href = nettebook-0.5.0.tar.gz>0.5.0</a>;
+<a href = relnotes/0.5.0.html>release notes</a></LI>
+<LI><a href = nettebook-0.4.0.tar.gz>First alpha</a> release, 0.4.0; 
+<a href = relnotes/0.4.0.html>release notes</a></LI>
+</UL>
+<h2><a href = screenshots/index.html>Screenshots</a></h2>
+<h2>Discussion forums</h2>
+<UL>
+<LI><a href = http://www.nettebook.org/mailman/listinfo.cgi/nettebook-users>Mailing list</a> for users</LI>
+<LI><a href = http://www.nettebook.org/mailman/listinfo.cgi/nettebook-dev>Mailing list</a> for developers</LI>
+</UL>
+<h2>Web site to-dos</h2>
+<UL>
+<LI>CVS archive</LI>
+<LI>Working demo</LI>
+<LI>Debian package</LI>
+<LI>More docs</LI>
+</UL>
+<h2>Motivation and history</h2>
+<img align=right src=images/windingroad.gif>
+<P><B>Warning:</B> Rambling ahead</P>
+<P>My motivation in writing this was to replace my hopelessly outdated collections
+of Windows cardfiles which I was using to store my personal phone numbers
+and addresses (about 150 of them).  (This bad habit started in
+1992 or so when I got my 386 and had enough power and memory to run
+Windows.)  But it has been a couple years since I used Windows much.
+I have a laptop which still runs 3.1 and once in a 
+while I have had to fire it up to look up an address.  (BTW I'm waiting for 
+compressed ext2 to get finished so I can install Linux on that laptop.
+It only has 40 megs HD.)  I didn't want to manually 
+re-enter all that data, and certainly didn't want to use any more 
+here-today-gone-tomorrow formats.  Furthermore I've always been disgusted 
+with the way most contact 
+management/PIM type packages are too limiting; they may give you only one
+slot to fill in a person's phone number, and another for the fax, and another
+for the cell phone.  But people don't have fixed kinds and quantities of
+telephony devices so these fixed fields would have to keep changing over time.
+More likely the author would get bored with updating his program and it would
+become unmaintained and obsolete.  If there were updates, no doubt there
+would be file format incompatibilities (if memory serves, even .crd format
+was different between Windows 3.1 for DOS and NT 3.51.  After NT 3.51 it was
+dropped with no obvious replacement.)</P>
+<P>So in late 1998 I remembered having seen somewhere on the 'net a 
+program to convert .crd files to plain text.  I started thinking about the perfect
+PIM application (which, being a perfectionist by nature, could ultimately
+be nothing less than an expert system so that it could act on the information
+or answer questions as well as just store it).  Forcing myself into some
+moderation I decided it would be a good start if I could just import the
+individual cards in the cardfile into a database, and migrate them into
+something else later.  But I couldn't just not think about what would 
+come later so as another intermediate step I designed a schema that would
+store both the plain cards and the individual fields such as 
+last name, first name, phone numbers and email addresses.</P>
+<P>The general-purpose "cards" table simply contains a category
+(8 characters just like DOS file names, corresponding to which file the cards
+came from), an index line (like the top line of a 3x5 index card), and a body
+(unlimited amounts of text).  I found the crd-to-text converter which turned
+out to be a freeware C program, and modified it
+to instead write SQL statements for inserting the cards into my database.
+And presto, with a few commands I had imported all of my old .crd files.</P>
+<P>Then I installed PHP3 on my home gateway/web server and started writing a 
+simple front-end for viewing and editing the cards.  It was really easy and
+yielded immediate useful results.  About that time I needed a new job and
+used it successfully to manage info on a dozen-and-a-half headhunters
+and other job-hunting leads.  Once while at an interview, I needed to access
+some information in there and so I used the headhunter's computer to do so.
+Afterwards, I left the browser open, and she would have been 
+free to rummage around as she pleased for that browsing session, after I
+left, if she was the snoopy type.  Oops.  <code>:-)</code></P>
+<P>After I got the new job, I could afford a Palm and so began to think
+of how this database could be integrated with the one on the Palm.
+Unfortunately the built-in phone/address book thingy has a limited number
+of fields, but at least it allows you to select from all known varieties
+of phone numbers and use various combinations of them, and there are 4
+fields which can be renamed.  But why oh why are there only 4?!?!  I can
+easily think of many more needs than that: home page URLs (multiple of
+course), anniversary, birthday, what kind of car they drive, favorite 
+color, ham callsign, ICQ UID, etc.
+Not only that but if you rename field 2 to Home Page then field 2 is always
+reserved for Home Page whether or not a particular contact has one or 
+none or several.  And if you beam a card with a field 2 value to another
+Palm which has renamed field 2 to something else, then what?  I don't know
+what happens but there are only two solutions that I can see and neither
+one is pretty.  I simply can't believe the shortsightedness of these
+guys, especially with their Newton background.  Well anyway... I think
+I can cobble together a conduit which will at least transfer the 
+most important (in the eyes of Palm Inc. of course) fields back and
+forth between the two.  I will probably do that in Java.</P>
+<P>I also did some preliminary experiments with 
+<a href=http://www-sor.inria.fr/~java/tools/jlex/>JLex</a>, the Java
+lexer generator (not having had any experience with that kind of stuff)
+and managed to write a parser which has surprisingly resilient, intelligent-
+looking behavior for purposes of extracting phone numbers and text
+which is perceived as being descriptive of the phone number.  It 
+recognizes all forms of phone numbers that I know of (including foreign
+ones; with or without the plus in front; with or without dashes between
+the segments, or similar punctuation; with or without parentheses around
+the area code; etc.)  Text which is to the right or left of the phone
+number, or text which occurs before it, followed by a colon, is taken 
+as text which describes the purpose of that phone number.  The goal here
+is to write a program which can extract data from general-purpose 
+"cardfile" records in the database, and insert them into the contact
+management tables.  Most likely this will be done interactively card
+by card with the user verifying that everything got picked out properly
+before committing the changes.  What's left to make it possible of course
+is to recognize and extract email addresses, physical addresses, and URLs.
+It needs to be incorporated into a servlet.
+Leftover text can be dumped into a comment field (BTW, entities can have
+an unlimited number of comments too).  But I realized I was getting ahead
+of myself (as usual) until the PHP scripts 
+for various views and editing capabilities on the PIM tables
+are done.  So the parser thing is on the back shelf for now.</P>
+<P>Ultimately I think Java servlets are a better idea than PHP3 for portability 
+reasons, and because the parser thingy needs Java anyway (I wouldn't do it
+in PHP3 obviously).  So I might redo all the PHP scripts as servlets
+sooner or later.  In the meantime I kinda wanted to get it hobbling along
+well enough that I can start using the PIM tables rather than the plain
+cards for my day-to-day PIM-kind-of-stuff.  It's getting close.  But 
+I think the Palm conduit is my next priority, and then the parser (so 
+I can finally migrate those darn cards automagically) and then rewriting
+the PHP scripts.  Somewhere in there a vcard codec would be nice.  I
+plan on having a link that says "upload a vcard" and your browser will
+prompt you for the file, and send it to the servlet, which assimilates it.
+Similarly you should be able to save any contact as a vcard.</P>
+<P>After basic contact management there are other things a PIM needs to
+do, for instance calendaring.  Another can of worms considering how many
+half-ass calendars are out there.  Well at least some of those have decent
+groupware features so I need to develop some concepts to make that work
+really well too.  The contact management stuff is sortof designed for 
+multiple users (based on who logs in) but I'm not sure it's robust enough
+and right now there is no way to view someone else's stuff without logging
+in as them.  That's OK for most of us but maybe not OK for collaborating
+salespeople or something.  Of course relational databases don't map well
+onto federated hierarchies either.  That's what 
+<a href=http://whatis.com/ldap.htm>LDAP</a> is for.  In the beginning
+I toyed with implementing the whole thing on top of 
+<a href=http://http://www.openldap.org/software/man.cgi?query=slapd>slapd</a> instead of 
+<a href=http://www.postgresql.org/>PostgreSQL</a> but decided against it on the grounds that existing LDAP implementations tend to fill me with a sense of 
+<a href=directory-vs-database.html>
+fear and loathing</a> and because the relational database is a superset of the tree
+structure's functionality.  (It's an evolutionary step too, which makes
+me wonder why directories are so popular nowadays.  Hierarchical databases
+from the 60's got replaced with relational ones, remember?)  I think it would
+be possible to implement an LDAP-compliant shell which accepts queries but
+gets the answers from the database.  There are other LDAP gateways that
+do similar things for other kinds of data anyway.  So then multiple
+copies of NetteBook could be federated into the directory namespace
+transparently.  The only remaining problem is how to replicate data
+between the servers in an LDAP-compliant way, and I don't have a good
+solution for that yet.</P>
+<P>Oh of course there are rumors that PostgreSQL doesn't scale well enough.
+If this becomes a problem I'm open to porting it to 
+<a href=http://www.mysql.org/>MySQL</a> but I don't 
+like MySQL's <a href=http://www.mysql.org/Manual_chapter/manual_Public_license.html#Public_license>licensing terms</a> as much.  
+</P>
+<P>No PIM is complete without multimedia.  Believe it
+or not, you could actually OLE-embed anything you wanted into a Windows
+3.1 cardfile, and one of my cardfiles consisted of WMF diagrams showing various
+connector pinouts, for reference purposes.  I don't intend to decifer how
+to un-embed the diagrams programmatically, but it illustrates the point 
+that there is sometimes a need
+for images.  The most classic example would be wanting to have a photo of
+each contact, or a scanned business card.
+The next question would be how to store the images, in BLOBs or files.
+Personally I think since we're using a full-featured database, which might
+or not reside on a <a href=filesystem.html>filesystem</a> 
+10 years from now, why not use BLOBs.  The only 
+scary thing is that PostgreSQL's BLOB support had better be stable.
+As for UI, adding
+multimedia to a contact will probably be done just like adding vcards,
+via an HTTP upload.  I have to come up with a good way of distinguishing
+images best shown inline from supplementary materials (home movies, say).
+Probably via a form which will prompt for the caption, and 
+a checkbox to say whether or not it should be an inline image, and
+that form's submit button does the upload.</P>
+<P>About the name:  It's your notebook on the 'net.  Its data can
+funnel into the smallest browsers or PDAs thus the "ette" part (French
+suffix meaning small).  Well the other reason for the "ette" is that
+netbook.com seems to exist and 
+I don't want to infringe any trademarks or anything.  This name is 
+corny enough that infringement is improbable.  
+Comparing it to a notebook is appropriate to its general purpose
+nature.  Hopefully it will evolve towards storing things
+in more suitably structured ways.</P>
+<P>Concerning structure - my philosophy is that there is an optimum
+amount of it for each personality.  I'm kindof messy and lazy sometimes;
+I liked the Windows cardfile specifically for its lack of structure.
+I'd get the benefits of electronic storage without the anal retentiveness
+of a PIM (and anyway PIMs were a new concept and sucked even worse 
+back then than now).  Similarly I don't see any point in breaking up
+fields any more than necessary; so the actual phone number for example is a 
+single field in its table.  (Having it in a separate table is only for
+normalization purposes, to be flexible in allowing as many phone numbers
+per person as you like.)  I don't have separate fields for country
+code, area code, prefix, suffix, etc.  Those kinds of fields tend to
+become obsolete anyway.  Similarly the person table has a lastname
+field, and an othernames field.  I don't know how many names are
+traditional in every country, so there's no point in having a middle
+name field (or worse, constraining you to only a middle initial).
+I only wanted to have the option of alphabetizing by last name, so
+it had to be separate.  In general the goal of Nettebook is to
+let you be as anal as you like, if you're so inclined, but not force
+you into it.  I will probably always have a few lingering free-form
+cards in my database.</P>
+<P>This project deserves to be open source because it has been 
+so long in coming.
+&LT/RAMBLING&GT<BR>
+<H2>Credits</H2>
+<P>Thanks to Jay at WiredGlobal.com for providing free web space for this
+project.  Also thanks to Hannu Aronsson for the 
+<a href=http://www.indl.com/tools/english.html>
+crd2html</a>
+utility.</P>
+</P><font size=-1>Note, there is a similar crd2txt utility
+<a href=http://www.cmp.sanken.osaka-u.ac.jp/~nisimatu/computer/crd2txt/>
+here</a> if you are looking for such things.  I thought at first that
+that was the one I had used, but looking at the code again I see the
+comment that it was the one written by Hannu.</P></font>

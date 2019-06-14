@@ -1,0 +1,41 @@
+		An excerpt from the future JavaDocs:
+		<P>Service an incoming connection by syncing the address databases.</P>
+		<P>Strategy:</P><UL>
+		<LI>If Postgres user.date is null, this indicates the database has never been
+		synced with the PDA.  Assume there is no duplication of records between them
+		(and if there is the user can weed out the dups later).</LI>
+			<UL>
+			<LI>Insert all records from the PDA into the database. (this is the part I have done so far)</LI>
+			<LI>Update all existing PDA records to have the record ID equal to the 
+			person entity ID in the database.  (That way when syncing in the future
+			we can assume the record IDs are in this form.)</LI>
+			<LI>Insert all existing records from the database into the PDA, not
+			including the ones that were just inserted from the PDA into the 
+			database.</LI>
+			</UL>
+		<LI>Else if the user.date is not null, we know when the last sync happened.  
+		For each changed record in the PDA, however, we don't know what changed - 
+		a contact method, or the person's name, or the company's name, or the note.
+		For each changed record in the PDA:</LI>
+			<UL>
+			<LI>For every changed record relating to that person and/or company
+			in the database, load the record into memory and hold it.</LI>
+			<LI>If the note changed (test by comparing content), don't update it 
+			because we don't know how much changed.  Instead insert a new record
+			into the database.  Open issue: how does the user change the PDA
+			note from the web interface?  When the sync process runs it can't
+			tell whether the note was changed on the PDA or the web, only that
+			they're different.  Well... I guess the database needs a last changed
+			timestamp.</LI>
+			<LI>Update the rest of the database records from the PDA record.</LI>
+			<LI>Update both the database and the PDA from the records in memory.</LI>
+			</UL>
+		</UL>
+		<P>So the individualized changes in the database override changes on the
+		PDA, because we have more specific knowledge of what changed; but, other
+		changes made on the PDA to a record are not lost.  Old notes are kept until
+		the user deletes them via the web interface.  The primary_comment fields
+		in the person and company tables indicate which of the comments is the
+		PDA "note" field.  Similarly the primary_employer field in the person 
+		table points to the company that should be shown with the person on 
+		the PDA.</P>

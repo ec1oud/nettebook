@@ -1,0 +1,140 @@
++------------------+----------------------------------+----------+
+|  Owner           |             Relation             |   Type   |
++------------------+----------------------------------+----------+
+| rutledge         | company                          | table    |
+| rutledge         | company_pkey                     | index    |
+| rutledge         | contact_method                   | table    |
+| rutledge         | conversation                     | table    |
+| rutledge         | conversation_id_s                | sequence |
+| rutledge         | conversation_pkey                | index    |
+| rutledge         | entity_comment                   | table    |
+| rutledge         | entity_comment_id_s              | sequence |
+| rutledge         | entity_comment_pkey              | index    |
+| rutledge         | entity_id_s                      | sequence |
+| rutledge         | general_purpose                  | table    |
+| rutledge         | general_purpose_gp_id_key        | index    |
+| rutledge         | general_purpose_pkey             | index    |
+| rutledge         | gp_id_s                          | sequence |
+| rutledge         | location                         | table    |
+| rutledge         | location_assoc                   | table    |
+| rutledge         | location_id_s                    | sequence |
+| rutledge         | location_pkey                    | index    |
+| rutledge         | person                           | table    |
+| rutledge         | person_pkey                      | index    |
+| rutledge         | relationship_assoc               | table    |
+| rutledge         | relationship_assoc_pkey          | index    |
+| rutledge         | relationship_type                | table    |
+| rutledge         | relationship_type_id_s           | sequence |
+| rutledge         | relationship_type_pkey           | index    |
+| rutledge         | user                             | table    |
+| rutledge         | user_person_id_key               | index    |
+| rutledge         | user_pkey                        | index    |
+| rutledge         | user_userid_key                  | index    |
++------------------+----------------------------------+----------+
+
+Table    = person
++----------------------------------+----------------------------------+-------+
+|              Field               |              Type                | Length|
++----------------------------------+----------------------------------+-------+
+| lastname                         | varchar()                        |    80 |
+| othernames                       | varchar()                        |   120 |
+| suffixes                         | varchar()                        |    40 |
+| creation                         | timestamp default timestamp ( no |     4 |
+| entity_id                        | int4 not null default nextval (  |     4 |
++----------------------------------+----------------------------------+-------+
+
+Table    = company
++----------------------------------+----------------------------------+-------+
+|              Field               |              Type                | Length|
++----------------------------------+----------------------------------+-------+
+| name                             | varchar()                        |   160 |
+| creation                         | timestamp default timestamp ( no |     4 |
+| entity_id                        | int4 not null default nextval (  |     4 |
++----------------------------------+----------------------------------+-------+
+
+Table    = contact_method
++----------------------------------+----------------------------------+-------+
+|              Field               |              Type                | Length|
++----------------------------------+----------------------------------+-------+
+| entity_id                        | int4 not null                    |     4 |
+| location_id                      | int4                             |     4 |
+| type                             | varchar()                        |    10 |
+| description                      | varchar()                        |    20 |
+| detail                           | varchar()                        |  2048 |
+| creation                         | timestamp default timestamp ( no |     4 |
++----------------------------------+----------------------------------+-------+
+
+Table    = conversation
++----------------------------------+----------------------------------+-------+
+|              Field               |              Type                | Length|
++----------------------------------+----------------------------------+-------+
+| owner_id                         | int4 not null                    |     4 |
+| other_id                         | int4 not null                    |     4 |
+| comment                          | text                             |   var |
+| beginning                        | timestamp                        |     4 |
+| ending                           | timestamp default timestamp ( no |     4 |
+| conversation_id                  | int4 not null default nextval (  |     4 |
++----------------------------------+----------------------------------+-------+
+
+Table    = entity_comment
++----------------------------------+----------------------------------+-------+
+|              Field               |              Type                | Length|
++----------------------------------+----------------------------------+-------+
+| entity_id                        | int4 not null                    |     4 |
+| comment                          | text                             |   var |
+| creation                         | timestamp default timestamp ( no |     4 |
+| comment_id                       | int4 not null default nextval (  |     4 |
++----------------------------------+----------------------------------+-------+
+
+Table    = general_purpose
++----------------------------------+----------------------------------+-------+
+|              Field               |              Type                | Length|
++----------------------------------+----------------------------------+-------+
+| owner_id                         | int4                             |     4 |
+| category                         | varchar()                        |    40 |
+| title                            | varchar()                        |    80 |
+| body                             | text                             |   var |
+| creation                         | datetime default 'now'           |     8 |
+| gp_id                            | int4 not null default nextval (  |     4 |
++----------------------------------+----------------------------------+-------+
+
+Table    = location
++----------------------------------+----------------------------------+-------+
+|              Field               |              Type                | Length|
++----------------------------------+----------------------------------+-------+
+| name                             | varchar()                        |    80 |
+| description                      | text                             |   var |
+| address                          | text                             |   var |
+| entity_id                        | int4                             |     4 |
+| creation                         | timestamp default timestamp ( no |     4 |
+| location_id                      | int4 not null default nextval (  |     4 |
++----------------------------------+----------------------------------+-------+
+
+Table    = relationship_assoc
++----------------------------------+----------------------------------+-------+
+|              Field               |              Type                | Length|
++----------------------------------+----------------------------------+-------+
+| one_entity                       | int4 not null                    |     4 |
+| other_entity                     | int4 not null                    |     4 |
+| type_id                          | int4                             |     4 |
+| comment                          | text                             |   var |
++----------------------------------+----------------------------------+-------+
+
+Table    = relationship_type
++----------------------------------+----------------------------------+-------+
+|              Field               |              Type                | Length|
++----------------------------------+----------------------------------+-------+
+| name                             | varchar()                        |    40 |
+| sentence_usage                   | varchar()                        |    80 |
+| reverse_sentence_usage           | varchar()                        |    80 |
+| type_id                          | int4 not null default nextval (  |     4 |
++----------------------------------+----------------------------------+-------+
+
+Table    = user
++----------------------------------+----------------------------------+-------+
+|              Field               |              Type                | Length|
++----------------------------------+----------------------------------+-------+
+| userid                           | varchar() not null               |     8 |
+| password                         | varchar()                        |    80 |
+| entity_id                        | int4 not null default nextval (  |     4 |
++----------------------------------+----------------------------------+-------+

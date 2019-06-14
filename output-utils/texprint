@@ -1,0 +1,13 @@
+#!/bin/sh
+cd /tmp
+tmpfile=`date +%s`
+tmpfile=`echo "tmptex$tmpfile"`
+tmpin=`echo $tmpfile`.tex
+echo "Saving to tempfile $tmpin" > log
+cat > $tmpin
+/usr/bin/latex $tmpin
+tmpout=`echo $tmpfile`.dvi
+echo "dvips $tmpout" >> log
+/usr/bin/dvips $tmpout
+#rm $tmpfile
+#rm $tmpout

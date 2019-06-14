@@ -1,0 +1,36 @@
+texprint is intended to be installed in /usr/local/bin and is useful
+for direct printing when nettebook is used to generate a TeX file from 
+a template.  It can accept TeX output directly from nettebook, convert
+it to postscript, and queue it to your default printer.
+
+In the manual directory are some utilities that may be useful when
+nettebook is used to generate TeX or LyX output from a template, and
+you want to download it, review it and print it by hand.  This 
+situation often occurs when you want to print a batch of letters
+or envelopes at once. 
+
+Specifically:
+
+BurstLyx.java and BurstTeX.java are used to separate ("burst")
+a sequence of Lyx or TeX documents out into separate files.  In your
+template, use a line like this:
+
+%% file: <firstName/>-<lastName/>.tex
+
+for TeX, or this:
+
+#file: <firstName/>-<lastName/>.tex
+
+and then if you merge a batch, every person's first and lastnames
+will be substituted, and you can then use one of the "burst" programs
+to find each of these "file" comments, break the output at that point,
+and put it into a file with the name specified in the comment.
+
+To use either burst utility, it's necessary to compile it first.
+For example, 
+javac BurstLyx.java
+and to use it:
+java BurstLyx
+
+The "printall" shell script simply prints every .tex file in the 
+current directory.

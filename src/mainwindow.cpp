@@ -109,15 +109,22 @@ void MainWindow::on_actionOpen_triggered()
 
 void MainWindow::load(QString url)
 {
-    qDebug() << url;
-    ui->urlField->setText(url);
     // QUrl::fromUserInput knows how to guess about http and file URLs,
     // but mangles ipfs hashes by converting them to lowercase and setting scheme to http
     bool directory = url.endsWith(QLatin1String("/"));
+    QUrl u(url);
     if (url.contains(base58HashPrefix) || url.contains(base32HashPrefix))
-        m_mainWidget->setSource(QUrl(url), directory ? QTextDocument::MarkdownResource : QTextDocument::UnknownResource);
+        ; // nothing to do
+    else if (u.scheme().isEmpty()) {
+        QFileInfo fi(url);
+        if (fi.exists())
+            u = QUrl::fromLocalFile(fi.canonicalFilePath());
+    }
     else
-        m_mainWidget->setSource(QUrl::fromUserInput(url), directory ? QTextDocument::MarkdownResource : QTextDocument::UnknownResource);
+        u = QUrl::fromUserInput(url);
+    qDebug() << Q_FUNC_INFO << url << u << "dir?" << directory;
+    ui->urlField->setText(u.toString());
+    m_mainWidget->setSource(u, directory ? QTextDocument::MarkdownResource : QTextDocument::UnknownResource);
 }
 
 void MainWindow::on_actionSave_triggered()

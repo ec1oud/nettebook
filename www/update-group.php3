@@ -8,11 +8,11 @@
 	$row = pg_fetch_array ($result, 0);
 	$owner_id = $row["entity_id"];
 
-	$result = pg_Exec ($conn, "update thing SET name='$name' WHERE entity_id=$entity_id");
+	$result = pg_Exec ($conn, "update group_entity SET name='$name' WHERE entity_id=$entity_id");
 	if (!$result) 	
 	{
 		echo "An error occured.\n";
 	    exit;
 	}
-	Header("Location: view-thing.php3?entity_id=$entity_id");
+	Header("Location: view-group.php3?entity_id=$entity_id");
 ?>

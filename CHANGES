@@ -1,0 +1,13 @@
+0.5.0		Implemented "things" which are just non-person entities.
+			All possible relationships are allowed between people and things.  
+			Companies are now implemented as things; there is no "company"
+			table anymore.  Added a mailmerge feature; it allowed me to address
+			some envelopes with as little manual intervention as possible, but
+			it is not complete yet, nor has the existing functionality been
+			exhoustively tested yet.  You can create a "thing" representing a
+			group of people, and for each person, create a "membership"
+			relationship between the person and the group.  Then, you can
+			mailmerge the list of people (with their families and addresses)
+			with an arbitrary textual template.
+
+0.4.0		First alpha

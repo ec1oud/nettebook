@@ -9,7 +9,7 @@
   	} 
 	else 
 	{
-		$conn=pg_connect("dbname=nettebook user=wwwdata");
+		$conn=pg_connect("dbname=nettebook host=localhost port=5432 user=wwwdata");
 		if (!$conn) 
 		{
   	  		echo "Cannot connect to database\n";
@@ -37,5 +37,7 @@
 <P><a href=cardsframe.html target=main><img src=images/cards-icon.png alt=cards border=0><BR>Cardfile</a></P>
 <P><a href=view-people.php3 target=main><img src=images/people-icon.png alt=people border=0><BR>People</a></P>
 <P><a href=view-companies.php3 target=main><img src=images/company-icon.png alt=companies border=0><BR>Companies</a></P>
+<P><a href=view-my-groups.php3 target=main><img src=images/mygroups-icon.png alt="my groups" border=0><BR>My Groups</a></P>
+<P><a href=view-all-public-groups.php3 target=main><img src=images/groups-icon.png alt="all groups" border=0><BR>All Public Groups</a></P>
 </center>
 </body>

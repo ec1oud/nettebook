@@ -44,11 +44,10 @@ psql -f setup.sql nettebook 		You should now have the necessary
 psql nettebook 				you will get a psql command prompt
 \d 					make sure all the tables are there;
 					should look like this:
+Database    = nettebook
  +------------------+----------------------------------+----------+
  |  Owner           |             Relation             |   Type   |
  +------------------+----------------------------------+----------+
- | rutledge         | company                          | table    |
- | rutledge         | company_pkey                     | index    |
  | rutledge         | contact_method                   | table    |
  | rutledge         | conversation                     | table    |
  | rutledge         | conversation_id_s                | sequence |
@@ -58,13 +57,15 @@ psql nettebook 				you will get a psql command prompt
  | rutledge         | entity_comment_pkey              | index    |
  | rutledge         | entity_id_s                      | sequence |
  | rutledge         | general_purpose                  | table    |
- | rutledge         | general_purpose_gp_id_key        | index    |
  | rutledge         | general_purpose_pkey             | index    |
  | rutledge         | gp_id_s                          | sequence |
+ | rutledge         | list_addresses                   | table    |
  | rutledge         | location                         | table    |
  | rutledge         | location_assoc                   | table    |
  | rutledge         | location_id_s                    | sequence |
  | rutledge         | location_pkey                    | index    |
+ | rutledge         | mailmerge_template               | table    |
+ | rutledge         | mailmerge_template_pkey          | index    |
  | rutledge         | person                           | table    |
  | rutledge         | person_pkey                      | index    |
  | rutledge         | relationship_assoc               | table    |
@@ -72,9 +73,14 @@ psql nettebook 				you will get a psql command prompt
  | rutledge         | relationship_type                | table    |
  | rutledge         | relationship_type_id_s           | sequence |
  | rutledge         | relationship_type_pkey           | index    |
+ | rutledge         | template_id_s                    | sequence |
+ | rutledge         | thing                            | table    |
+ | rutledge         | thing_pkey                       | index    |
+ | rutledge         | thing_type                       | table    |
+ | rutledge         | thing_type_s                     | sequence |
  | rutledge         | user                             | table    |
- | rutledge         | user_pkey                        | index    |
  | rutledge         | user_prefs                       | table    |
+ | rutledge         | user_prefs_pkey                  | index    |
  +------------------+----------------------------------+----------+
 
 insert into person values ('Blow', 'Joe A.', 'PhD');
@@ -125,6 +131,11 @@ Is user "wwwdata" allowed to create databases (y/n) n
 Is user "wwwdata" a superuser? (y/n) n
 createuser: www-data was successfully added
 Shall I create a database for "wwwdata" (y/n) n
+
+Finally, in postmaster.init (/etc/postgresql/postmaster.init), 
+uncomment PGALLOWTCPIP and set it to "yes":
+
+PGALLOWTCPIP=yes
 
 That's about it.  PHP scripts should now have permission to access
 the database.  There is a "grant" command in postgresql/setup.sql 

@@ -14,7 +14,7 @@
 				$retval = $retval . ", " . $r[suffixes];
 			return $retval;
 		}
-		$res = pg_Exec ($conn, "SELECT * FROM company WHERE entity_id=$ent_id");
+		$res = pg_Exec ($conn, "SELECT * from thing WHERE entity_id=$ent_id");
 		if (!$res)
 			return $retval;
 		if (pg_numrows($res) > 0)
@@ -31,7 +31,7 @@
 	echo "<P>Please fill in the blanks:</P>\n";
 	echo "<form action=update-reltype-grammar.php3 method=post>\n";
 	echo "<input type=hidden name=entity_id value=$entity_id>\n";
-	echo "<input type=hidden name=is_company value=$is_company>\n";
+	echo "<input type=hidden name=is_thing value=$is_thing>\n";
 	echo "<input type=hidden name=sentence_usage value=\"$sentence_usage\">\n";
 	echo "<P>Given that $one_name $sentence_usage $other_name,<BR>\n";
 	echo "$other_name <input type=text name=reverse_sentence_usage length=10> $one_name.</P>\n";

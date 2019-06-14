@@ -21,9 +21,9 @@
 				$conversation_id = 0;
 		}
 	}
-	if ($is_company)
+	if ($is_thing)
 	{
-		$result = pg_Exec ($conn, "SELECT * FROM company WHERE entity_id=$entity_id");
+		$result = pg_Exec ($conn, "SELECT * from thing WHERE entity_id=$entity_id");
 		$row = pg_fetch_array ($result, 0);
 		echo "Record of conversation with <font size=+1>$row[name]</font>\n";
 	}
@@ -34,7 +34,7 @@
 		echo "Record of conversation with <font size=+1>$row[othernames] $row[lastname]</font>\n";
 	}
 	echo "<form name=conv action=update-conversation.php3 method=post>\n";
-	echo "<input type=hidden name=is_company value=$is_company>\n";
+	echo "<input type=hidden name=is_thing value=$is_thing>\n";
 	echo "<input type=hidden name=entity_id value=$entity_id>\n";
 	if ($conversation_id)
 		echo "<input type=hidden name=conversation_id value=$conversation_id>\n";

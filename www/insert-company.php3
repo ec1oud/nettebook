@@ -9,7 +9,7 @@
 	$owner_id = $row["entity_id"];
 	$name = ucwords($name);
 
-	$result = pg_Exec ($conn, "INSERT INTO company VALUES ('$name')");
+	$result = pg_Exec ($conn, "INSERT into thing VALUES ('$name', 1)");
 	if (!$result) 	
 	{
 		echo "An error occured.\n";

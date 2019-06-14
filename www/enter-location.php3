@@ -3,7 +3,7 @@
 	include 'authenticate.inc';
 	echo "<form action=update-location.php3 method=post>\n";
 	echo "<input type=hidden name=entity_id value=$entity_id>\n";
-	echo "<input type=hidden name=is_company value=$is_company>\n";
+	echo "<input type=hidden name=is_thing value=$is_thing>\n";
 	if ($location_id)
 	{
 		echo "<input type=hidden name=location_id value=$location_id>\n";

@@ -7,7 +7,7 @@
   	} 
 	else 
 	{
-		$conn=pg_connect("dbname=nettebook user=wwwdata");
+		$conn=pg_connect("dbname=nettebook host=localhost port=5432 user=wwwdata");
 		if (!$conn) 
 		{
   	  		echo "Cannot connect to database\n";

@@ -21,7 +21,7 @@
     }
     if (pg_numrows($result) == 0)
     {
-	    $result = pg_Exec ($conn, "SELECT * FROM company WHERE entity_id=$entity_id");
+	    $result = pg_Exec ($conn, "SELECT * from thing WHERE entity_id=$entity_id");
 	    if (!$result)
 	    {
 	        echo "An error occured during SELECT\n";
@@ -51,7 +51,7 @@
 
 	echo "<form action=update-contact-method.php3 method=post>\n";
 	echo "<input type=hidden name=entity_id value=$entity_id>\n";
-	echo "<input type=hidden name=is_company value=$is_company>\n";
+	echo "<input type=hidden name=is_thing value=$is_thing>\n";
 	if ($detail)
 	{
 		$detail = rawurldecode($detail);

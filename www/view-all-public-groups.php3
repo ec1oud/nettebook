@@ -5,14 +5,14 @@
 	header("Pragma: no-cache");                                   // HTTP/1.0
 
 	include 'authenticate.inc';
-	$result = pg_Exec ($conn, "SELECT * from thing WHERE type=1 ORDER BY name");
+	$result = pg_Exec ($conn, "SELECT * from thing WHERE owner=null AND NOT type=1 ORDER BY name");
 	if (!$result)
 	{
 	    echo "An error occured during SELECT\n";
         exit;
 	}
 	echo "<table width=100%>\n";
-	echo "<tr bgcolor=lightyellow><th width=99% align = left>Companies</th><th align=right><a href = enter-company.php3>New</a></th></tr>\n";
+	echo "<tr bgcolor=lightyellow><th width=99% align = left>Named Groups</th><th align=right><a href = enter-thing.php3?thing_owner=null>New</a></th></tr>\n";
 	for ($rc = 0; $rc < pg_numrows($result); ++$rc)
 	{
 		$row = pg_fetch_array ($result, $rc);

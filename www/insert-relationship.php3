@@ -37,10 +37,10 @@
 	    exit;
 	}
 	if ($other)
-    	Header("Location: enter-reltype-grammar.php3?sentence_usage=" . urlencode($other) . "&one_entity=$one_entity&other_entity=$other_entity&entity_id=$entity_id&is_company=$is_company");
+    	Header("Location: enter-reltype-grammar.php3?sentence_usage=" . urlencode($other) . "&one_entity=$one_entity&other_entity=$other_entity&entity_id=$entity_id&is_thing=$is_thing");
 	else
-	    if ($is_company)
-	        Header("Location: view-company.php3?entity_id=$entity_id");
+	    if ($is_thing)
+	        Header("Location: view-thing.php3?entity_id=$entity_id");
 	    else
 	        Header("Location: view-person.php3?entity_id=$entity_id");
 ?>

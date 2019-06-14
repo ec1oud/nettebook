@@ -18,8 +18,8 @@
 		echo "An error occured.\n";
 	    exit;
 	}
-	if ($is_company)
-    	Header("Location: view-company.php3?entity_id=$entity_id");
+	if ($is_thing)
+    	Header("Location: view-thing.php3?entity_id=$entity_id");
 	else
     	Header("Location: view-person.php3?entity_id=$entity_id");
 ?>

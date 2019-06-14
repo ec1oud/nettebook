@@ -20,7 +20,7 @@
 			$retval = $retval . "$row[lastname], $row[othernames]\n";
 		}
     	$result = pg_Exec ($conn, 
-			"SELECT * FROM company WHERE entity_id!=$exclude ORDER BY name");
+			"SELECT * from thing WHERE entity_id!=$exclude ORDER BY name");
 	    for ($rc = 0; $rc < pg_numrows($result); ++$rc)
 	    {
 	        $row = pg_fetch_array ($result, $rc);
@@ -34,10 +34,10 @@
         echo "An error occured during SELECT\n";
         exit;
     }
-	$is_company = false;
+	$is_thing = false;
     if (pg_numrows($result) == 0)
 	{
-		$result = pg_Exec ($conn, "SELECT * FROM company WHERE entity_id=$entity_id");
+		$result = pg_Exec ($conn, "SELECT * from thing WHERE entity_id=$entity_id");
 	    if (!$result)
 	    {
 	        echo "An error occured during SELECT\n";
@@ -52,7 +52,7 @@
 	    {
 	        $row = pg_fetch_array ($result, 0);
 	        $fullname = $row[name];
-			$is_company=true;
+			$is_thing=true;
 	    }
 	}
     else
@@ -89,7 +89,7 @@
 		echo "</a></td></tr></table>\n";
 	}
 	echo "<form action=insert-relationship.php3 method=post>\n";
-	echo "<input type=hidden name=is_company value=$is_company>\n";
+	echo "<input type=hidden name=is_thing value=$is_thing>\n";
 	echo "<table vspace=0>\n";
 	echo "<tr valign=top>\n";
 	if ($direction == "rev")
@@ -107,7 +107,7 @@
  		for ($rc = 0; $rc < pg_numrows($result); ++$rc)
 		{
 			$row = pg_fetch_array ($result, $rc);
-			echoTypeOption($row[type_id], $row[sentence_usage], false);
+			echoTypeOption($row[type_id], $row[sentence_usage], $selected_type);
 		}
 		echo "</select>";
 		echo "<BR>other:<BR> <input type=text name=other size=10 length=10>\n";
@@ -125,7 +125,7 @@
  		for ($rc = 0; $rc < pg_numrows($result); ++$rc)
 		{
 			$row = pg_fetch_array ($result, $rc);
-			echoTypeOption($row[type_id], $row[sentence_usage], false);
+			echoTypeOption($row[type_id], $row[sentence_usage], $selected_type);
 		}
 		echo "</select>";
 		echo "<BR>other:<BR> <input type=text name=other size=10 length=10>\n";

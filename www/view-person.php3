@@ -40,7 +40,7 @@
 	echo "</table>\n";
 	$result = pg_Exec ($conn, "SELECT * FROM contact_method WHERE entity_id=$entity_id ORDER BY location_id");
 	echo "<table width=100%>\n<tr bgcolor=lightyellow><th align=left width=40%>Contact Method </th><th align=left width=10%>Type</th><th align=left width=25%>Location</th>\n";
-	echo "<th align=left width=25%>Description</th><th align=right><a href=enter-contact-method.php3?entity_id=$entity_id&is_company=0>new</a></th></tr>\n";
+	echo "<th align=left width=25%>Description</th><th align=right><a href=enter-contact-method.php3?entity_id=$entity_id&is_thing=0>new</a></th></tr>\n";
 	if (pg_numrows($result) > 0)
 	{
 		for ($rc = 0; $rc < pg_numrows($result); ++$rc)
@@ -72,8 +72,8 @@
 	}
 	echo "</table>\n";
 	echo "<table width=100%>\n<tr bgcolor=lightyellow><th width=99% align=left>Relationships</th>\n";
-	echo "<th align=right><a href=enter-relationship.php3?entity_id=$entity_id&direction=fwd&is_company=0>new</a></th></tr>\n";
-	echo "<tr><td colspan=2><form action=search-relationships.php3?is_company=0 method=post>\n";
+	echo "<th align=right><a href=enter-relationship.php3?entity_id=$entity_id&direction=fwd&is_thing=0>new</a></th></tr>\n";
+	echo "<tr><td colspan=2><form action=search-relationships.php3?is_thing=0 method=post>\n";
 	echo "<input type=hidden name=entity_id value=$entity_id>\n";
 	echo "<table width=100%>\n";
 	echo "<tr><td valign=top>Search:</td>\n";

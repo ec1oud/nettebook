@@ -6,7 +6,7 @@
 	{
 		echo "<form action=update-company.php3 method=post>\n";
 		echo "<input type=hidden name=entity_id value=$entity_id>\n";
-		$result = pg_Exec ($conn, "SELECT * FROM company WHERE entity_id=$entity_id");
+		$result = pg_Exec ($conn, "SELECT * from thing WHERE entity_id=$entity_id");
 		$row = pg_fetch_array ($result, 0);
 		if (!$result) 	
 		{

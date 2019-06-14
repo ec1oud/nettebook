@@ -10,10 +10,10 @@
 	for ($rc = 0; $rc < pg_numrows($result); ++$rc)
 	{
 		$row = pg_fetch_array ($result, $rc);
-		echo "<TR><TD><a href=card-title-picker.php3?category=";
+		echo "<a href=card-title-picker.php3?category=";
 		echo $row["category"];
 		echo " target=titles>";
 		echo $row["category"];
-		echo "</a></TR></TD>\n";
+		echo "</a><BR>\n";
 	}
 ?>

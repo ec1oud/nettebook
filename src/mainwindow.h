@@ -45,6 +45,7 @@ public slots:
     bool setBrowserStyle(QUrl url);
     void setEditMode(bool mode = true);
     void updateUrlField(QUrl url);
+    void showJsonWindow(QUrl url);
 
 private slots:
     void currentCharFormatChanged(const QTextCharFormat &format);

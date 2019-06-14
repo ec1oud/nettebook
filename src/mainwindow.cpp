@@ -32,6 +32,7 @@
 #include <QTextList>
 #include <iostream>
 #include <sstream>
+#include "jsonview.h"
 
 static const QString ipfsScheme = QStringLiteral("ipfs");
 static const QString fileScheme = QStringLiteral("file");
@@ -124,7 +125,10 @@ void MainWindow::load(QString url)
         u = QUrl::fromUserInput(url);
     qDebug() << Q_FUNC_INFO << url << u << "dir?" << directory;
     ui->urlField->setText(u.toString());
-    m_mainWidget->setSource(u, directory ? QTextDocument::MarkdownResource : QTextDocument::UnknownResource);
+    if (url.endsWith("json"))
+        showJsonWindow(u); // TODO way less stupid
+    else
+        m_mainWidget->setSource(u, directory ? QTextDocument::MarkdownResource : QTextDocument::UnknownResource);
 }
 
 void MainWindow::on_actionSave_triggered()
@@ -188,6 +192,21 @@ void MainWindow::setEditMode(bool mode)
 void MainWindow::updateUrlField(QUrl url)
 {
     ui->urlField->setText(url.toString());
+}
+
+void MainWindow::showJsonWindow(QUrl url)
+{
+    JsonView *v = new JsonView();
+    qDebug() << Q_FUNC_INFO << url;
+    if (url.isLocalFile()) {
+        QFile f(url.toLocalFile());
+        if (f.open(QFile::ReadOnly))
+            v->load(f.readAll());
+        else
+            qWarning() << "failed to open" << url;
+    }
+    // TODO else use KIO (or maybe just use it in the first place)
+    v->show();
 }
 
 void MainWindow::currentCharFormatChanged(const QTextCharFormat &format)

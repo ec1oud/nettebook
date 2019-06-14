@@ -14,12 +14,16 @@ SOURCES += \
     document.cpp \
     main.cpp \
     mainwindow.cpp \
-    markdownbrowser.cpp
+    markdownbrowser.cpp \
+    jsonview.cpp \
+    ../deps/QJsonModel/qjsonmodel.cpp
 
 HEADERS += \
     document.h \
     mainwindow.h \
-    markdownbrowser.h
+    markdownbrowser.h \
+    jsonview.h \
+    ../deps/QJsonModel/qjsonmodel.h
 
 FORMS += \
     mainwindow.ui
@@ -27,7 +31,7 @@ FORMS += \
 RESOURCES += \
     resources/resources.qrc
 
-INCLUDEPATH += /usr/include/KF5/KIOCore
+INCLUDEPATH += /usr/include/KF5/KIOCore ../deps/QJsonModel
 LIBS += -L/usr/lib/kf5 -lKF5KIOCore -lKF5CoreAddons
 
 # Default rules for deployment.

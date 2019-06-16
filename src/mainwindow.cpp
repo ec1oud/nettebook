@@ -17,6 +17,7 @@
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "cidfinder.h"
 #include "document.h"
 
 #include <QDebug>
@@ -36,8 +37,6 @@
 
 static const QString ipfsScheme = QStringLiteral("ipfs");
 static const QString fileScheme = QStringLiteral("file");
-static const QString base58HashPrefix = QStringLiteral("Qm");
-static const QString base32HashPrefix = QStringLiteral("bafybei");
 static const int BlockQuoteIndent = 40; // pixels, same as in QTextHtmlParserNode::initializeProperties
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -114,7 +113,8 @@ void MainWindow::load(QString url)
     // but mangles ipfs hashes by converting them to lowercase and setting scheme to http
     bool directory = url.endsWith(QLatin1String("/"));
     QUrl u(url);
-    if (url.contains(base58HashPrefix) || url.contains(base32HashPrefix))
+    CidFinder::Result cidResult = CidFinder::findIn(url);
+    if (cidResult.isValid())
         ; // nothing to do
     else if (u.scheme().isEmpty()) {
         QFileInfo fi(url);
@@ -510,12 +510,14 @@ void MainWindow::on_actionUnindent_triggered()
 void MainWindow::on_actionConvert_CID_v0_to_v1_triggered()
 {
     QString text = ui->urlField->text();
-    m_hashBegin = text.indexOf(base58HashPrefix);
+    CidFinder::Result cidResult = CidFinder::findIn(text);
+    // TODO check type
+    m_hashBegin = cidResult.start;
     if (m_hashBegin >= 0) {
-        m_hashEnd = m_hashBegin + 46;
+        m_hashEnd = m_hashBegin + cidResult.length;
         QUrl apiUrl = m_apiBaseUrl;
         apiUrl.setPath(m_apiBaseUrl.path(QUrl::DecodeReserved) + QLatin1String("cid/base32"));
-        apiUrl.setQuery("arg=" + text.mid(m_hashBegin, 46));
+        apiUrl.setQuery("arg=" + cidResult.toString(text));
         QNetworkReply *reply = m_nam.get(QNetworkRequest(apiUrl));
         connect(reply, &QNetworkReply::finished, [=]() {
             QJsonObject jo = QJsonDocument::fromJson(reply->readAll()).object();
@@ -523,7 +525,7 @@ qDebug() << jo;
             reply->deleteLater();
             QString cid = jo.value(QLatin1String("Formatted")).toString();
             QString newText(text);
-            ui->urlField->setText(newText.replace(m_hashBegin, 46, cid));
+            ui->urlField->setText(newText.replace(m_hashBegin, cidResult.length, cid));
         });
     }
 }

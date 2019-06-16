@@ -1,4 +1,5 @@
 #include "document.h"
+#include "cidfinder.h"
 #include <QApplication>
 #include <QBuffer>
 #include <QDebug>
@@ -13,8 +14,6 @@
 
 static const QString ipfsScheme = QStringLiteral("ipfs");
 static const QString fileScheme = QStringLiteral("file");
-static const QString base58HashPrefix = QStringLiteral("Qm");
-static const QString base32HashPrefix = QStringLiteral("bafybei");
 
 Document::Document(QObject *parent) : QTextDocument(parent)
 {
@@ -27,11 +26,10 @@ QVariant Document::loadResource(int t, const QUrl &name)
         m_saveType = static_cast<QTextDocument::ResourceType>(type);
     QUrl url(name);
     QString urlString = url.toString();
-    int base58HashIndex = urlString.indexOf(base58HashPrefix);
-    int base32HashIndex = urlString.indexOf(base32HashPrefix);
-    if (base58HashIndex >= 0 || base32HashIndex >= 0)
+    CidFinder::Result cidResult = CidFinder::findIn(urlString);
+    if (cidResult.isValid())
         url.setScheme(ipfsScheme);
-    if (url.isRelative() && base58HashIndex < 0 && base32HashIndex < 0) {
+    else if (url.isRelative()) {
         qDebug() << "resolving relative URL" << url << "base" << baseUrl() << "meta" << metaInformation(DocumentUrl);
         url = baseUrl().resolved(url);
     }

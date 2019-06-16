@@ -11,6 +11,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 CONFIG += c++11
 
 SOURCES += \
+    cidfinder.cpp \
     document.cpp \
     main.cpp \
     mainwindow.cpp \
@@ -19,6 +20,7 @@ SOURCES += \
     ../deps/QJsonModel/qjsonmodel.cpp
 
 HEADERS += \
+    cidfinder.h \
     document.h \
     mainwindow.h \
     markdownbrowser.h \

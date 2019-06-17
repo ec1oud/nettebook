@@ -27,9 +27,11 @@ QVariant Document::loadResource(int t, const QUrl &name)
     QUrl url(name);
     QString urlString = url.toString();
     CidFinder::Result cidResult = CidFinder::findIn(urlString);
-    if (cidResult.isValid())
+    if (cidResult.isValid()) {
         url.setScheme(ipfsScheme);
-    else if (url.isRelative()) {
+        if (url.adjusted(QUrl::RemoveFilename).path().isEmpty())
+            url.setPath(QLatin1Char('/') + url.path());
+    } else if (url.isRelative()) {
         qDebug() << "resolving relative URL" << url << "base" << baseUrl() << "meta" << metaInformation(DocumentUrl);
         url = baseUrl().resolved(url);
     }
@@ -74,7 +76,7 @@ QVariant Document::loadResource(int t, const QUrl &name)
             return m_loadedResources.value(name);
         }
         // not cached, so try to load it
-        KIO::Job* job = KIO::get(name);
+        KIO::Job* job = KIO::get(url);
 qDebug() << "GET" << name << job;
         connect (job, SIGNAL(data(KIO::Job *, const QByteArray &)),
                  this, SLOT(resourceDataReceived(KIO::Job *, const QByteArray &)));

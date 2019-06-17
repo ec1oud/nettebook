@@ -24,6 +24,7 @@
 #include <QStack>
 #include <QTextBrowser>
 #include <QUrl>
+#include "markdownbrowser.h"
 
 namespace Ui {
 class MainWindow;
@@ -92,7 +93,7 @@ private:
 
 private:
     Ui::MainWindow *ui;
-    QTextBrowser *m_mainWidget;
+    MarkdownBrowser *m_mainWidget;
     Document *m_document;
     QFont m_monoFont;
     QNetworkAccessManager m_nam;

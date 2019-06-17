@@ -59,6 +59,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(m_document, &Document::allResourcesLoaded,
             [=]() { m_mainWidget->setDocument(m_document); });
     connect(m_document, &Document::saved, this, &MainWindow::updateUrlField);
+    connect(m_document, &Document::contentSourceChanged, this, &MainWindow::updateUrlField);
 
     while (ui->toolbarStuff->count()) {
         QWidget *tw = ui->toolbarStuff->takeAt(0)->widget();
@@ -134,7 +135,7 @@ void MainWindow::load(QString url)
 void MainWindow::on_actionSave_triggered()
 {
     qDebug() << m_mainWidget->source();
-    m_document->saveAs(m_mainWidget->source());
+    m_document->saveAs(m_document->contentSource());
 }
 
 void MainWindow::on_actionSave_As_triggered()

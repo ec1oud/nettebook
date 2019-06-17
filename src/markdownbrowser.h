@@ -26,10 +26,12 @@ class MarkdownBrowser : public QTextBrowser
 public:
     MarkdownBrowser(QWidget *parent = nullptr);
     void setSource(const QUrl &name) override;
+    void setSource(const QUrl &name, QTextDocument::ResourceType type);
     QVariant loadResource(int type, const QUrl &name) override;
 
 private:
     QTimer m_loadingTimeout;
+    QUrl m_loading;
 };
 
 #endif // MARKDOWNBROWSER_H

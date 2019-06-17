@@ -24,19 +24,33 @@ class Document : public QTextDocument
 public:
     Document(QObject *parent = nullptr);
 
-    void loadUrl(QUrl url);
+    QUrl contentSource() const { return m_mainFile; }
     void saveAs(const QUrl &url, const QString &mimeType = QString());
     void saveToIpfs();
     QByteArray fileListMarkdown();
 
+    enum Status {
+        NullStatus = 0,
+        LoadingMain = 1,
+//        LoadingResources = 2,
+        Ready = 3,
+        ErrorEmpty = -1,
+        ErrorWithText = -2
+    };
+
+    Status status() { return m_status; }
+    QString errorText() { return m_errorText; }
+
 signals:
-    void status(const QString &text);
+    void errorTextChanged(const QString &text);
     void allResourcesLoaded();
     void resourceLoaded(QUrl url);
     void saved(QUrl url);
+    void contentSourceChanged(QUrl url);
 
 protected:
     QVariant loadResource(int type, const QUrl &name) override;
+    void setStatus(Status s);
 
 private slots:
     void resourceDataReceived(KIO::Job *, const QByteArray &data);
@@ -53,10 +67,12 @@ private:
 
     QHash<QUrl, KJob*> m_resourceLoaders;
     QHash<QUrl, QByteArray> m_loadedResources;
+    QUrl m_mainFile;
     KIO::UDSEntryList m_fileList;
     QString m_errorText;
     KIO::TransferJob *m_transferJob = nullptr;
     int m_saveType = UnknownResource;
+    Status m_status = NullStatus;
     bool m_saveDone = false;
 
     friend class MarkdownBrowser;

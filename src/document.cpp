@@ -22,8 +22,8 @@ Document::Document(QObject *parent) : QTextDocument(parent)
 QVariant Document::loadResource(int t, const QUrl &name)
 {
     QTextDocument::ResourceType type = static_cast<QTextDocument::ResourceType>(t);
-    if (type == ResourceType::HtmlResource || type == ResourceType::MarkdownResource)
-        m_saveType = static_cast<QTextDocument::ResourceType>(type);
+    if (m_status >= NullStatus && (type == ResourceType::HtmlResource || type == ResourceType::MarkdownResource))
+        setStatus(LoadingMain);
     QUrl url(name);
     QString urlString = url.toString();
     CidFinder::Result cidResult = CidFinder::findIn(urlString);
@@ -42,10 +42,12 @@ QVariant Document::loadResource(int t, const QUrl &name)
         if (!m_fileList.isEmpty()) {
             QByteArray ret = fileListMarkdown();
             m_fileList.clear();
+            setStatus(Ready);
             return ret;
         } else if (!m_errorText.isEmpty()) {
             QString ret = m_errorText;
             m_errorText.clear();
+            setStatus(ErrorWithText);
             return ret;
         }
         m_fileList.clear();
@@ -54,7 +56,20 @@ QVariant Document::loadResource(int t, const QUrl &name)
                  this, SLOT(fileListReceived(KIO::Job*, const KIO::UDSEntryList &)));
         m_resourceLoaders.insert(name, job);
     } else {
+        bool main = false;
+        if (type == ResourceType::HtmlResource || type == ResourceType::MarkdownResource) {
+            m_mainFile = url;
+            m_saveType = static_cast<QTextDocument::ResourceType>(type);
+            main = true;
+        }
         if (m_loadedResources.contains(name)) {
+            if (m_status < NullStatus) {
+                if (main && m_mainFile.scheme().isEmpty()) {
+                    m_mainFile = m_mainFile.fromLocalFile(url.path());
+                    emit contentSourceChanged(m_mainFile);
+                    qDebug() << "assuming missing local file" << m_mainFile;
+                }
+            }
             emit resourceLoaded(name);
             return m_loadedResources.value(name);
         }
@@ -68,6 +83,12 @@ qDebug() << "GET" << name << job;
     }
     // Waiting for now, but this function can't block.  We'll be nagged again soon.
     return QVariant();
+}
+
+void Document::setStatus(Document::Status s)
+{
+    m_status = s;
+    // TODO emit?
 }
 
 void Document::resourceDataReceived(KIO::Job *job, const QByteArray & data)
@@ -86,12 +107,16 @@ void Document::resourceReceiveDone(KJob *job)
     QUrl url = m_resourceLoaders.key(job);
     qDebug() << "for" << url.toString() << "got" << m_loadedResources.value(url).size() << "bytes";
     if (!m_loadedResources.value(url).size()) {
+        if (m_status == LoadingMain)
+            setStatus(ErrorEmpty);
         m_loadedResources[url].append(tr("%1: empty document").arg(url.toString()).toUtf8());
     } else {
         QMimeType type = QMimeDatabase().mimeTypeForFileNameAndData(url.fileName(), m_loadedResources[url]);
         qDebug() << "detected mime type" << type.name();
         if (type.name().contains(QLatin1String("html")))
             m_saveType = HtmlResource;
+        if (m_status == LoadingMain)
+            setStatus(Ready);
         // not useful because Qt doesn't have an OpenDoc reader yet
 //        else if (type.name().contains(QLatin1String("opendocument")))
 //            m_saveType = OdtResource;
@@ -114,8 +139,12 @@ void Document::fileListReceived(KIO::Job *job, const KIO::UDSEntryList &list)
         m_fileList.clear();
     } else {
         m_fileList = list;
-        if (list.count() == 0)
+        if (list.count() == 0) {
             m_errorText = tr("no files in %1").arg(url.toString());
+            setStatus(ErrorEmpty);
+        } else {
+            setStatus(Ready);
+        }
         qDebug() << "got file list" << list.count() << m_fileList;
     }
     m_resourceLoaders.remove(url);
@@ -228,9 +257,18 @@ void Document::onSaveDone(KJob *job)
         qDebug() << m_transferJob->metaData();
         if (!hash.isEmpty()) {
             QUrl url(QLatin1String("ipfs:///") + hash);
+            setStatus(Ready);
             emit saved(url);
+        } else {
+            m_errorText = QLatin1String("save failed: no hash");
+            setStatus(ErrorWithText);
         }
     } else {
+        if (!m_transferJob) {
+            m_errorText = QLatin1String("save failed");
+            setStatus(ErrorWithText);
+            return;
+        }
         qDebug() << m_transferJob->url();
         emit saved(m_transferJob->url());
     }

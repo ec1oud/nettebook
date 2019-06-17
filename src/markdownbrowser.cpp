@@ -28,17 +28,26 @@ MarkdownBrowser::MarkdownBrowser(QWidget *parent)
 
 void MarkdownBrowser::setSource(const QUrl &name)
 {
+    m_loading = name;
+    // this override doesn't get called from main()
     if (name.fileName().isEmpty()) // directory listing will be markdown
         QTextBrowser::setSource(name, QTextDocument::MarkdownResource);
     else
         QTextBrowser::setSource(name);
 }
 
+void MarkdownBrowser::setSource(const QUrl &name, QTextDocument::ResourceType type)
+{
+    qDebug() << Q_FUNC_INFO << name << type;
+    m_loading = name;
+    QTextBrowser::setSource(name, type);
+}
+
 QVariant MarkdownBrowser::loadResource(int type, const QUrl &name)
 {
     Document *doc = static_cast<Document *>(document());
     QVariant ret = doc->loadResource(type, name);
-    qDebug() << type << name << (ret.isNull() ? "fetching" : "got it");
+    qDebug() << Q_FUNC_INFO << type << name << (ret.isNull() ? "fetching" : "got it") << "main?" << m_loading;
     if (ret.isNull()) {
         QEventLoop loop;
         connect(doc, SIGNAL(resourceLoaded(QUrl)), &loop, SLOT(quit()));
@@ -46,7 +55,7 @@ QVariant MarkdownBrowser::loadResource(int type, const QUrl &name)
         m_loadingTimeout.start(5000);
         loop.exec();
         ret = doc->loadResource(type, name);
-        if (ret.isNull()) {
+        if (ret.isNull() || doc->status() < Document::NullStatus) {
             switch (type) {
             case QTextDocument::HtmlResource:
                 ret = tr("failed to load <a href=\"%1\">%1</a>").arg(name.toString());
@@ -58,6 +67,7 @@ QVariant MarkdownBrowser::loadResource(int type, const QUrl &name)
                 ret = tr("failed to load %1").arg(name.toString());
                 break;
             }
+            qWarning() << ret << doc->errorText();
         }
     }
     return ret;

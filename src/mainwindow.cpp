@@ -135,7 +135,10 @@ void MainWindow::load(QString url)
 void MainWindow::on_actionSave_triggered()
 {
     qDebug() << m_mainWidget->source();
-    m_document->saveAs(m_document->contentSource());
+    if (m_document->contentSource().isEmpty())
+        on_actionSave_As_triggered();
+    else
+        m_document->saveAs(m_document->contentSource());
 }
 
 void MainWindow::on_actionSave_As_triggered()

@@ -115,15 +115,21 @@ void MainWindow::load(QString url)
     bool directory = url.endsWith(QLatin1String("/"));
     QUrl u(url);
     CidFinder::Result cidResult = CidFinder::findIn(url);
-    if (cidResult.isValid())
+    if (cidResult.isValid()) {
         ; // nothing to do
-    else if (u.scheme().isEmpty()) {
+    } else if (u.scheme().isEmpty()) {
         QFileInfo fi(url);
         if (fi.exists())
             u = QUrl::fromLocalFile(fi.canonicalFilePath());
-    }
-    else
+    } else if (u.scheme() == ipfsScheme) {
+        // there is no CID, so we have something like ipfs:local or whatever: probably a directory
+        if (u.adjusted(QUrl::RemoveFilename).path().isEmpty()) {
+            u.setPath(QLatin1Char('/') + u.path() + QLatin1Char('/'));
+            directory = true;
+        }
+    } else {
         u = QUrl::fromUserInput(url);
+    }
     qDebug() << Q_FUNC_INFO << url << u << "dir?" << directory;
     ui->urlField->setText(u.toString());
     if (url.endsWith("json"))

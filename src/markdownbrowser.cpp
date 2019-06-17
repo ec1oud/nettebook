@@ -56,16 +56,18 @@ QVariant MarkdownBrowser::loadResource(int type, const QUrl &name)
         loop.exec();
         ret = doc->loadResource(type, name);
         if (ret.isNull() || doc->status() < Document::NullStatus) {
-            switch (type) {
-            case QTextDocument::HtmlResource:
-                ret = tr("failed to load <a href=\"%1\">%1</a>").arg(name.toString());
-                break;
-            case QTextDocument::MarkdownResource:
-                ret = tr("failed to load [%1](%1)").arg(name.toString());
-                break;
-            default:
-                ret = tr("failed to load %1").arg(name.toString());
-                break;
+            if (isReadOnly()) {
+                switch (type) {
+                case QTextDocument::HtmlResource:
+                    ret = tr("failed to load <a href=\"%1\">%1</a>").arg(name.toString());
+                    break;
+                case QTextDocument::MarkdownResource:
+                    ret = tr("failed to load [%1](%1)").arg(name.toString());
+                    break;
+                default:
+                    ret = tr("failed to load %1").arg(name.toString());
+                    break;
+                }
             }
             qWarning() << ret << doc->errorText();
         }

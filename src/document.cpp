@@ -109,7 +109,7 @@ void Document::resourceReceiveDone(KJob *job)
     if (!m_loadedResources.value(url).size()) {
         if (m_status == LoadingMain)
             setStatus(ErrorEmpty);
-        m_loadedResources[url].append(tr("%1: empty document").arg(url.toString()).toUtf8());
+        m_loadedResources[url].append(QString());
     } else {
         QMimeType type = QMimeDatabase().mimeTypeForFileNameAndData(url.fileName(), m_loadedResources[url]);
         qDebug() << "detected mime type" << type.name();

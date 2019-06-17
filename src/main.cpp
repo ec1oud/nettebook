@@ -53,13 +53,13 @@ int main(int argc, char *argv[])
         parser.showHelp();
 
     MainWindow w;
+    if (parser.isSet(editOption))
+        w.setEditMode(true);
     if (parser.positionalArguments().count() > 0)
         w.load(parser.positionalArguments().last());
     w.show();
     if (parser.isSet(cssOption))
         w.setBrowserStyle(QUrl::fromLocalFile(parser.value(cssOption)));
-    if (parser.isSet(editOption))
-        w.setEditMode(true);
 
     return app.exec();
 }

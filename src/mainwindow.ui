@@ -177,6 +177,7 @@
    <addaction name="actionStrongEmphasis"/>
    <addaction name="actionStrikeOut"/>
    <addaction name="actionMonospace"/>
+   <addaction name="actionInsert_Horizontal_Rule"/>
    <addaction name="actionIndent"/>
    <addaction name="actionUnindent"/>
   </widget>
@@ -362,6 +363,18 @@
   <action name="actionConvert_CID_v0_to_v1">
    <property name="text">
     <string>Convert CID v0 to v1</string>
+   </property>
+  </action>
+  <action name="actionInsert_Horizontal_Rule">
+   <property name="icon">
+    <iconset resource="resources/resources.qrc">
+     <normaloff>:/32/insert-horizontal-rule.png</normaloff>:/32/insert-horizontal-rule.png</iconset>
+   </property>
+   <property name="text">
+    <string>Insert Horizontal Rule</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+L</string>
    </property>
   </action>
  </widget>

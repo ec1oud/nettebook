@@ -352,6 +352,7 @@ void MainWindow::on_actionToggleEditMode_toggled(bool edit)
     ui->actionSave->setVisible(edit);
     ui->actionSave_As->setVisible(edit);
     ui->actionSave_to_IPFS->setVisible(edit);
+    ui->actionInsert_Horizontal_Rule->setVisible(edit);
 }
 
 void MainWindow::on_actionStrongEmphasis_toggled(bool a)
@@ -538,4 +539,17 @@ qDebug() << jo;
             ui->urlField->setText(newText.replace(m_hashBegin, cidResult.length, cid));
         });
     }
+}
+
+void MainWindow::on_actionInsert_Horizontal_Rule_triggered()
+{
+    QTextCursor cursor = m_mainWidget->textCursor();
+    cursor.beginEditBlock();
+    cursor.insertBlock();
+    cursor.movePosition(QTextCursor::PreviousBlock);
+    QTextBlockFormat blockFmt;
+    blockFmt.setProperty(QTextFormat::BlockTrailingHorizontalRulerWidth, 1);
+    cursor.setBlockFormat(blockFmt);
+    cursor.movePosition(QTextCursor::NextBlock);
+    cursor.endEditBlock();
 }

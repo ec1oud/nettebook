@@ -134,8 +134,10 @@ void MainWindow::load(QString url)
     ui->urlField->setText(u.toString());
     if (url.endsWith("json"))
         showJsonWindow(u); // TODO way less stupid
-    else
+    else {
         m_mainWidget->setSource(u, directory ? QTextDocument::MarkdownResource : QTextDocument::UnknownResource);
+        updateUrlField(u);
+    }
 }
 
 void MainWindow::on_actionSave_triggered()
@@ -202,6 +204,8 @@ void MainWindow::setEditMode(bool mode)
 void MainWindow::updateUrlField(QUrl url)
 {
     ui->urlField->setText(url.toString());
+    bool filenameOnly = (url.scheme() == ipfsScheme || url.scheme() == fileScheme) && !url.fileName().isEmpty();
+    setWindowTitle(filenameOnly ? url.fileName() : url.toString());
 }
 
 void MainWindow::showJsonWindow(QUrl url)

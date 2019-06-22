@@ -73,6 +73,7 @@ private slots:
     void on_headingLevelSB_valueChanged(int headingLevel);
 
     void on_actionConvert_CID_v0_to_v1_triggered();
+    void on_action_Local_IPFS_files_triggered();
 
 private:
     void mergeFormatOnWordOrSelection(const QTextCharFormat &format);

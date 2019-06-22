@@ -557,3 +557,8 @@ void MainWindow::on_actionInsert_Horizontal_Rule_triggered()
     cursor.movePosition(QTextCursor::NextBlock);
     cursor.endEditBlock();
 }
+
+void MainWindow::on_action_Local_IPFS_files_triggered()
+{
+    load(QLatin1String("ipfs:local"));
+}

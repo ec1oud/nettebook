@@ -60,6 +60,11 @@ MainWindow::MainWindow(QWidget *parent) :
             [=]() { m_mainWidget->setDocument(m_document); });
     connect(m_document, &Document::saved, this, &MainWindow::updateUrlField);
     connect(m_document, &Document::contentSourceChanged, this, &MainWindow::updateUrlField);
+    connect(m_document, &Document::modificationChanged, this, &QWidget::setWindowModified);
+    connect(m_document, &Document::undoAvailable, ui->action_Undo, &QAction::setEnabled);
+    connect(m_document, &Document::redoAvailable, ui->action_Redo, &QAction::setEnabled);
+    connect(m_mainWidget, &QTextEdit::copyAvailable, ui->actionCut, &QAction::setEnabled);
+    connect(m_mainWidget, &QTextEdit::copyAvailable, ui->action_Copy, &QAction::setEnabled);
 
     while (ui->toolbarStuff->count()) {
         QWidget *tw = ui->toolbarStuff->takeAt(0)->widget();
@@ -357,6 +362,7 @@ void MainWindow::on_actionToggleEditMode_toggled(bool edit)
     ui->actionSave_As->setVisible(edit);
     ui->actionSave_to_IPFS->setVisible(edit);
     ui->actionInsert_Horizontal_Rule->setVisible(edit);
+    ui->menuEdit->setEnabled(edit);
 }
 
 void MainWindow::on_actionStrongEmphasis_toggled(bool a)
@@ -561,4 +567,34 @@ void MainWindow::on_actionInsert_Horizontal_Rule_triggered()
 void MainWindow::on_action_Local_IPFS_files_triggered()
 {
     load(QLatin1String("ipfs:local"));
+}
+
+void MainWindow::on_actionCut_triggered()
+{
+    if (QWidget *t = qApp->focusWidget())
+        t->metaObject()->invokeMethod(t, "cut");
+}
+
+void MainWindow::on_action_Copy_triggered()
+{
+    if (QWidget *t = qApp->focusWidget())
+        t->metaObject()->invokeMethod(t, "copy");
+}
+
+void MainWindow::on_action_Paste_triggered()
+{
+    if (QWidget *t = qApp->focusWidget())
+        t->metaObject()->invokeMethod(t, "paste");
+}
+
+void MainWindow::on_action_Undo_triggered()
+{
+    if (QWidget *t = qApp->focusWidget())
+        t->metaObject()->invokeMethod(t, "undo");
+}
+
+void MainWindow::on_action_Redo_triggered()
+{
+    if (QWidget *t = qApp->focusWidget())
+        t->metaObject()->invokeMethod(t, "redo");
 }

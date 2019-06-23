@@ -75,6 +75,12 @@ private slots:
     void on_actionConvert_CID_v0_to_v1_triggered();
     void on_action_Local_IPFS_files_triggered();
 
+    void on_actionCut_triggered();
+    void on_action_Copy_triggered();
+    void on_action_Paste_triggered();
+    void on_action_Undo_triggered();
+    void on_action_Redo_triggered();
+
 private:
     void mergeFormatOnWordOrSelection(const QTextCharFormat &format);
     void modifyIndentation(int amount);

@@ -67,6 +67,7 @@ private slots:
     void on_actionStrikeOut_toggled(bool a);
     void on_actionMonospace_toggled(bool a);
     void on_actionInsert_Horizontal_Rule_triggered();
+    void on_actionInsert_Table_triggered();
     void on_actionIndent_triggered();
     void on_actionUnindent_triggered();
     void on_styleCB_activated(int index);

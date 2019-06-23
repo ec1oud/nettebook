@@ -17,7 +17,8 @@ SOURCES += \
     mainwindow.cpp \
     markdownbrowser.cpp \
     jsonview.cpp \
-    ../deps/QJsonModel/qjsonmodel.cpp
+    ../deps/QJsonModel/qjsonmodel.cpp \
+    tablesizedialog.cpp
 
 HEADERS += \
     cidfinder.h \
@@ -25,10 +26,12 @@ HEADERS += \
     mainwindow.h \
     markdownbrowser.h \
     jsonview.h \
-    ../deps/QJsonModel/qjsonmodel.h
+    ../deps/QJsonModel/qjsonmodel.h \
+    tablesizedialog.h
 
 FORMS += \
-    mainwindow.ui
+    mainwindow.ui \
+    tablesizedialog.ui
 
 RESOURCES += \
     resources/resources.qrc

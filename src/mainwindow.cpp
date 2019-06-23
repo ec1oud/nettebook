@@ -34,6 +34,7 @@
 #include <iostream>
 #include <sstream>
 #include "jsonview.h"
+#include "tablesizedialog.h"
 
 static const QString ipfsScheme = QStringLiteral("ipfs");
 static const QString fileScheme = QStringLiteral("file");
@@ -562,6 +563,12 @@ void MainWindow::on_actionInsert_Horizontal_Rule_triggered()
     cursor.setBlockFormat(blockFmt);
     cursor.movePosition(QTextCursor::NextBlock);
     cursor.endEditBlock();
+}
+
+void MainWindow::on_actionInsert_Table_triggered()
+{
+    QSize size = TableSizeDialog::getSize(this);
+    m_mainWidget->textCursor().insertTable(size.height(), size.width());
 }
 
 void MainWindow::on_action_Local_IPFS_files_triggered()

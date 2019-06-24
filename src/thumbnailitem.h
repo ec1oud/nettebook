@@ -33,20 +33,19 @@ public:
     ThumbnailItem();
     ThumbnailItem(const QPixmap& pm, int pageNum, QString lbl);
 
-    int width() { return 128; }
+    int width() { return pixmap().width(); }
     int height() { return pixmap().height(); }
 
-    int pageIdx = 0;
-    QString label;
+    int pageId = 0; // not really page number, just a unique and initially sequential ID
+	QString label;
 
-    bool operator< ( const ThumbnailItem & i ) const { return pageIdx < i.pageIdx; }
+    // TODO stop abusing this as a model
+    QString content;
 
     void paint ( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = nullptr );
 
 protected:
     void mouseMoveEvent ( QGraphicsSceneMouseEvent * ev );
 };
-
-bool lessThan( const QGraphicsItem * s1 , const QGraphicsItem * s2 );
 
 #endif // THUMBNAILITEM_H

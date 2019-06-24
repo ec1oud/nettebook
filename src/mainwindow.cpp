@@ -150,10 +150,14 @@ void MainWindow::load(QString url)
 void MainWindow::on_actionSave_triggered()
 {
     qDebug() << m_mainWidget->source();
-    if (m_document->contentSource().isEmpty())
-        on_actionSave_As_triggered();
-    else
-        m_document->saveAs(m_document->contentSource());
+    if (m_thumbs)
+        m_thumbs->saveAllToIpfs();
+    else {
+        if (m_document->contentSource().isEmpty())
+            on_actionSave_As_triggered();
+        else
+            m_document->saveAs(m_document->contentSource());
+    }
 }
 
 void MainWindow::on_actionSave_As_triggered()
@@ -610,6 +614,17 @@ void MainWindow::on_action_Redo_triggered()
 void MainWindow::on_actionNewPageSeries_triggered()
 {
     m_thumbs = new ThumbnailScene();
+    connect(m_thumbs, &ThumbnailScene::currentPageChanging,
+            [=](ThumbnailItem *it) {
+        it->content = m_document->toMarkdown();
+        QPixmap pm = m_mainWidget->grab(QRect(0, 0, 256, 256)).scaled(128, 128);
+        it->setPixmap(pm);
+    });
+    connect(m_thumbs, &ThumbnailScene::currentPageChanged,
+            [=](const QString &source, const QString &content) {
+        Q_UNUSED(source)
+        m_document->setMarkdown(content);
+    });
     ui->thumbnailsView->setScene(m_thumbs);
     ui->thumbnailsDock->show();
     m_thumbs->appendBlank();

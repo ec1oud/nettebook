@@ -25,6 +25,7 @@
 #include <QApplication>
 #include <QDrag>
 #include <QMimeData>
+#include <QDebug>
 
 ThumbnailItem::ThumbnailItem() :
     QGraphicsPixmapItem()
@@ -32,10 +33,10 @@ ThumbnailItem::ThumbnailItem() :
 }
 
 ThumbnailItem::ThumbnailItem(const QPixmap& pm, int pageNum, QString lbl) :
-    QGraphicsPixmapItem(pm),
-    //	selected(false),
-    pageIdx(pageNum),
-    label(lbl)
+	QGraphicsPixmapItem(pm),
+//	selected(false),
+    pageId(pageNum),
+	label(lbl)
 {
 //	qDebug("ThumbnailItem(pixmap dims %d x %d, page %d: %s)",
 //			pm.width(), pm.height(), pageNum, lbl.toAscii().constData());
@@ -53,24 +54,23 @@ void ThumbnailItem::paint ( QPainter * painter, const QStyleOptionGraphicsItem *
 //		painter->setPen(QPen(Qt::darkGreen, 3));
 //		painter->drawRect(pixmap().rect().adjusted(-4, -4, 4, 4));
 //	}
-    QString pageStr = label;
-    if (pageStr.isEmpty())
-        pageStr = QString::number(pageIdx);
-    QRect pageBounds = painter->boundingRect(0, 0, width(), height() - 1, Qt::AlignHCenter| Qt::AlignBottom, pageStr);
-    QPainterPath pp;
-    pp.moveTo(pageBounds.bottomRight());
-    pp.arcTo(pageBounds.topRight().x(), pageBounds.topRight().y(), pageBounds.height() / 2, pageBounds.height() - 1, 270, 180);
+	QString pageStr = label;
+	if (pageStr.isEmpty())
+        pageStr = QString::number(pageId);
+	QRect pageBounds = painter->boundingRect(0, 0, width(), height() - 1, Qt::AlignHCenter| Qt::AlignBottom, pageStr);
+	QPainterPath pp;
+	pp.moveTo(pageBounds.bottomRight());
+	pp.arcTo(pageBounds.topRight().x(), pageBounds.topRight().y(), pageBounds.height() / 2, pageBounds.height() - 1, 270, 180);
 //	pp.lineTo(pageBounds.topLeft());
-    pp.arcTo(pageBounds.topLeft().x(), pageBounds.topLeft().y(), pageBounds.height() / -2, pageBounds.height() - 1, 90, -180);
-    pp.lineTo(pageBounds.bottomRight());
-    pp.closeSubpath();
-    QColor pageLabelFill(Qt::lightGray);
-    if (((ThumbnailScene*)scene())->currentPage() == pageIdx)
-        pageLabelFill = Qt::red;
-    pageLabelFill.setAlpha(220);
-    painter->fillPath(pp, QBrush(pageLabelFill));
-//	painter->drawPath(pp);
-    painter->drawText(pageBounds, Qt::AlignCenter, pageStr);
+	pp.arcTo(pageBounds.topLeft().x(), pageBounds.topLeft().y(), pageBounds.height() / -2, pageBounds.height() - 1, 90, -180);
+	pp.lineTo(pageBounds.bottomRight());
+	pp.closeSubpath();
+	QColor pageLabelFill(Qt::lightGray);
+    if (((ThumbnailScene*)scene())->currentPage() == pageId)
+		pageLabelFill = Qt::red;
+	pageLabelFill.setAlpha(220);
+	painter->fillPath(pp, QBrush(pageLabelFill));
+	painter->drawText(pageBounds, Qt::AlignCenter, pageStr);
 }
 
 void ThumbnailItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
@@ -83,9 +83,4 @@ void ThumbnailItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
     QMimeData *mime = new QMimeData;
     drag->setMimeData(mime);
     drag->exec();
-}
-
-bool lessThan( const QGraphicsItem * s1 , const QGraphicsItem * s2 )
-{
-    return ((ThumbnailItem*)s1)->pageIdx < ((ThumbnailItem*)s2)->pageIdx;
 }

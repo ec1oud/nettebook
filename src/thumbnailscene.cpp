@@ -19,13 +19,10 @@
 ** GNU General Public License for more details.
 ****************************************************************************/
 #include "thumbnailscene.h"
-//#include "common.h"
+#include <QDebug>
 
 ThumbnailScene::ThumbnailScene() :
-    cols(2), spacing(6), selectedIdx(-1),
-    defaultItemIcon(":/32/document-new.png"),
-    insertionPoint(),
-    maxWidth(0), maxHeight(0)
+    QGraphicsScene()
 {
     qDebug("ThumbnailScene constructor");
     setBackgroundBrush(QBrush(Qt::darkGray));
@@ -34,12 +31,12 @@ ThumbnailScene::ThumbnailScene() :
     insertionPoint.setPen(thickRed);
     QAction *newAction = m_contextMenu.addAction(tr("New"));
     connect(newAction, &QAction::triggered, this, &ThumbnailScene::appendBlank);
+    connect(this, &QGraphicsScene::selectionChanged, this, &ThumbnailScene::selectionChanged);
 }
 
 void ThumbnailScene::resize(int numItems)
 {
-    foreach(ThumbnailItem* item, items)
-        delete item;
+    qDeleteAll(items); // TODO dangling pointers?
     items.resize(numItems);
     col = 0;
     row = 0;
@@ -50,9 +47,13 @@ void ThumbnailScene::resize(int numItems)
 
 void ThumbnailScene::clear()
 {
-    foreach(ThumbnailItem* item, items)
-        delete item;
+    qDeleteAll(items);
     items.clear();
+}
+
+void ThumbnailScene::saveAllToIpfs()
+{
+    qDebug() << "saving page series";
 }
 
 void ThumbnailScene::add(int idx, QImage pm, QString label)
@@ -88,7 +89,9 @@ void ThumbnailScene::add(int idx, QImage pm, QString label)
 
 void ThumbnailScene::appendBlank()
 {
-    ThumbnailItem* item = new ThumbnailItem(defaultItemIcon, items.count(), tr("untitled"));
+    QString label = tr("page %1").arg(items.count());
+    ThumbnailItem* item = new ThumbnailItem(defaultItemIcon, items.count(), label);
+    item->content = label;
     addItem(item);
     if (item->width() > maxWidth)
         maxWidth = item->width();
@@ -111,16 +114,13 @@ void ThumbnailScene::layout(int width, int height)
         cols = (width + spacing) / (maxWidth + spacing);
     //qDebug("layout(%d), cols now %d, sceneRect %f x %f", width, cols, sceneRect().width(), sceneRect().height());
     int i = 0;
-    foreach(ThumbnailItem* item, items)
-    {
-        if (col >= cols)
-        {
+    for (ThumbnailItem* item : items) {
+        if (col >= cols) {
             col = 0;
             ++row;
         }
         item->setPos(col++ * (maxWidth + spacing) + (maxWidth - item->width()) / 2,
                      row * (maxHeight + spacing) + (maxHeight - item->height()) / 2);
-        //		item->selected = (i == selectedIdx ? true : false);
         ++i;
     }
     QRectF sceneBounds = sceneRect();
@@ -133,9 +133,11 @@ void ThumbnailScene::layout(int width, int height)
 
 void ThumbnailScene::currentPage(int idx)
 {
+    emit currentPageChanging(items[selectedIdx]);
     selectedIdx = idx;
-    update(sceneRect());
-    emit currentPageThumbnail(items[idx]);
+	update(sceneRect());
+	emit currentPageThumbnail(items[idx]);
+    emit currentPageChanged(items[idx]->label, items[idx]->content);
 }
 
 void ThumbnailScene::dragEnterEvent ( QGraphicsSceneDragDropEvent * ev )
@@ -156,30 +158,27 @@ void ThumbnailScene::dragMoveEvent ( QGraphicsSceneDragDropEvent * ev )
         x -= insertionPoint.pen().width() / 2;
     int y = insColRow.y() * (maxHeight + spacing) + (spacing / 2);
 //	qDebug("line top at %d, %d", x, y);
-    insertionPoint.setLine(x, y, x, y + maxHeight);
-    int insIdx = insColRow.y() * cols + insColRow.x();
-    if (insIdx >= 0)
-    {
-        if (insIdx + 1 < items.size())
-            emit statusMessage(QString("moving between %1 and %2").arg(items[insIdx]->pageIdx).arg(items[insIdx + 1]->pageIdx));
-        else
-            emit statusMessage(QString("moving to end"));
+	insertionPoint.setLine(x, y, x, y + maxHeight);
+	int insIdx = insColRow.y() * cols + insColRow.x();
+    if (insIdx >= 0) {
+		if (insIdx + 1 < items.size())
+            emit statusMessage(QString("moving between %1 and %2").arg(items[insIdx]->pageId).arg(items[insIdx + 1]->pageId));
+		else
+			emit statusMessage(QString("moving to end"));
+    } else {
+		emit statusMessage("moving to beginning");
     }
-    else
-        emit statusMessage("moving to beginning");
 }
 
 void ThumbnailScene::dropEvent ( QGraphicsSceneDragDropEvent * ev )
 {
-    qDebug("dropEvent at %f, %f", ev->scenePos().x(), ev->scenePos().y());
-    removeItem(&insertionPoint);
-    emit statusClear();
-    QPoint insColRow = insertionIdx(ev->scenePos());
-    QList<QGraphicsItem *> sel = selectedItems();
-    qSort(sel.begin(), sel.end(), lessThan);
-    int insIdx = insColRow.y() * cols + insColRow.x() + 1;
-    foreach (QGraphicsItem* item, sel)
-    {
+	qDebug("dropEvent at %f, %f", ev->scenePos().x(), ev->scenePos().y());
+	removeItem(&insertionPoint);
+	emit statusClear();
+	QPoint insColRow = insertionIdx(ev->scenePos());
+    const QList<QGraphicsItem *> sel = selectedItems();
+	int insIdx = insColRow.y() * cols + insColRow.x() + 1;
+    for (QGraphicsItem* item : sel) {
         int oldIdx = items.indexOf(static_cast<ThumbnailItem*>(item));
         if (oldIdx < 0)
             qWarning("item being dropped is not in the set of thumbnails!");
@@ -188,7 +187,7 @@ void ThumbnailScene::dropEvent ( QGraphicsSceneDragDropEvent * ev )
         if (oldIdx < insIdx)
             --insIdx;
     }
-    foreach (QGraphicsItem* item, sel)
+    for (QGraphicsItem* item : sel)
         items.insert(insIdx++, static_cast<ThumbnailItem*>(item));
     layout();
 }
@@ -199,4 +198,11 @@ QPoint ThumbnailScene::insertionIdx(QPointF pos)
     int xadj = int(pos.x() - ((maxWidth + spacing) / 2));
     int col = (xadj < 0 ? -1 : xadj / maxWidth);
     return QPoint(col, row);
+}
+
+void ThumbnailScene::selectionChanged()
+{
+    const QList<QGraphicsItem *> sel = selectedItems();
+    if (sel.size() > 0)
+        currentPage(static_cast<ThumbnailItem*>(sel.first())->pageId);
 }

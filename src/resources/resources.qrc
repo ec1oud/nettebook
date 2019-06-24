@@ -23,5 +23,6 @@
         <file>32/document-edit.png</file>
         <file>32/format-text-mono.png</file>
         <file>32/insert-horizontal-rule.png</file>
+        <file>128/empty-page.png</file>
     </qresource>
 </RCC>

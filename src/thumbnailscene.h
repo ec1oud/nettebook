@@ -55,11 +55,14 @@ public slots:
         Override QGraphicsScene::clear() to also delete local stuff.
     */
     void clear();
+    void saveAllToIpfs();
 
 signals:
-    void statusMessage(QString msg, int timeout = 0);
-    void statusClear();
-    void currentPageThumbnail(QGraphicsItem* it);
+	void statusMessage(QString msg, int timeout = 0);
+	void statusClear();
+    void currentPageThumbnail(ThumbnailItem* it);
+    void currentPageChanging(ThumbnailItem* it);
+    void currentPageChanged(const QString &source, const QString &content);
 
 protected:
     void dragEnterEvent ( QGraphicsSceneDragDropEvent * ev );
@@ -73,12 +76,15 @@ protected:
      */
     QPoint insertionIdx(QPointF pos);
 
+protected slots:
+    void selectionChanged();
+
 protected:
-    int cols;
-    int spacing;
+    int cols = 2;
+    int spacing = 6;
     QVector<ThumbnailItem*> items;
-    int selectedIdx;
-    QPixmap defaultItemIcon;
+    int selectedIdx = 0;
+    QPixmap defaultItemIcon = QPixmap(":/128/empty-page.png");
     QGraphicsLineItem insertionPoint;
     QMenu m_contextMenu;
     int row = 0;

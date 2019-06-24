@@ -120,13 +120,20 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>39</height>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
     <property name="title">
      <string>&amp;File</string>
     </property>
+    <widget class="QMenu" name="menu_New">
+     <property name="title">
+      <string>&amp;New</string>
+     </property>
+     <addaction name="actionNewPageSeries"/>
+    </widget>
+    <addaction name="menu_New"/>
     <addaction name="actionOpen"/>
     <addaction name="actionSave"/>
     <addaction name="actionSave_As"/>
@@ -196,6 +203,21 @@
    <addaction name="actionInsert_Horizontal_Rule"/>
    <addaction name="actionIndent"/>
    <addaction name="actionUnindent"/>
+  </widget>
+  <widget class="QDockWidget" name="thumbnailsDock">
+   <property name="windowTitle">
+    <string>Pages in Series</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>1</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents">
+    <layout class="QVBoxLayout" name="verticalLayout_2">
+     <item>
+      <widget class="ThumbnailView" name="thumbnailsView"/>
+     </item>
+    </layout>
+   </widget>
   </widget>
   <action name="actionOpen">
    <property name="icon">
@@ -463,9 +485,19 @@
     <string>Insert T&amp;able</string>
    </property>
   </action>
+  <action name="actionNewPageSeries">
+   <property name="text">
+    <string>Page &amp;Series</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
+  <customwidget>
+   <class>ThumbnailView</class>
+   <extends>QGraphicsView</extends>
+   <header>thumbnailview.h</header>
+  </customwidget>
   <customwidget>
    <class>MarkdownBrowser</class>
    <extends>QTextBrowser</extends>

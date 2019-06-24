@@ -25,6 +25,7 @@
 #include <QTextBrowser>
 #include <QUrl>
 #include "markdownbrowser.h"
+#include "thumbnailscene.h"
 
 namespace Ui {
 class MainWindow;
@@ -82,6 +83,8 @@ private slots:
     void on_action_Undo_triggered();
     void on_action_Redo_triggered();
 
+    void on_actionNewPageSeries_triggered();
+
 private:
     void mergeFormatOnWordOrSelection(const QTextCharFormat &format);
     void modifyIndentation(int amount);
@@ -104,6 +107,7 @@ private:
     Ui::MainWindow *ui;
     MarkdownBrowser *m_mainWidget;
     Document *m_document;
+    ThumbnailScene *m_thumbs = nullptr;
     QFont m_monoFont;
     QNetworkAccessManager m_nam;
     QUrl m_apiBaseUrl = QUrl(QLatin1String("http://localhost:5001/api/v0/"));

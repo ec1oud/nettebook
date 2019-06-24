@@ -88,6 +88,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->editToolbarStuff = nullptr;
 
     on_actionToggleEditMode_toggled(false);
+    ui->thumbnailsDock->hide();
 }
 
 MainWindow::~MainWindow()
@@ -122,7 +123,7 @@ void MainWindow::load(QString url)
     QUrl u(url);
     CidFinder::Result cidResult = CidFinder::findIn(url);
     if (cidResult.isValid()) {
-        ; // nothing to do
+        // nothing to do
     } else if (u.scheme().isEmpty()) {
         QFileInfo fi(url);
         if (fi.exists())
@@ -604,4 +605,12 @@ void MainWindow::on_action_Redo_triggered()
 {
     if (QWidget *t = qApp->focusWidget())
         t->metaObject()->invokeMethod(t, "redo");
+}
+
+void MainWindow::on_actionNewPageSeries_triggered()
+{
+    m_thumbs = new ThumbnailScene();
+    ui->thumbnailsView->setScene(m_thumbs);
+    ui->thumbnailsDock->show();
+    m_thumbs->appendBlank();
 }

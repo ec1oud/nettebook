@@ -19,7 +19,12 @@
 ** GNU General Public License for more details.
 ****************************************************************************/
 #include "thumbnailscene.h"
+#include "ipfsagent.h"
 #include <QDebug>
+#include <QJsonDocument>
+#include <QJsonArray>
+#include <QJsonObject>
+#include <KIO/Job>
 
 ThumbnailScene::ThumbnailScene() :
     QGraphicsScene()
@@ -49,11 +54,6 @@ void ThumbnailScene::clear()
 {
     qDeleteAll(items);
     items.clear();
-}
-
-void ThumbnailScene::saveAllToIpfs()
-{
-    qDebug() << "saving page series";
 }
 
 void ThumbnailScene::add(int idx, QImage pm, QString label)
@@ -205,4 +205,49 @@ void ThumbnailScene::selectionChanged()
     const QList<QGraphicsItem *> sel = selectedItems();
     if (sel.size() > 0)
         currentPage(static_cast<ThumbnailItem*>(sel.first())->pageId);
+}
+
+void ThumbnailScene::saveAllToIpfs()
+{
+    for (ThumbnailItem * item : items) {
+        QUrl url("ipfs:///");
+        item->saved = false;
+        KIO::TransferJob *job = KIO::put(url, -1, KIO::Overwrite);
+        job->addMetaData("content-type", QLatin1String("text/markdown"));
+        m_saveJobs.insert(job, item);
+        connect (job, &KIO::TransferJob::dataReq, [=](KIO::Job *job, QByteArray &dest) {
+            ThumbnailItem *item = m_saveJobs.value(job);
+            if (!item || item->saved)
+                return;
+            dest = item->content.toUtf8();
+            item->saved = true;
+        });
+        connect (job, SIGNAL(result(KJob*)), this, SLOT(saveJobResult(KJob*)));
+    }
+}
+
+void ThumbnailScene::saveJobResult(KJob *job)
+{
+    QString hash = static_cast<KIO::Job *>(job)->metaData().value(QLatin1String("Hash"), QString());
+    ThumbnailItem *item = m_saveJobs.value(job);
+    qDebug() << item->pageId << "saved as" << hash;
+    item->cid = hash;
+    item->label = hash.left(12) + "\u2026";
+    m_saveJobs.remove(job);
+    if (m_saveJobs.isEmpty()) {
+        qDebug() << "ready to save wrapper node";
+        QJsonArray a;
+        for (ThumbnailItem * item : items)
+            a.append(item->cid);
+        QJsonObject o;
+        o.insert(QLatin1String("series"), a);
+        QJsonDocument doc(o);
+        qDebug() << doc.toJson();
+        IpfsAgent agent;
+        QJsonDocument result = agent.execPost("dag/put", "input-enc=json", doc);
+        qDebug() << result.toJson();
+        QString cid = result.object().value(QLatin1String("Cid")).toObject().value(QLatin1String("/")).toString();
+        qDebug() << cid;
+        emit seriesCidChanged(QUrl("ipfs:///" + cid));
+    }
 }

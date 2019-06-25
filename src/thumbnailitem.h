@@ -37,10 +37,12 @@ public:
     int height() { return pixmap().height(); }
 
     int pageId = 0; // not really page number, just a unique and initially sequential ID
-	QString label;
+    QString label;
 
     // TODO stop abusing this as a model
+    QString cid;
     QString content;
+    bool saved = false;
 
     void paint ( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = nullptr );
 

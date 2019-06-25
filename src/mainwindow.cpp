@@ -613,19 +613,24 @@ void MainWindow::on_action_Redo_triggered()
 
 void MainWindow::on_actionNewPageSeries_triggered()
 {
-    m_thumbs = new ThumbnailScene();
-    connect(m_thumbs, &ThumbnailScene::currentPageChanging,
-            [=](ThumbnailItem *it) {
-        it->content = m_document->toMarkdown();
-        QPixmap pm = m_mainWidget->grab(QRect(0, 0, 256, 256)).scaled(128, 128);
-        it->setPixmap(pm);
-    });
-    connect(m_thumbs, &ThumbnailScene::currentPageChanged,
-            [=](const QString &source, const QString &content) {
-        Q_UNUSED(source)
-        m_document->setMarkdown(content);
-    });
-    ui->thumbnailsView->setScene(m_thumbs);
+    if (m_thumbs)
+        m_thumbs->clear();
+    else {
+        m_thumbs = new ThumbnailScene();
+        connect(m_thumbs, &ThumbnailScene::currentPageChanging,
+                [=](ThumbnailItem *it) {
+            it->content = m_document->toMarkdown();
+            QPixmap pm = m_mainWidget->grab(QRect(0, 0, 256, 256)).scaled(128, 128);
+            it->setPixmap(pm);
+        });
+        connect(m_thumbs, &ThumbnailScene::currentPageChanged,
+                [=](const QString &source, const QString &content) {
+            Q_UNUSED(source)
+            m_document->setMarkdown(content);
+        });
+        connect(m_thumbs, &ThumbnailScene::seriesCidChanged, this, &MainWindow::updateUrlField);
+        ui->thumbnailsView->setScene(m_thumbs);
+    }
     ui->thumbnailsDock->show();
     m_thumbs->appendBlank();
 }

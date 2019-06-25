@@ -13,6 +13,7 @@ CONFIG += c++11
 SOURCES += \
     cidfinder.cpp \
     document.cpp \
+    ipfsagent.cpp \
     main.cpp \
     mainwindow.cpp \
     markdownbrowser.cpp \
@@ -26,6 +27,7 @@ SOURCES += \
 HEADERS += \
     cidfinder.h \
     document.h \
+    ipfsagent.h \
     mainwindow.h \
     markdownbrowser.h \
     jsonview.h \

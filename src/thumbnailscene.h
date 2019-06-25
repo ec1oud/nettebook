@@ -26,6 +26,8 @@
 #include <QMenu>
 #include "thumbnailitem.h"
 
+class KJob;
+
 /**
     \brief QGraphicsScene specialized for holding thumbnails for all of the
     pages in a series.
@@ -63,6 +65,7 @@ signals:
     void currentPageThumbnail(ThumbnailItem* it);
     void currentPageChanging(ThumbnailItem* it);
     void currentPageChanged(const QString &source, const QString &content);
+    void seriesCidChanged(QUrl cid);
 
 protected:
     void dragEnterEvent ( QGraphicsSceneDragDropEvent * ev );
@@ -78,6 +81,7 @@ protected:
 
 protected slots:
     void selectionChanged();
+    void saveJobResult(KJob *job);
 
 protected:
     int cols = 2;
@@ -91,6 +95,8 @@ protected:
     int col = 0;
     int maxWidth = 0;
     int maxHeight = 0;
+
+    QMap<KJob *,ThumbnailItem *> m_saveJobs;
 };
 
 #endif // THUMBNAILSCENE_H

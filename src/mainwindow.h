@@ -109,8 +109,6 @@ private:
     Document *m_document;
     ThumbnailScene *m_thumbs = nullptr;
     QFont m_monoFont;
-    QNetworkAccessManager m_nam;
-    QUrl m_apiBaseUrl = QUrl(QLatin1String("http://localhost:5001/api/v0/"));
     int m_hashBegin = 0, m_hashEnd = 0;
     bool m_programmaticUiSetting = false;
 };

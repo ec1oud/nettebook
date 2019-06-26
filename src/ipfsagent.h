@@ -31,7 +31,7 @@ public:
 signals:
 
 public slots:
-//    void invokeGet(const QString &suffix, const QString &query);
+    QJsonDocument execGet(const QString &suffix, const QString &query);
     QJsonDocument execPost(const QString &suffix, const QString &query, const QJsonDocument &body);
 
 private:

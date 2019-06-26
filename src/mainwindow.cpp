@@ -19,6 +19,7 @@
 #include "ui_mainwindow.h"
 #include "cidfinder.h"
 #include "document.h"
+#include "ipfsagent.h"
 
 #include <QDebug>
 #include <QFileDialog>
@@ -542,18 +543,12 @@ void MainWindow::on_actionConvert_CID_v0_to_v1_triggered()
     m_hashBegin = cidResult.start;
     if (m_hashBegin >= 0) {
         m_hashEnd = m_hashBegin + cidResult.length;
-        QUrl apiUrl = m_apiBaseUrl;
-        apiUrl.setPath(m_apiBaseUrl.path(QUrl::DecodeReserved) + QLatin1String("cid/base32"));
-        apiUrl.setQuery("arg=" + cidResult.toString(text));
-        QNetworkReply *reply = m_nam.get(QNetworkRequest(apiUrl));
-        connect(reply, &QNetworkReply::finished, [=]() {
-            QJsonObject jo = QJsonDocument::fromJson(reply->readAll()).object();
-qDebug() << jo;
-            reply->deleteLater();
-            QString cid = jo.value(QLatin1String("Formatted")).toString();
-            QString newText(text);
-            ui->urlField->setText(newText.replace(m_hashBegin, cidResult.length, cid));
-        });
+        IpfsAgent agent;
+        QJsonObject jo = agent.execGet("cid/base32", "arg=" + cidResult.toString(text)).object();
+        qDebug() << jo;
+        QString cid = jo.value(QLatin1String("Formatted")).toString();
+        QString newText(text);
+        ui->urlField->setText(newText.replace(m_hashBegin, cidResult.length, cid));
     }
 }
 

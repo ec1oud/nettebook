@@ -22,6 +22,21 @@ IpfsAgent::IpfsAgent(QObject *parent) : QObject(parent)
 {
 }
 
+QJsonDocument IpfsAgent::execGet(const QString &suffix, const QString &query)
+{
+    QJsonDocument ret;
+    QUrl apiUrl = m_apiBaseUrl;
+    apiUrl.setPath(m_apiBaseUrl.path(QUrl::DecodeReserved) + suffix);
+    apiUrl.setQuery(query);
+    QNetworkReply *reply = m_nam.get(QNetworkRequest(apiUrl));
+    connect(reply, &QNetworkReply::finished, [&]() {
+        ret = QJsonDocument::fromJson(reply->readAll());
+        m_eventLoop.exit();
+    });
+    m_eventLoop.exec();
+    return ret;
+}
+
 QJsonDocument IpfsAgent::execPost(const QString &suffix, const QString &query, const QJsonDocument &body)
 {
     QJsonDocument ret;
@@ -35,10 +50,10 @@ QJsonDocument IpfsAgent::execPost(const QString &suffix, const QString &query, c
     textPart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"file\""));
     textPart.setBody(body.toJson());
     multiPart->append(textPart);
-    QNetworkReply *m_reply = m_nam.post(req, multiPart);
-    multiPart->setParent(m_reply); // delete the multiPart with the reply
-    connect(m_reply, &QNetworkReply::finished, [&]() {
-        ret = QJsonDocument::fromJson(m_reply->readAll());
+    QNetworkReply *reply = m_nam.post(req, multiPart);
+    multiPart->setParent(reply); // delete the multiPart with the reply
+    connect(reply, &QNetworkReply::finished, [&]() {
+        ret = QJsonDocument::fromJson(reply->readAll());
         m_eventLoop.exit();
     });
     m_eventLoop.exec();

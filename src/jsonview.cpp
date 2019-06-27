@@ -21,6 +21,7 @@ JsonView::JsonView(QWidget *parent)
   : QTreeView(parent)
 {
     setModel(&m_model);
+    setAttribute(Qt::WA_DeleteOnClose);
 }
 
 void JsonView::load(const QByteArray &buf)

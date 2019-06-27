@@ -3,7 +3,7 @@
 #include <QDebug>
 
 static const QString base58HashPrefix = QStringLiteral("Qm");
-static const QString base32HashPrefix = QStringLiteral("bafybei");
+static const QString base32HashPrefix = QStringLiteral("bafy");
 
 CidFinder::CidFinder()
 {

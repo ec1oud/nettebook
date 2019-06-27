@@ -18,6 +18,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include <QJsonDocument>
 #include <QMainWindow>
 #include <QMimeType>
 #include <QNetworkAccessManager>
@@ -85,6 +86,8 @@ private slots:
 
     void on_actionNewPageSeries_triggered();
 
+    void on_action_Raw_DAG_node_triggered();
+
 private:
     void mergeFormatOnWordOrSelection(const QTextCharFormat &format);
     void modifyIndentation(int amount);
@@ -107,6 +110,7 @@ private:
     Ui::MainWindow *ui;
     MarkdownBrowser *m_mainWidget;
     Document *m_document;
+    QJsonDocument m_jsonDocument;
     ThumbnailScene *m_thumbs = nullptr;
     QFont m_monoFont;
     int m_hashBegin = 0, m_hashEnd = 0;

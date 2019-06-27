@@ -123,8 +123,15 @@ void MainWindow::load(QString url)
     bool directory = url.endsWith(QLatin1String("/"));
     QUrl u(url);
     CidFinder::Result cidResult = CidFinder::findIn(url);
+    m_jsonDocument = QJsonDocument();
+    ui->action_Raw_DAG_node->setEnabled(false);
     if (cidResult.isValid()) {
-        // nothing to do
+        // fetch the raw DAG node
+        IpfsAgent agent;
+        m_jsonDocument = agent.execGet("dag/get", "arg=/ipfs/" + url.mid(cidResult.start));
+        ui->action_Raw_DAG_node->setEnabled(!m_jsonDocument.isEmpty());
+        qDebug() << "raw DAG node" << m_jsonDocument.object();
+        // TODO deal with special cases like page series
     } else if (u.scheme().isEmpty()) {
         QFileInfo fi(url);
         if (fi.exists())
@@ -135,6 +142,7 @@ void MainWindow::load(QString url)
             u.setPath(QLatin1Char('/') + u.path() + QLatin1Char('/'));
             directory = true;
         }
+        // TODO resolve and populate m_jsonDocument
     } else {
         u = QUrl::fromUserInput(url);
     }
@@ -628,4 +636,11 @@ void MainWindow::on_actionNewPageSeries_triggered()
     }
     ui->thumbnailsDock->show();
     m_thumbs->appendBlank();
+}
+
+void MainWindow::on_action_Raw_DAG_node_triggered()
+{
+    JsonView *v = new JsonView();
+    v->load(m_jsonDocument.toJson());
+    v->show();
 }

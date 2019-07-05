@@ -125,13 +125,32 @@ void MainWindow::load(QString url)
     CidFinder::Result cidResult = CidFinder::findIn(url);
     m_jsonDocument = QJsonDocument();
     ui->action_Raw_DAG_node->setEnabled(false);
+    bool specialContentLoaded = false;
     if (cidResult.isValid()) {
         // fetch the raw DAG node
         IpfsAgent agent;
         m_jsonDocument = agent.execGet("dag/get", "arg=/ipfs/" + url.mid(cidResult.start));
         ui->action_Raw_DAG_node->setEnabled(!m_jsonDocument.isEmpty());
         qDebug() << "raw DAG node" << m_jsonDocument.object();
-        // TODO deal with special cases like page series
+        // deal with special cases like page series
+        auto series = m_jsonDocument.object().value("series");
+        if (series.isArray()) {
+            specialContentLoaded = true;
+            newPageSeries();
+            int i = 0;
+            for (auto v : series.toArray()) {
+                QString path = v.toString(); // in practice probably just a CID
+                QUrl u("/" + path);
+                u.setScheme(ipfsScheme);
+                m_ipfsAgent.getFileKIO(u, [path,this,i](QByteArray content) {
+                    QString s = QString::fromUtf8(content);
+                    if (i == 0)
+                        m_document->setMarkdown(s);
+                    m_thumbs->append(path, s);
+                });
+                ++i;
+            }
+        }
     } else if (u.scheme().isEmpty()) {
         QFileInfo fi(url);
         if (fi.exists())
@@ -151,7 +170,8 @@ void MainWindow::load(QString url)
     if (url.endsWith("json"))
         showJsonWindow(u); // TODO way less stupid
     else {
-        m_mainWidget->setSource(u, directory ? QTextDocument::MarkdownResource : QTextDocument::UnknownResource);
+        if (!specialContentLoaded)
+            m_mainWidget->setSource(u, directory ? QTextDocument::MarkdownResource : QTextDocument::UnknownResource);
         updateUrlField(u);
     }
 }
@@ -616,15 +636,21 @@ void MainWindow::on_action_Redo_triggered()
 
 void MainWindow::on_actionNewPageSeries_triggered()
 {
+    newPageSeries();
+    m_thumbs->appendBlank();
+}
+
+void MainWindow::newPageSeries()
+{
     if (m_thumbs)
         m_thumbs->clear();
     else {
         m_thumbs = new ThumbnailScene();
         connect(m_thumbs, &ThumbnailScene::currentPageChanging,
                 [=](ThumbnailItem *it) {
-            it->content = m_document->toMarkdown();
-            QPixmap pm = m_mainWidget->grab(QRect(0, 0, 256, 256)).scaled(128, 128);
-            it->setPixmap(pm);
+            QString content = m_document->toMarkdown();
+            if (!content.isEmpty())
+                it->content = content;
         });
         connect(m_thumbs, &ThumbnailScene::currentPageChanged,
                 [=](const QString &source, const QString &content) {
@@ -635,7 +661,6 @@ void MainWindow::on_actionNewPageSeries_triggered()
         ui->thumbnailsView->setScene(m_thumbs);
     }
     ui->thumbnailsDock->show();
-    m_thumbs->appendBlank();
 }
 
 void MainWindow::on_action_Raw_DAG_node_triggered()

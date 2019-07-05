@@ -48,10 +48,10 @@ public:
 
 public slots:
     void resize(int numItems);
-    void add(int idx, QImage pm, QString label);
     void appendBlank();
+    void append(const QString &ipfsPath, const QString &content);
     void layout(int width = -1, int height = -1);
-    void currentPage(int idx);
+    void setCurrentPage(ThumbnailItem *item);
 
     /**
         Override QGraphicsScene::clear() to also delete local stuff.

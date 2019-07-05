@@ -27,14 +27,12 @@
 /**
     \brief A thumbnail to be shown in the QGraphicsView in the thumbnails dock widget.
 */
-class ThumbnailItem : public QGraphicsPixmapItem
+class ThumbnailItem : public QGraphicsItem
 {
 public:
     ThumbnailItem();
-    ThumbnailItem(const QPixmap& pm, int pageNum, QString lbl);
+    ThumbnailItem(int pageNum, QString lbl);
 
-    int width() { return pixmap().width(); }
-    int height() { return pixmap().height(); }
 
     int pageId = 0; // not really page number, just a unique and initially sequential ID
     QString label;
@@ -44,7 +42,8 @@ public:
     QString content;
     bool saved = false;
 
-    void paint ( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = nullptr );
+    QRectF boundingRect() const override;
+    void paint ( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = nullptr ) override;
 
 protected:
     void mouseMoveEvent ( QGraphicsSceneMouseEvent * ev );

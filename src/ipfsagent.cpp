@@ -17,6 +17,7 @@
 #include "ipfsagent.h"
 #include <QHttpPart>
 #include <QNetworkReply>
+#include <KIO/Job>
 
 IpfsAgent::IpfsAgent(QObject *parent) : QObject(parent)
 {
@@ -58,4 +59,37 @@ QJsonDocument IpfsAgent::execPost(const QString &suffix, const QString &query, c
     });
     m_eventLoop.exec();
     return ret;
+}
+
+void IpfsAgent::getFileKIO(const QUrl &url, std::function<void (QByteArray)> handleResult)
+{
+qDebug() << "GET" << url;
+    KIO::Job* job = KIO::get(url);
+    connect (job, SIGNAL(data(KIO::Job *, const QByteArray &)),
+             this, SLOT(fileDataReceived(KIO::Job *, const QByteArray &)));
+    connect (job, SIGNAL(result(KJob*)), this, SLOT(fileDataReceiveDone(KJob*)));
+    m_resourceLoaders.insert(url, job);
+    m_resourceResponders.insert(url, handleResult);
+}
+
+void IpfsAgent::fileDataReceived(KIO::Job *job, const QByteArray & data)
+{
+    QUrl url = m_resourceLoaders.key(job);
+    // TODO check data for error messages
+//qDebug() << job << "received" << data.size() << url;
+    if (m_loadedResources.contains(url))
+        m_loadedResources[url].append(data);
+    else
+        m_loadedResources.insert(url, data);
+}
+
+void IpfsAgent::fileDataReceiveDone(KJob *job)
+{
+    QUrl url = m_resourceLoaders.key(job);
+    qDebug() << "for" << url.toString() << "got" << m_loadedResources.value(url).size() << "bytes";
+    if (!m_loadedResources.value(url).size()) {
+        m_loadedResources[url].append(QString());
+    }
+    m_resourceLoaders.remove(url);
+    m_resourceResponders.value(url)(m_loadedResources.value(url));
 }

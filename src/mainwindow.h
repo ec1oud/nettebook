@@ -26,6 +26,7 @@
 #include <QTextBrowser>
 #include <QUrl>
 #include "markdownbrowser.h"
+#include "ipfsagent.h"
 #include "thumbnailscene.h"
 
 namespace Ui {
@@ -91,6 +92,7 @@ private slots:
 private:
     void mergeFormatOnWordOrSelection(const QTextCharFormat &format);
     void modifyIndentation(int amount);
+    void newPageSeries();
 
     // to be kept in sync with items in ui->styleCB
     enum class Style {
@@ -113,6 +115,7 @@ private:
     QJsonDocument m_jsonDocument;
     ThumbnailScene *m_thumbs = nullptr;
     QFont m_monoFont;
+    IpfsAgent m_ipfsAgent;
     int m_hashBegin = 0, m_hashEnd = 0;
     bool m_programmaticUiSetting = false;
 };

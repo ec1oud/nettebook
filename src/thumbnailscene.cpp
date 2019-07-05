@@ -24,6 +24,7 @@
 #include <QJsonDocument>
 #include <QJsonArray>
 #include <QJsonObject>
+#include <QPainter>
 #include <KIO/Job>
 
 ThumbnailScene::ThumbnailScene() :
@@ -56,47 +57,14 @@ void ThumbnailScene::clear()
     items.clear();
 }
 
-void ThumbnailScene::add(int idx, QImage pm, QString label)
-{
-    ThumbnailItem* item = nullptr;
-    //	qDebug("for idx %d got thumb with dims %d x %d", idx, pm.width(), pm.height());
-    if (pm.width() < 1) {
-        item = new ThumbnailItem(defaultItemIcon, idx, label);
-    } else {
-        QPixmap pxm = QPixmap::fromImage(pm);
-        item = new ThumbnailItem(pxm, idx, label);
-    }
-    addItem(item);
-    if (item->width() > maxWidth)
-        maxWidth = item->width();
-    if (item->height() > maxHeight)
-        maxHeight = item->height();
-    if (items.count() > idx && items[idx]) {
-        removeItem(items[idx]);
-        delete items[idx];
-        update(sceneRect());
-    }
-    items[idx] = item;
-    item->setPos(col++ * maxWidth + spacing, row * maxHeight + spacing);
-    if (col >= cols) {
-        col = 0;
-        ++row;
-    }
-    if (selectedIdx < 0)
-        selectedIdx = idx;
-//	layout.addItem(item, idx, 0, Qt::AlignHCenter);
-}
-
 void ThumbnailScene::appendBlank()
 {
     QString label = tr("page %1").arg(items.count());
-    ThumbnailItem* item = new ThumbnailItem(defaultItemIcon, items.count(), label);
+    ThumbnailItem* item = new ThumbnailItem(items.count(), label);
     item->content = label;
     addItem(item);
-    if (item->width() > maxWidth)
-        maxWidth = item->width();
-    if (item->height() > maxHeight)
-        maxHeight = item->height();
+    maxWidth = qMax(int(item->boundingRect().width()), maxWidth);
+    maxHeight = qMax(int(item->boundingRect().height()), maxHeight);
     items.append(item);
     item->setPos(col++ * maxWidth + spacing, row * maxHeight + spacing);
     if (col >= cols) {
@@ -104,6 +72,22 @@ void ThumbnailScene::appendBlank()
         ++row;
     }
     selectedIdx = items.count() - 1;
+}
+
+void ThumbnailScene::append(const QString &ipfsPath, const QString &content)
+{
+    ThumbnailItem* item = new ThumbnailItem(items.count(), ipfsPath);
+    item->content = content;
+    addItem(item);
+    maxWidth = qMax(int(item->boundingRect().width()), maxWidth);
+    maxHeight = qMax(int(item->boundingRect().height()), maxHeight);
+    items.append(item);
+    item->setPos(col++ * maxWidth + spacing, row * maxHeight + spacing);
+    if (col >= cols) {
+        col = 0;
+        ++row;
+    }
+//    selectedIdx = items.count() - 1;
 }
 
 void ThumbnailScene::layout(int width, int height)
@@ -119,8 +103,8 @@ void ThumbnailScene::layout(int width, int height)
             col = 0;
             ++row;
         }
-        item->setPos(col++ * (maxWidth + spacing) + (maxWidth - item->width()) / 2,
-                     row * (maxHeight + spacing) + (maxHeight - item->height()) / 2);
+        item->setPos(col++ * (maxWidth + spacing) + (maxWidth - int(item->boundingRect().width())) / 2,
+                     row * (maxHeight + spacing) + (maxHeight - int(item->boundingRect().height())) / 2);
         ++i;
     }
     QRectF sceneBounds = sceneRect();
@@ -131,13 +115,13 @@ void ThumbnailScene::layout(int width, int height)
     setSceneRect(sceneBounds);
 }
 
-void ThumbnailScene::currentPage(int idx)
+void ThumbnailScene::setCurrentPage(ThumbnailItem *item)
 {
     emit currentPageChanging(items[selectedIdx]);
-    selectedIdx = idx;
+    selectedIdx = item->pageId;
 	update(sceneRect());
-	emit currentPageThumbnail(items[idx]);
-    emit currentPageChanged(items[idx]->label, items[idx]->content);
+    emit currentPageThumbnail(item);
+    emit currentPageChanged(item->label, item->content);
 }
 
 void ThumbnailScene::dragEnterEvent ( QGraphicsSceneDragDropEvent * ev )
@@ -204,7 +188,7 @@ void ThumbnailScene::selectionChanged()
 {
     const QList<QGraphicsItem *> sel = selectedItems();
     if (sel.size() > 0)
-        currentPage(static_cast<ThumbnailItem*>(sel.first())->pageId);
+        setCurrentPage(static_cast<ThumbnailItem*>(sel.first()));
 }
 
 void ThumbnailScene::saveAllToIpfs()

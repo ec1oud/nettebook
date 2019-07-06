@@ -8,6 +8,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QTextCodec>
+#include <QTextFrame>
 #include <QTextDocumentWriter>
 #include <KIO/Job>
 #include <KIO/ListJob>
@@ -37,9 +38,8 @@ QVariant Document::loadResource(int t, const QUrl &name)
     }
     if (m_resourceLoaders.contains(name))
         return QVariant(); // still waiting
-    else
-        qDebug() << type << name << url <<
-                    (m_loadedResources.contains(name) ? "from cache" : "new request");
+    else if (!m_loadedResources.contains(name))
+        qDebug() << type << name << url;
     if (url.fileName().isEmpty()) {
         if (!m_fileList.isEmpty()) {
             QByteArray ret = fileListMarkdown();
@@ -176,7 +176,9 @@ QByteArray Document::fileListMarkdown()
 void Document::saveAs(const QUrl &url, const QString &mimeType)
 {
     m_saveDone = false;
-    qDebug() << url << mimeType;
+    QUrl dir = url.adjusted(QUrl::RemoveFilename);
+    qDebug() << url << mimeType << dir;
+    saveResources(dir);
     QString mt = mimeType;
     if (mimeType.contains(QLatin1String("opendocument")))
         m_saveType = OdtResource;
@@ -196,6 +198,35 @@ void Document::saveAs(const QUrl &url, const QString &mimeType)
     connect (job, SIGNAL(dataReq(KIO::Job *, QByteArray &)),
              this, SLOT(onSaveDataReq(KIO::Job *, QByteArray &)));
     connect (job, SIGNAL(result(KJob*)), this, SLOT(onSaveDone(KJob*)));
+}
+
+void Document::saveResources(const QUrl &dir)
+{
+    QTextCursor cursor(this);
+    bool moved = true;
+    do {
+        QTextCharFormat fmt = cursor.charFormat();
+        if (fmt.isImageFormat()) {
+            QTextImageFormat ifmt = fmt.toImageFormat();
+            QString desc = ifmt.stringProperty(QTextFormat::ImageAltText);
+            QString title = ifmt.stringProperty(QTextFormat::ImageTitle);
+            QVariant image = loadResource(ImageResource, ifmt.name());
+            if (image.isValid()) {
+                QUrl url(ifmt.name());
+                QString path = dir.toLocalFile() + url.fileName();
+                qDebug() << "saving image" << ifmt.name() << "->" << path;
+                QFile out(path);
+                if (out.open(QFile::WriteOnly | QIODevice::Truncate)) {
+                    out.write(image.toByteArray());
+                    out.close();
+                    ifmt.setName(url.fileName());
+                    cursor.select(QTextCursor::BlockUnderCursor);
+                    cursor.setCharFormat(ifmt);
+                }
+            }
+        }
+        moved = cursor.movePosition(QTextCursor::NextBlock);
+    } while (moved);
 }
 
 /*!

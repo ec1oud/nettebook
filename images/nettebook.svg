@@ -9,16 +9,16 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="98.401276mm"
+   width="119.89258mm"
    height="119.89258mm"
-   viewBox="0 0 98.401276 119.89258"
+   viewBox="0 0 119.89258 119.89258"
    version="1.1"
    id="svg8"
    inkscape:version="0.92.4 5da689c313, 2019-01-14"
    sodipodi:docname="nettebook.svg"
-   inkscape:export-filename="/home/rutledge/art/nettebook64.png"
-   inkscape:export-xdpi="13.558805"
-   inkscape:export-ydpi="13.558805">
+   inkscape:export-filename="/home/rutledge/prj/nettebook/src/resources/64/nettebook.png"
+   inkscape:export-xdpi="13.56"
+   inkscape:export-ydpi="13.56">
   <defs
      id="defs2" />
   <sodipodi:namedview
@@ -29,15 +29,15 @@
      inkscape:pageopacity="0"
      inkscape:pageshadow="2"
      inkscape:zoom="0.49497475"
-     inkscape:cx="378.47686"
+     inkscape:cx="26.943777"
      inkscape:cy="82.040883"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      showgrid="false"
-     inkscape:window-width="1200"
-     inkscape:window-height="1897"
-     inkscape:window-x="1920"
-     inkscape:window-y="0"
+     inkscape:window-width="1920"
+     inkscape:window-height="1177"
+     inkscape:window-x="0"
+     inkscape:window-y="488"
      inkscape:window-maximized="1"
      fit-margin-top="0"
      fit-margin-left="0"
@@ -59,12 +59,12 @@
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
      id="layer1"
-     transform="translate(-33.181459,-19.684939)">
+     transform="translate(-33.181459,-19.684935)">
     <rect
        transform="matrix(0.87397801,0.48596546,0,1,0,0)"
        ry="4.1126046"
-       y="25.152254"
-       x="38.233429"
+       y="19.177258"
+       x="50.528534"
        height="70.266548"
        width="55.184422"
        id="rect5151"
@@ -74,14 +74,14 @@
        id="rect4518"
        width="52.658829"
        height="68.094498"
-       x="39.330017"
-       y="26.910028"
+       x="51.550541"
+       y="21.090054"
        ry="3.9854777"
        transform="matrix(0.87931205,0.47624608,0,1,0,0)" />
     <rect
        ry="3.9854777"
-       y="115.93267"
-       x="-148.06818"
+       y="121.75265"
+       x="-160.2887"
        height="68.094498"
        width="52.658829"
        id="rect4628"
@@ -90,7 +90,7 @@
     <g
        style="stroke-width:1.08989108"
        id="g4733"
-       transform="matrix(1,0,0,0.84184818,0,7.436664)">
+       transform="matrix(1,0,0,0.84184818,10.745652,7.436664)">
       <ellipse
          ry="1.6380385"
          rx="1.5697905"
@@ -117,7 +117,7 @@
     <g
        style="stroke-width:1.08989108"
        id="g4741"
-       transform="matrix(1,0,0,0.84184818,0,3.3902305)">
+       transform="matrix(1,0,0,0.84184818,10.745652,3.3902305)">
       <ellipse
          cy="99.946144"
          cx="92.499352"
@@ -143,7 +143,7 @@
     </g>
     <g
        style="stroke-width:1.08989108"
-       transform="matrix(1,0,0,0.84184818,0,-0.65618747)"
+       transform="matrix(1,0,0,0.84184818,10.745652,-0.65618747)"
        id="g4749">
       <ellipse
          ry="1.6380385"
@@ -171,7 +171,7 @@
     <g
        style="stroke-width:1.08989108"
        id="g4757"
-       transform="matrix(1,0,0,0.84184818,0,-4.7026209)">
+       transform="matrix(1,0,0,0.84184818,10.745652,-4.7026209)">
       <ellipse
          cy="99.946144"
          cx="92.499352"
@@ -198,7 +198,7 @@
     <g
        style="stroke-width:1.08989108"
        id="g4765"
-       transform="matrix(1,0,0,0.84184818,0,-8.749045)">
+       transform="matrix(1,0,0,0.84184818,10.745652,-8.749045)">
       <ellipse
          cy="99.946144"
          cx="92.499352"
@@ -224,7 +224,7 @@
     </g>
     <g
        style="stroke-width:1.08989108"
-       transform="matrix(1,0,0,0.84184818,0,-12.795465)"
+       transform="matrix(1,0,0,0.84184818,10.745652,-12.795465)"
        id="g4773">
       <ellipse
          ry="1.6380385"
@@ -252,7 +252,7 @@
     <g
        style="stroke-width:1.08989108"
        id="g4781"
-       transform="matrix(1,0,0,0.84184818,0,-16.841897)">
+       transform="matrix(1,0,0,0.84184818,10.745652,-16.841897)">
       <ellipse
          cy="99.946144"
          cx="92.499352"
@@ -278,7 +278,7 @@
     </g>
     <g
        style="stroke-width:1.08989108"
-       transform="matrix(1,0,0,0.84184818,0,-20.888316)"
+       transform="matrix(1,0,0,0.84184818,10.745652,-20.888316)"
        id="g4789">
       <ellipse
          ry="1.6380385"
@@ -305,7 +305,7 @@
     </g>
     <g
        style="stroke-width:1.08989108"
-       transform="matrix(1,0,0,0.84184818,0,-24.934733)"
+       transform="matrix(1,0,0,0.84184818,10.745652,-24.934733)"
        id="g4797">
       <ellipse
          ry="1.6380385"
@@ -333,7 +333,7 @@
     <g
        style="stroke-width:1.08989108"
        id="g4805"
-       transform="matrix(1,0,0,0.84184818,0,-28.981165)">
+       transform="matrix(1,0,0,0.84184818,10.745652,-28.981165)">
       <ellipse
          cy="99.946144"
          cx="92.499352"
@@ -359,7 +359,7 @@
     </g>
     <g
        style="stroke-width:1.08989108"
-       transform="matrix(1,0,0,0.84184818,0,-33.027585)"
+       transform="matrix(1,0,0,0.84184818,10.745652,-33.027585)"
        id="g4813">
       <ellipse
          ry="1.6380385"
@@ -387,7 +387,7 @@
     <g
        style="stroke-width:1.08989108"
        id="g4821"
-       transform="matrix(1,0,0,0.84184818,0,-37.074017)">
+       transform="matrix(1,0,0,0.84184818,10.745652,-37.074017)">
       <ellipse
          cy="99.946144"
          cx="92.499352"
@@ -414,7 +414,7 @@
     <g
        style="stroke-width:1.08989108"
        id="g4829"
-       transform="matrix(1,0,0,0.84184818,0,-41.120441)">
+       transform="matrix(1,0,0,0.84184818,10.745652,-41.120441)">
       <ellipse
          cy="99.946144"
          cx="92.499352"
@@ -440,7 +440,7 @@
     </g>
     <g
        style="stroke-width:1.08989108"
-       transform="matrix(1,0,0,0.84184818,0,-45.166861)"
+       transform="matrix(1,0,0,0.84184818,10.745652,-45.166861)"
        id="g4837">
       <ellipse
          ry="1.6380385"
@@ -468,7 +468,7 @@
     <g
        style="stroke-width:1.08989108"
        id="g4845"
-       transform="matrix(1,0,0,0.84184818,0,-49.213293)">
+       transform="matrix(1,0,0,0.84184818,10.745652,-49.213293)">
       <ellipse
          cy="99.946144"
          cx="92.499352"
@@ -494,7 +494,7 @@
     </g>
     <g
        style="stroke-width:1.08989108"
-       transform="matrix(1,0,0,0.84184818,0,-53.259713)"
+       transform="matrix(1,0,0,0.84184818,10.745652,-53.259713)"
        id="g4853">
       <ellipse
          ry="1.6380385"
@@ -521,7 +521,7 @@
     </g>
     <path
        style="opacity:1;fill:none;fill-opacity:0.79899495;stroke:#000000;stroke-width:4;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.8"
-       d="M 44.58826,43.801495 C 52.489743,30.115723 67.092287,21.68494 82.895255,21.684939 c 15.802967,0 30.405515,8.430782 38.306995,22.116553"
+       d="M 55.333912,43.801495 C 63.235395,30.115723 77.837939,21.68494 93.640907,21.684939 c 15.802963,0 30.405513,8.430782 38.306993,22.116553"
        id="path4857"
        inkscape:connector-curvature="0"
        sodipodi:nodetypes="csc" />
@@ -529,11 +529,11 @@
        sodipodi:nodetypes="csc"
        inkscape:connector-curvature="0"
        id="path4860"
-       d="m 52.048399,48.004814 c 6.3627,-10.751158 18.121455,-17.374145 30.846856,-17.374146 12.7254,0 24.484155,6.622986 30.846855,17.374144"
+       d="m 62.794051,48.004814 c 6.3627,-10.751158 18.121455,-17.374145 30.846856,-17.374146 12.725403,0 24.484153,6.622986 30.846853,17.374144"
        style="opacity:1;fill:none;fill-opacity:0.79899495;stroke:#000000;stroke-width:4;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.8" />
     <path
        style="opacity:1;fill:none;fill-opacity:0.79899495;stroke:#000000;stroke-width:4;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.8"
-       d="m 59.684216,52.546947 c 4.771534,-7.716452 13.589691,-12.469981 23.132758,-12.469982 9.543066,0 18.361226,4.753529 23.132746,12.46998"
+       d="m 70.429868,52.546947 c 4.771534,-7.716452 13.589691,-12.469981 23.132758,-12.469982 9.543064,0 18.361224,4.753529 23.132744,12.46998"
        id="path4862"
        inkscape:connector-curvature="0"
        sodipodi:nodetypes="csc" />
@@ -541,11 +541,11 @@
        sodipodi:nodetypes="csc"
        inkscape:connector-curvature="0"
        id="path4864"
-       d="m 67.21863,57.183231 c 3.119974,-4.527723 8.885921,-7.316917 15.125868,-7.316917 6.239947,0 12.005894,2.789191 15.125863,7.316915"
+       d="m 77.964282,57.183231 c 3.119974,-4.527723 8.885921,-7.316917 15.125868,-7.316917 6.239947,0 12.00589,2.789191 15.12586,7.316915"
        style="opacity:1;fill:none;fill-opacity:0.79899495;stroke:#000000;stroke-width:3.99999976;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.8" />
     <g
        id="g5030"
-       transform="matrix(1,0.55066182,0,1,2.0983238,-42.821195)"
+       transform="matrix(1,0.55066182,0,1,12.843976,-42.821195)"
        style="stroke:#888888;stroke-opacity:0.27522936">
       <rect
          y="88.35714"
@@ -642,7 +642,7 @@
     </g>
     <g
        id="g5048"
-       transform="matrix(1,-0.54326218,0,1,-2.587088,47.701853)"
+       transform="matrix(1,-0.54326218,0,1,8.158564,47.701853)"
        style="stroke:#888888;stroke-opacity:0.27522936">
       <path
          inkscape:connector-curvature="0"
@@ -730,8 +730,8 @@
        id="rect5153"
        width="55.184422"
        height="70.266548"
-       x="-150.2887"
-       y="116.7675"
+       x="-162.5838"
+       y="122.7425"
        ry="4.1126046"
        transform="matrix(-0.87397801,0.48596546,0,1,0,0)" />
   </g>

@@ -89,6 +89,8 @@ private slots:
 
     void on_action_Raw_DAG_node_triggered();
 
+    void on_actionSettings_triggered();
+
 private:
     void mergeFormatOnWordOrSelection(const QTextCharFormat &format);
     void modifyIndentation(int amount);

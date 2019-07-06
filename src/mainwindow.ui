@@ -154,6 +154,8 @@
      <string>&amp;Tools</string>
     </property>
     <addaction name="actionConvert_CID_v0_to_v1"/>
+    <addaction name="separator"/>
+    <addaction name="actionSettings"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="title">
@@ -494,6 +496,11 @@
   <action name="action_Raw_DAG_node">
    <property name="text">
     <string>&amp;Raw DAG node</string>
+   </property>
+  </action>
+  <action name="actionSettings">
+   <property name="text">
+    <string>Settings</string>
    </property>
   </action>
  </widget>

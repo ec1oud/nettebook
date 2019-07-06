@@ -51,7 +51,7 @@ signals:
 protected:
     QVariant loadResource(int type, const QUrl &name) override;
     void setStatus(Status s);
-    void saveResources(const QUrl &dir);
+    void saveResources(const QUrl &dir, const QString &subdir);
 
 private slots:
     void resourceDataReceived(KIO::Job *, const QByteArray &data);

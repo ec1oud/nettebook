@@ -1,5 +1,7 @@
 <RCC>
     <qresource prefix="/">
+        <file>16/nettebook.png</file>
+        <file>32/nettebook.png</file>
         <file>32/document-new.png</file>
         <file>32/document-open.png</file>
         <file>32/document-print-preview.png</file>
@@ -23,6 +25,7 @@
         <file>32/document-edit.png</file>
         <file>32/format-text-mono.png</file>
         <file>32/insert-horizontal-rule.png</file>
+        <file>64/nettebook.png</file>
         <file>128/empty-page.png</file>
     </qresource>
 </RCC>

@@ -35,6 +35,7 @@
 #include <iostream>
 #include <sstream>
 #include "jsonview.h"
+#include "settingsdialog.h"
 #include "tablesizedialog.h"
 
 static const QString ipfsScheme = QStringLiteral("ipfs");
@@ -668,4 +669,10 @@ void MainWindow::on_action_Raw_DAG_node_triggered()
     JsonView *v = new JsonView();
     v->load(m_jsonDocument.toJson());
     v->show();
+}
+
+void MainWindow::on_actionSettings_triggered()
+{
+    SettingsDialog *d = new SettingsDialog();
+    d->show();
 }

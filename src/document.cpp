@@ -1,8 +1,11 @@
 #include "document.h"
 #include "cidfinder.h"
+#include "settings.h"
 #include <QApplication>
 #include <QBuffer>
 #include <QDebug>
+#include <QDir>
+#include <QFileInfo>
 #include <QImage>
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -160,7 +163,7 @@ QByteArray Document::fileListMarkdown()
     for (const KIO::UDSEntry &f : m_fileList) {
         auto name = f.stringValue(KIO::UDSEntry::UDS_NAME);
         if (f.isDir())
-            name += "/";
+            name += QDir::separator();
         auto hash = f.stringValue(KIO::UDSEntry::UDS_LINK_DEST);
         qint64 size = f.numberValue(KIO::UDSEntry::UDS_SIZE);
         ret += "|[" + name + "](" + name + ")|" + hash +
@@ -178,7 +181,11 @@ void Document::saveAs(const QUrl &url, const QString &mimeType)
     m_saveDone = false;
     QUrl dir = url.adjusted(QUrl::RemoveFilename);
     qDebug() << url << mimeType << dir;
-    saveResources(dir);
+    Settings *settings = Settings::instance();
+    if (settings->boolOrDefault(settings->writingGroup, settings->saveResourcesWithDocuments, true)) {
+        QString suffix = settings->stringOrDefault(settings->writingGroup, settings->resourceDirectorySuffix, QLatin1String("_resources"));
+        saveResources(dir, QFileInfo(url.fileName()).baseName() + suffix);
+    }
     QString mt = mimeType;
     if (mimeType.contains(QLatin1String("opendocument")))
         m_saveType = OdtResource;
@@ -200,8 +207,12 @@ void Document::saveAs(const QUrl &url, const QString &mimeType)
     connect (job, SIGNAL(result(KJob*)), this, SLOT(onSaveDone(KJob*)));
 }
 
-void Document::saveResources(const QUrl &dir)
+void Document::saveResources(const QUrl &dir, const QString &subdir)
 {
+    QDir d(dir.toLocalFile());
+    if (!d.exists(subdir))
+        d.mkdir(subdir);
+    d.cd(subdir);
     QTextCursor cursor(this);
     bool moved = true;
     do {
@@ -213,13 +224,13 @@ void Document::saveResources(const QUrl &dir)
             QVariant image = loadResource(ImageResource, ifmt.name());
             if (image.isValid()) {
                 QUrl url(ifmt.name());
-                QString path = dir.toLocalFile() + url.fileName();
+                QString path = d.absoluteFilePath(url.fileName());
                 qDebug() << "saving image" << ifmt.name() << "->" << path;
                 QFile out(path);
                 if (out.open(QFile::WriteOnly | QIODevice::Truncate)) {
                     out.write(image.toByteArray());
                     out.close();
-                    ifmt.setName(url.fileName());
+                    ifmt.setName(subdir + QDir::separator() + url.fileName());
                     cursor.select(QTextCursor::BlockUnderCursor);
                     cursor.setCharFormat(ifmt);
                 }

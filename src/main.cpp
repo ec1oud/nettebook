@@ -55,10 +55,17 @@ int main(int argc, char *argv[])
     MainWindow w;
     if (parser.isSet(editOption))
         w.setEditMode(true);
-    if (parser.positionalArguments().count() > 0)
-        w.load(parser.positionalArguments().last());
+    bool preloadCss = false;
+    if (parser.positionalArguments().count() > 0) {
+        QString toLoad = parser.positionalArguments().last();
+        if (toLoad.endsWith(QLatin1String(".html")) && parser.isSet(cssOption)) {
+            preloadCss = true;
+            w.setBrowserStyle(QUrl::fromLocalFile(parser.value(cssOption)));
+        }
+        w.load(toLoad);
+    }
     w.show();
-    if (parser.isSet(cssOption))
+    if (!preloadCss && parser.isSet(cssOption))
         w.setBrowserStyle(QUrl::fromLocalFile(parser.value(cssOption)));
 
     return app.exec();

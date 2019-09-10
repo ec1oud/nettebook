@@ -25,7 +25,7 @@ public:
     Document(QObject *parent = nullptr);
 
     QUrl contentSource() const { return m_mainFile; }
-    void saveAs(const QUrl &url, const QString &mimeType = QString());
+    void saveAs(QUrl url, const QString &mimeType = QString());
     void saveToIpfs();
     QByteArray fileListMarkdown();
 

@@ -176,10 +176,12 @@ QByteArray Document::fileListMarkdown()
     return ret;
 }
 
-void Document::saveAs(const QUrl &url, const QString &mimeType)
+void Document::saveAs(QUrl url, const QString &mimeType)
 {
     m_saveDone = false;
     QUrl dir = url.adjusted(QUrl::RemoveFilename);
+    if (url.isLocalFile())
+        url.setPath(QDir(dir.toLocalFile()).absoluteFilePath(url.fileName()));
     qDebug() << url << mimeType << dir;
     Settings *settings = Settings::instance();
     if (settings->boolOrDefault(settings->writingGroup, settings->saveResourcesWithDocuments, true)) {

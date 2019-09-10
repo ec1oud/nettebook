@@ -210,9 +210,7 @@ void Document::saveAs(const QUrl &url, const QString &mimeType)
 void Document::saveResources(const QUrl &dir, const QString &subdir)
 {
     QDir d(dir.toLocalFile());
-    if (!d.exists(subdir))
-        d.mkdir(subdir);
-    d.cd(subdir);
+    bool needToCreateDir = !d.exists(subdir);
     QTextCursor cursor(this);
     bool moved = true;
     do {
@@ -226,6 +224,11 @@ void Document::saveResources(const QUrl &dir, const QString &subdir)
                 QUrl url(ifmt.name());
                 QString path = d.absoluteFilePath(url.fileName());
                 qDebug() << "saving image" << ifmt.name() << "->" << path;
+                if (needToCreateDir) {
+                    d.mkdir(subdir);
+                    d.cd(subdir);
+                    needToCreateDir = false;
+                }
                 QFile out(path);
                 if (out.open(QFile::WriteOnly | QIODevice::Truncate)) {
                     out.write(image.toByteArray());

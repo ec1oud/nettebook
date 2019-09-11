@@ -27,6 +27,7 @@ public:
     QUrl contentSource() const { return m_mainFile; }
     void saveAs(QUrl url, const QString &mimeType = QString());
     void saveToIpfs();
+    bool saving() const { return !m_saveUrl.isEmpty(); }
     QByteArray fileListMarkdown();
 
     enum Status {
@@ -70,6 +71,7 @@ private:
     QHash<QUrl, KJob*> m_resourceLoaders;
     QHash<QUrl, QByteArray> m_loadedResources;
     QUrl m_mainFile;
+    QUrl m_saveUrl;
     KIO::UDSEntryList m_fileList;
     QString m_errorText;
     KIO::TransferJob *m_transferJob = nullptr;

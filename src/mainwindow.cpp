@@ -26,6 +26,7 @@
 #include <QFontDatabase>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QMessageBox>
 #include <QMimeDatabase>
 #include <QNetworkReply>
 #include <QTextCodec>
@@ -40,6 +41,7 @@
 
 static const QString ipfsScheme = QStringLiteral("ipfs");
 static const QString fileScheme = QStringLiteral("file");
+static const QString fileModifiedPlaceholder = QStringLiteral(" [*]");
 static const int BlockQuoteIndent = 40; // pixels, same as in QTextHtmlParserNode::initializeProperties
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -68,7 +70,6 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(m_document, &Document::redoAvailable, ui->action_Redo, &QAction::setEnabled);
     connect(m_mainWidget, &QTextEdit::copyAvailable, ui->actionCut, &QAction::setEnabled);
     connect(m_mainWidget, &QTextEdit::copyAvailable, ui->action_Copy, &QAction::setEnabled);
-    connect(ui->actionReload, &QAction::triggered, m_mainWidget, &MarkdownBrowser::reload);
 
     while (ui->toolbarStuff->count()) {
         QWidget *tw = ui->toolbarStuff->takeAt(0)->widget();
@@ -101,7 +102,34 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_actionQuit_triggered()
 {
-    qApp->quit();
+    close();
+}
+
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    if (maybeSave())
+        event->accept();
+    else
+        event->ignore();
+}
+
+bool MainWindow::maybeSave()
+{
+    if (!m_document->isModified())
+        return true;
+
+    switch (QMessageBox::warning(this, QCoreApplication::applicationName(),
+            tr("The file has been modified.\n"
+            "Do you want to save your changes?"),
+            QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel)) {
+    case QMessageBox::Save:
+        return on_actionSave_triggered();
+    case QMessageBox::Cancel:
+        return false;
+    default:
+        break;
+    }
+    return true;
 }
 
 void MainWindow::on_actionOpen_triggered()
@@ -116,6 +144,12 @@ void MainWindow::on_actionOpen_triggered()
     if (fileDialog.exec() != QDialog::Accepted)
         return;
     load(fileDialog.selectedFiles().first());
+}
+
+void MainWindow::on_actionReload_triggered()
+{
+    if (maybeSave())
+        m_mainWidget->reload();
 }
 
 void MainWindow::load(QString url)
@@ -178,20 +212,21 @@ void MainWindow::load(QString url)
     }
 }
 
-void MainWindow::on_actionSave_triggered()
+bool MainWindow::on_actionSave_triggered()
 {
     qDebug() << m_mainWidget->source();
     if (m_thumbs)
         m_thumbs->saveAllToIpfs();
     else {
         if (m_document->contentSource().isEmpty())
-            on_actionSave_As_triggered();
+            return on_actionSave_As_triggered();
         else
             m_document->saveAs(m_document->contentSource());
     }
+    return true;
 }
 
-void MainWindow::on_actionSave_As_triggered()
+bool MainWindow::on_actionSave_As_triggered()
 {
     qDebug() << m_mainWidget->source();
     QFileDialog fileDialog(this, tr("Save as..."));
@@ -212,13 +247,15 @@ void MainWindow::on_actionSave_As_triggered()
     fileDialog.setDefaultSuffix("md");
 #endif
     if (fileDialog.exec() != QDialog::Accepted)
-        return;
+        return false;
     m_document->saveAs(fileDialog.selectedUrls().first(), fileDialog.selectedMimeTypeFilter());
+    return true;
 }
 
-void MainWindow::on_actionSave_to_IPFS_triggered()
+bool MainWindow::on_actionSave_to_IPFS_triggered()
 {
     m_document->saveToIpfs();
+    return true;
 }
 
 bool MainWindow::setBrowserStyle(QUrl url)
@@ -247,7 +284,9 @@ void MainWindow::updateUrlField(QUrl url)
 {
     ui->urlField->setText(url.toString());
     bool filenameOnly = (url.scheme() == ipfsScheme || url.scheme() == fileScheme) && !url.fileName().isEmpty();
-    setWindowTitle(filenameOnly ? url.fileName() : url.toString());
+    setWindowTitle((filenameOnly ? url.fileName() : url.toString()) + fileModifiedPlaceholder);
+    m_document->setModified(false);
+    m_mainWidget->updateWatcher();
 }
 
 void MainWindow::showJsonWindow(QUrl url)

@@ -31,25 +31,17 @@ MarkdownBrowser::MarkdownBrowser(QWidget *parent)
 void MarkdownBrowser::setSource(const QUrl &name)
 {
     m_loading = name;
-    m_watcher.removePaths(m_watcher.files());
     // this override doesn't get called from main()
     if (name.fileName().isEmpty()) // directory listing will be markdown
         QTextBrowser::setSource(name, QTextDocument::MarkdownResource);
-    else {
+    else
         QTextBrowser::setSource(name);
-        if (name.isLocalFile())
-            m_watcher.addPath(name.toLocalFile());
-    }
 }
 
 void MarkdownBrowser::setSource(const QUrl &name, QTextDocument::ResourceType type)
 {
-    qDebug() << Q_FUNC_INFO << name << type;
     m_loading = name;
     QTextBrowser::setSource(name, type);
-    m_watcher.removePaths(m_watcher.files());
-    if (name.isLocalFile())
-        m_watcher.addPath(name.toLocalFile());
 }
 
 QVariant MarkdownBrowser::loadResource(int type, const QUrl &name)
@@ -90,9 +82,21 @@ void MarkdownBrowser::reload()
     QTextBrowser::reload();
 }
 
+void MarkdownBrowser::updateWatcher()
+{
+    QStringList wasWatching = m_watcher.files();
+    if (!wasWatching.isEmpty())
+        m_watcher.removePaths(wasWatching);
+    if (source().isLocalFile())
+        m_watcher.addPath(source().toLocalFile());
+    qDebug() << "watching" << m_watcher.files();
+}
+
 void MarkdownBrowser::onFileChanged(const QString &path)
 {
-    qDebug() << path;
+    qDebug() << path << "saving?" << static_cast<Document *>(document())->saving();
+    if (static_cast<Document *>(document())->saving())
+        return;
     if (QMessageBox::question(this, QCoreApplication::applicationName(),
             tr("The file has changed.  Do you want to reload it?")) == QMessageBox::Yes)
         reload();

@@ -30,6 +30,7 @@ public:
     void setSource(const QUrl &name, QTextDocument::ResourceType type);
     QVariant loadResource(int type, const QUrl &name) override;
     void reload() override;
+    void updateWatcher();
 
 private:
     void onFileChanged(const QString &path);

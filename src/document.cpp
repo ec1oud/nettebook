@@ -187,6 +187,7 @@ void Document::saveAs(QUrl url, const QString &mimeType)
     QUrl dir = url.adjusted(QUrl::RemoveFilename);
     if (url.isLocalFile())
         url.setPath(QDir(dir.toLocalFile()).absoluteFilePath(url.fileName()));
+    m_saveUrl = url;
     qDebug() << url << mimeType << dir;
     Settings *settings = Settings::instance();
     if (settings->boolOrDefault(settings->writingGroup, settings->saveResourcesWithDocuments, true)) {
@@ -323,13 +324,9 @@ void Document::onSaveDone(KJob *job)
             setStatus(ErrorWithText);
         }
     } else {
-        if (!m_transferJob) {
-            m_errorText = QLatin1String("save failed");
-            setStatus(ErrorWithText);
-            return;
-        }
-        qDebug() << m_transferJob->url();
-        emit saved(m_transferJob->url());
+        qDebug() << m_saveUrl;
+        emit saved(m_saveUrl);
     }
     m_transferJob = nullptr;
+    m_saveUrl.clear();
 }

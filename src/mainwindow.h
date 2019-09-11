@@ -44,8 +44,11 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+    void closeEvent(QCloseEvent *event) override;
+
 public slots:
     void load(QString url);
+    bool maybeSave();
     bool setBrowserStyle(QUrl url);
     void setEditMode(bool mode = true);
     void updateUrlField(QUrl url);
@@ -56,14 +59,15 @@ private slots:
     void cursorPositionChanged();
     void on_actionQuit_triggered();
     void on_actionOpen_triggered();
+    void on_actionReload_triggered();
     void on_actionBack_triggered();
     void on_browser_backwardAvailable(bool a);
     void on_urlField_returnPressed();
     void on_browser_highlighted(const QUrl &url);
     void on_actionToggleEditMode_toggled(bool edit);
-    void on_actionSave_triggered();
-    void on_actionSave_As_triggered();
-    void on_actionSave_to_IPFS_triggered();
+    bool on_actionSave_triggered();
+    bool on_actionSave_As_triggered();
+    bool on_actionSave_to_IPFS_triggered();
 
     void on_actionStrongEmphasis_toggled(bool a);
     void on_actionEmphasis_toggled(bool a);

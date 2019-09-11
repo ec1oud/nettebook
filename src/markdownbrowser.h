@@ -18,6 +18,7 @@
 #ifndef MARKDOWNBROWSER_H
 #define MARKDOWNBROWSER_H
 
+#include <QFileSystemWatcher>
 #include <QTextBrowser>
 #include <QTimer>
 
@@ -28,10 +29,15 @@ public:
     void setSource(const QUrl &name) override;
     void setSource(const QUrl &name, QTextDocument::ResourceType type);
     QVariant loadResource(int type, const QUrl &name) override;
+    void reload() override;
+
+private:
+    void onFileChanged(const QString &path);
 
 private:
     QTimer m_loadingTimeout;
     QUrl m_loading;
+    QFileSystemWatcher m_watcher;
 };
 
 #endif // MARKDOWNBROWSER_H

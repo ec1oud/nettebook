@@ -40,6 +40,7 @@ public:
 
     Status status() { return m_status; }
     QString errorText() { return m_errorText; }
+    void clearCache(const QUrl &url);
 
 signals:
     void errorTextChanged(const QString &text);

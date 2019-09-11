@@ -68,6 +68,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(m_document, &Document::redoAvailable, ui->action_Redo, &QAction::setEnabled);
     connect(m_mainWidget, &QTextEdit::copyAvailable, ui->actionCut, &QAction::setEnabled);
     connect(m_mainWidget, &QTextEdit::copyAvailable, ui->action_Copy, &QAction::setEnabled);
+    connect(ui->actionReload, &QAction::triggered, m_mainWidget, &MarkdownBrowser::reload);
 
     while (ui->toolbarStuff->count()) {
         QWidget *tw = ui->toolbarStuff->takeAt(0)->widget();

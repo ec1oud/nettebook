@@ -135,6 +135,7 @@
     </widget>
     <addaction name="menu_New"/>
     <addaction name="actionOpen"/>
+    <addaction name="actionReload"/>
     <addaction name="actionSave"/>
     <addaction name="actionSave_As"/>
     <addaction name="actionSave_to_IPFS"/>
@@ -187,6 +188,7 @@
    <addaction name="actionSave"/>
    <addaction name="actionToggleEditMode"/>
    <addaction name="actionBack"/>
+   <addaction name="actionReload"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <widget class="QToolBar" name="editToolBar">
@@ -501,6 +503,18 @@
   <action name="actionSettings">
    <property name="text">
     <string>Settings</string>
+   </property>
+  </action>
+  <action name="actionReload">
+   <property name="icon">
+    <iconset resource="resources/resources.qrc">
+     <normaloff>:/32/reload.png</normaloff>:/32/reload.png</iconset>
+   </property>
+   <property name="text">
+    <string>Reload</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+R</string>
    </property>
   </action>
  </widget>

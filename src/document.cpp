@@ -176,6 +176,11 @@ QByteArray Document::fileListMarkdown()
     return ret;
 }
 
+void Document::clearCache(const QUrl &url)
+{
+    m_loadedResources.remove(url);
+}
+
 void Document::saveAs(QUrl url, const QString &mimeType)
 {
     m_saveDone = false;

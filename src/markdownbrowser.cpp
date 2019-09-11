@@ -80,10 +80,13 @@ void MarkdownBrowser::reload()
 {
     static_cast<Document *>(document())->clearCache(m_loading);
     QTextBrowser::reload();
+    updateWatcher();
 }
 
 void MarkdownBrowser::updateWatcher()
 {
+    // Some of the cases where this is called may be because saving an existing file
+    // is done by creating a new file and deleting the old one.  See QTBUG-53607
     QStringList wasWatching = m_watcher.files();
     if (!wasWatching.isEmpty())
         m_watcher.removePaths(wasWatching);
@@ -97,7 +100,7 @@ void MarkdownBrowser::onFileChanged(const QString &path)
     qDebug() << path << "saving?" << static_cast<Document *>(document())->saving();
     if (static_cast<Document *>(document())->saving())
         return;
-    if (QMessageBox::question(this, QCoreApplication::applicationName(),
+    if (QMessageBox::question(this, tr("%1 - Reload changed file?").arg(QCoreApplication::applicationName()),
             tr("The file has changed.  Do you want to reload it?")) == QMessageBox::Yes)
         reload();
 }

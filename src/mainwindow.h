@@ -27,6 +27,7 @@
 #include <QUrl>
 #include "markdownbrowser.h"
 #include "ipfsagent.h"
+#include "linkdialog.h"
 #include "thumbnailscene.h"
 
 namespace Ui {
@@ -73,6 +74,7 @@ private slots:
     void on_actionEmphasis_toggled(bool a);
     void on_actionStrikeOut_toggled(bool a);
     void on_actionMonospace_toggled(bool a);
+    void on_actionInsert_Link_triggered();
     void on_actionInsert_Horizontal_Rule_triggered();
     void on_actionInsert_Table_triggered();
     void on_actionIndent_triggered();
@@ -99,6 +101,7 @@ private:
     void mergeFormatOnWordOrSelection(const QTextCharFormat &format);
     void modifyIndentation(int amount);
     void newPageSeries();
+    void insertLink(const QString &destination, const QString &text, const QString &title);
 
     // to be kept in sync with items in ui->styleCB
     enum class Style {
@@ -120,6 +123,7 @@ private:
     Document *m_document;
     QJsonDocument m_jsonDocument;
     ThumbnailScene *m_thumbs = nullptr;
+    LinkDialog *m_linkDialog = nullptr;
     QFont m_monoFont;
     IpfsAgent m_ipfsAgent;
     int m_hashBegin = 0, m_hashEnd = 0;

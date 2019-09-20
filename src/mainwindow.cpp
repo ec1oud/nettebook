@@ -287,6 +287,8 @@ void MainWindow::updateUrlField(QUrl url)
     setWindowTitle((filenameOnly ? url.fileName() : url.toString()) + fileModifiedPlaceholder);
     m_document->setModified(false);
     m_mainWidget->updateWatcher();
+    if (m_linkDialog)
+        m_linkDialog->setDocumentPath(url);
 }
 
 void MainWindow::showJsonWindow(QUrl url)
@@ -619,6 +621,34 @@ void MainWindow::on_actionConvert_CID_v0_to_v1_triggered()
         QString newText(text);
         ui->urlField->setText(newText.replace(m_hashBegin, cidResult.length, cid));
     }
+}
+
+void MainWindow::on_actionInsert_Link_triggered()
+{
+    if (!m_linkDialog) {
+        m_linkDialog = new LinkDialog(this);
+        connect(m_linkDialog, &LinkDialog::insert, this, &MainWindow::insertLink);
+    }
+    m_linkDialog->setSelectedText(m_mainWidget->textCursor().selectedText());
+    m_linkDialog->setDocumentPath(m_document->contentSource());
+    m_linkDialog->show();
+}
+
+void MainWindow::insertLink(const QString &destination, const QString &text, const QString &title)
+{
+    Q_UNUSED(title) // markdown supports it, but QTextDocument doesn't (yet?)
+    QTextCursor cursor = m_mainWidget->textCursor();
+//    qDebug() << destination << text << title;
+    cursor.beginEditBlock();
+    QTextCharFormat fmt = cursor.charFormat();
+    fmt.setForeground(QPalette().link());
+    fmt.setAnchor(true);
+    fmt.setAnchorHref(destination);
+    if (text == cursor.selectedText())
+        cursor.setCharFormat(fmt);
+    else
+        cursor.insertText(text, fmt);
+    cursor.endEditBlock();
 }
 
 void MainWindow::on_actionInsert_Horizontal_Rule_triggered()

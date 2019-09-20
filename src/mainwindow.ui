@@ -168,7 +168,13 @@
     <addaction name="actionCut"/>
     <addaction name="action_Copy"/>
     <addaction name="action_Paste"/>
-    <addaction name="separator"/>
+   </widget>
+   <widget class="QMenu" name="menu_Insert">
+    <property name="title">
+     <string>&amp;Insert</string>
+    </property>
+    <addaction name="actionInsert_Link"/>
+    <addaction name="actionInsert_Image"/>
     <addaction name="actionInsert_Horizontal_Rule"/>
     <addaction name="actionInsert_Table"/>
    </widget>
@@ -176,6 +182,7 @@
    <addaction name="menuEdit"/>
    <addaction name="menuView"/>
    <addaction name="menuTools"/>
+   <addaction name="menu_Insert"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">
@@ -205,6 +212,7 @@
    <addaction name="actionStrongEmphasis"/>
    <addaction name="actionStrikeOut"/>
    <addaction name="actionMonospace"/>
+   <addaction name="actionInsert_Link"/>
    <addaction name="actionInsert_Horizontal_Rule"/>
    <addaction name="actionIndent"/>
    <addaction name="actionUnindent"/>
@@ -414,10 +422,7 @@
      <normaloff>:/32/insert-horizontal-rule.png</normaloff>:/32/insert-horizontal-rule.png</iconset>
    </property>
    <property name="text">
-    <string>Insert Horizontal Ru&amp;le</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+L</string>
+    <string>Horizontal &amp;Rule</string>
    </property>
   </action>
   <action name="action_Local_IPFS_files">
@@ -487,7 +492,7 @@
   </action>
   <action name="actionInsert_Table">
    <property name="text">
-    <string>Insert T&amp;able</string>
+    <string>&amp;Table</string>
    </property>
   </action>
   <action name="actionNewPageSeries">
@@ -515,6 +520,23 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+R</string>
+   </property>
+  </action>
+  <action name="actionInsert_Image">
+   <property name="text">
+    <string>Local &amp;Image</string>
+   </property>
+  </action>
+  <action name="actionInsert_Link">
+   <property name="icon">
+    <iconset resource="resources/resources.qrc">
+     <normaloff>:/32/insert-link.png</normaloff>:/32/insert-link.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Link</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+L</string>
    </property>
   </action>
  </widget>

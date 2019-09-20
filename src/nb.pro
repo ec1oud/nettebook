@@ -14,6 +14,7 @@ SOURCES += \
     cidfinder.cpp \
     document.cpp \
     ipfsagent.cpp \
+    linkdialog.cpp \
     main.cpp \
     mainwindow.cpp \
     markdownbrowser.cpp \
@@ -30,6 +31,7 @@ HEADERS += \
     cidfinder.h \
     document.h \
     ipfsagent.h \
+    linkdialog.h \
     mainwindow.h \
     markdownbrowser.h \
     jsonview.h \
@@ -42,6 +44,7 @@ HEADERS += \
     thumbnailview.h \
 
 FORMS += \
+    linkdialog.ui \
     mainwindow.ui \
     settingsdialog.ui \
     tablesizedialog.ui

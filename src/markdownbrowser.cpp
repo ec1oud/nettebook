@@ -19,6 +19,7 @@
 #include "markdownbrowser.h"
 #include <QDebug>
 #include <QApplication>
+#include <QMenu>
 #include <QMessageBox>
 #include <QThread>
 
@@ -93,6 +94,26 @@ void MarkdownBrowser::updateWatcher()
     if (source().isLocalFile())
         m_watcher.addPath(source().toLocalFile());
     qDebug() << "watching" << m_watcher.files();
+}
+
+void MarkdownBrowser::contextMenuEvent(QContextMenuEvent *event)
+{
+    if (!isReadOnly())
+        setTextCursor(cursorForPosition(event->pos()));
+    QMenu *menu = createStandardContextMenu();
+    if (!isReadOnly() && !textCursor().charFormat().anchorHref().isEmpty()) {
+        menu->addSeparator();
+        QAction *editLinkAction = menu->addAction(tr("Edit Link"));
+        connect(editLinkAction, &QAction::triggered, this, [this]() {
+            emit MarkdownBrowser::editLink();
+        });
+        QAction *unlinkAction = menu->addAction(tr("Unlink"));
+        connect(unlinkAction, &QAction::triggered, this, [this]() {
+            emit MarkdownBrowser::unlink();
+        });
+    }
+    menu->exec(event->globalPos());
+    delete menu;
 }
 
 void MarkdownBrowser::onFileChanged(const QString &path)

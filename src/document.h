@@ -6,6 +6,7 @@
 #include <QMimeDatabase>
 #include <QMimeType>
 #include <QTextDocument>
+#include <QTextFragment>
 #include <QUrl>
 #include <KIO/ListJob>
 
@@ -42,6 +43,7 @@ public:
     Status status() { return m_status; }
     QString errorText() { return m_errorText; }
     void clearCache(const QUrl &url);
+    QTextFragment fragmentAtCursor(const QTextCursor &cursor);
 
 signals:
     void errorTextChanged(const QString &text);

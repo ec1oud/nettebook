@@ -70,6 +70,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(m_document, &Document::redoAvailable, ui->action_Redo, &QAction::setEnabled);
     connect(m_mainWidget, &QTextEdit::copyAvailable, ui->actionCut, &QAction::setEnabled);
     connect(m_mainWidget, &QTextEdit::copyAvailable, ui->action_Copy, &QAction::setEnabled);
+    connect(m_mainWidget, &MarkdownBrowser::editLink, this, &MainWindow::on_actionEdit_Link_triggered);
+    connect(m_mainWidget, &MarkdownBrowser::unlink, this, &MainWindow::on_actionUnlink_triggered);
 
     while (ui->toolbarStuff->count()) {
         QWidget *tw = ui->toolbarStuff->takeAt(0)->widget();
@@ -631,23 +633,63 @@ void MainWindow::on_actionInsert_Link_triggered()
     }
     m_linkDialog->setSelectedText(m_mainWidget->textCursor().selectedText());
     m_linkDialog->setDocumentPath(m_document->contentSource());
+    m_editingLink = false;
+    m_linkDialog->setMode(LinkDialog::Mode::InsertLink);
     m_linkDialog->show();
+}
+
+void MainWindow::on_actionEdit_Link_triggered()
+{
+    if (!m_linkDialog) {
+        m_linkDialog = new LinkDialog(this);
+        connect(m_linkDialog, &LinkDialog::insert, this, &MainWindow::insertLink);
+    }
+    m_editingSelection = m_mainWidget->textCursor();
+    QTextFragment linkFragment = m_document->fragmentAtCursor(m_editingSelection);
+//qDebug() << "link goes from" << linkFragment.position() << "with len" << linkFragment.length() << "cursor is at" << cursor.position();
+    m_editingSelection.setPosition(linkFragment.position());
+    m_editingSelection.setPosition(linkFragment.position() + linkFragment.length(), QTextCursor::KeepAnchor);
+    m_mainWidget->setTextCursor(m_editingSelection);
+    m_linkDialog->setDestination(m_editingSelection.charFormat().anchorHref());
+    m_linkDialog->setLinkText(m_editingSelection.selectedText());
+//qDebug() << "anchor names" << cursor.charFormat().anchorHref() << cursor.charFormat().anchorNames();
+    m_linkDialog->setDocumentPath(m_document->contentSource());
+    m_linkDialog->setMode(LinkDialog::Mode::EditLink);
+    m_editingLink = true;
+    m_linkDialog->show();
+}
+
+void MainWindow::on_actionUnlink_triggered()
+{
+    QTextCursor cursor = m_mainWidget->textCursor();
+    QTextFragment linkFragment = m_document->fragmentAtCursor(cursor);
+//    qDebug() << "link goes from" << linkFragment.position() << "with len" << linkFragment.length() << "cursor is at" << cursor.position();
+    cursor.setPosition(linkFragment.position());
+    cursor.setPosition(linkFragment.position() + linkFragment.length(), QTextCursor::KeepAnchor);
+    cursor.beginEditBlock();
+    QTextCharFormat fmt = cursor.charFormat();
+    fmt.clearProperty(QTextFormat::ForegroundBrush);
+    fmt.clearProperty(QTextFormat::IsAnchor);
+    fmt.clearProperty(QTextFormat::AnchorHref);
+    cursor.setCharFormat(fmt);
+    cursor.endEditBlock();
 }
 
 void MainWindow::insertLink(const QString &destination, const QString &text, const QString &title)
 {
     Q_UNUSED(title) // markdown supports it, but QTextDocument doesn't (yet?)
-    QTextCursor cursor = m_mainWidget->textCursor();
+    QTextCursor cursor = (m_editingLink ? m_editingSelection : m_mainWidget->textCursor());
 //    qDebug() << destination << text << title;
     cursor.beginEditBlock();
     QTextCharFormat fmt = cursor.charFormat();
     fmt.setForeground(QPalette().link());
     fmt.setAnchor(true);
     fmt.setAnchorHref(destination);
-    if (text == cursor.selectedText())
+    if (text == cursor.selectedText()) {
         cursor.setCharFormat(fmt);
-    else
+    } else {
         cursor.insertText(text, fmt);
+    }
     cursor.endEditBlock();
 }
 

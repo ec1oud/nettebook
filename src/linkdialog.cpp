@@ -6,14 +6,12 @@
 
 LinkDialog::LinkDialog(QWidget *parent) :
     QDialog(parent),
-    ui(new Ui::LinkDialog)
+    ui(new Ui::LinkDialog),
+    m_insertButton(QIcon(QLatin1String(":/32/insert-link.png")), tr("Insert"), this)
 {
     ui->setupUi(this);
     ui->titleLE->hide();
     ui->titleLabel->hide();
-    ui->buttonBox->addButton(tr("Insert"), QDialogButtonBox::ApplyRole);
-    if (auto i = qobject_cast<QPushButton *>(ui->buttonBox->buttons().last()))
-        i->setDefault(true);
     adjustSize();
     connect(ui->absPathCB, &QCheckBox::toggled, this, &LinkDialog::updateDestinationField);
     connect(ui->buttonBox, &QDialogButtonBox::clicked, this, &LinkDialog::onClicked);
@@ -46,9 +44,38 @@ void LinkDialog::setSelectedText(const QString &text)
     }
 }
 
+void LinkDialog::setDestination(const QString &text)
+{
+    m_destination = text;
+    updateDestinationField();
+}
+
+void LinkDialog::setLinkText(const QString &text)
+{
+    ui->textLE->setText(text);
+}
+
+void LinkDialog::setMode(LinkDialog::Mode mode) {
+    switch (mode) {
+    case Mode::InsertLink:
+        ui->buttonBox->removeButton(m_okButton);
+        ui->buttonBox->addButton(&m_insertButton, QDialogButtonBox::ApplyRole);
+        m_insertButton.setDefault(true);
+        setWindowTitle(tr("Insert Link"));
+        break;
+    case Mode::EditLink:
+        ui->buttonBox->removeButton(&m_insertButton);
+        m_okButton = ui->buttonBox->addButton(QDialogButtonBox::Ok);
+        m_okButton->setDefault(true);
+        setWindowTitle(tr("Edit Link"));
+        break;
+    }
+    m_mode = mode;
+}
+
 void LinkDialog::onClicked(QAbstractButton *button)
 {
-    if (ui->buttonBox->buttonRole(button) == QDialogButtonBox::ApplyRole)
+    if (ui->buttonBox->buttonRole(button) != QDialogButtonBox::RejectRole)
         emit insert(ui->destinationLE->text(), ui->textLE->text(), ui->titleLE->text());
 }
 

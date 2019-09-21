@@ -24,6 +24,7 @@
 
 class MarkdownBrowser : public QTextBrowser
 {
+    Q_OBJECT
 public:
     MarkdownBrowser(QWidget *parent = nullptr);
     void setSource(const QUrl &name) override;
@@ -31,6 +32,13 @@ public:
     QVariant loadResource(int type, const QUrl &name) override;
     void reload() override;
     void updateWatcher();
+
+signals:
+    void editLink();
+    void unlink();
+
+protected:
+    void contextMenuEvent(QContextMenuEvent *event) override;
 
 private:
     void onFileChanged(const QString &path);

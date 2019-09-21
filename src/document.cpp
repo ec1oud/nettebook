@@ -181,6 +181,17 @@ void Document::clearCache(const QUrl &url)
     m_loadedResources.remove(url);
 }
 
+QTextFragment Document::fragmentAtCursor(const QTextCursor &cursor)
+{
+    QTextBlock::iterator it;
+    for (it = cursor.block().begin(); !(it.atEnd()); ++it) {
+        QTextFragment currentFragment = it.fragment();
+        if (currentFragment.contains(cursor.position()))
+            return currentFragment;
+    }
+    return QTextFragment();
+}
+
 void Document::saveAs(QUrl url, const QString &mimeType)
 {
     m_saveDone = false;

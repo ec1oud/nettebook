@@ -2,6 +2,7 @@
 #define LINKDIALOG_H
 
 #include <QDialog>
+#include <QPushButton>
 #include <QUrl>
 
 class QAbstractButton;
@@ -19,6 +20,16 @@ public:
     ~LinkDialog();
     void setDocumentPath(const QUrl &path);
     void setSelectedText(const QString &text);
+    void setDestination(const QString &text);
+    void setLinkText(const QString &text);
+
+    enum class Mode {
+        InsertLink,
+        EditLink
+    };
+    Q_ENUM(Mode)
+
+    void setMode(Mode mode);
 
 signals:
     void insert(QString destination, QString text, QString title);
@@ -33,8 +44,11 @@ private:
 
 private:
     Ui::LinkDialog *ui;
+    QPushButton m_insertButton;
+    QPushButton *m_okButton = nullptr;
     QUrl m_source;
     QUrl m_destination;
+    Mode m_mode = Mode::InsertLink;
 };
 
 #endif // LINKDIALOG_H

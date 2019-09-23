@@ -33,11 +33,13 @@
 #include <QTextDocumentFragment>
 #include <QTextEdit>
 #include <QTextList>
+#include <QTextTableCell>
 #include <iostream>
 #include <sstream>
 #include "jsonview.h"
 #include "settingsdialog.h"
 #include "tablesizedialog.h"
+#include "tableviewdialog.h"
 
 static const QString ipfsScheme = QStringLiteral("ipfs");
 static const QString fileScheme = QStringLiteral("file");
@@ -764,6 +766,41 @@ void MainWindow::on_action_Redo_triggered()
 {
     if (QWidget *t = qApp->focusWidget())
         t->metaObject()->invokeMethod(t, "redo");
+}
+
+void MainWindow::on_actionConvert_Table_triggered()
+{
+    QStringList lines = m_mainWidget->textCursor().selection()
+            .toPlainText().split(QLatin1Char('\n'));
+    TableViewDialog dlg(this);
+    dlg.setTextLines(lines);
+    if (dlg.exec())
+        convertToTable(lines, dlg.columns(), dlg.rows(), dlg.flow());
+}
+
+void MainWindow::convertToTable(QStringList lines, int columns, int rows, QListView::Flow flow)
+{
+    QTextCursor cursor = m_mainWidget->textCursor();
+    cursor.beginEditBlock();
+    cursor.removeSelectedText();
+    QTextTable *table = cursor.insertTable(rows, columns);
+//    qDebug() << "lines" << lines.count() << "rows" << rows << "columns" << columns;
+    if (flow == QListView::Flow::TopToBottom) {
+        int c = 0;
+        while (!lines.isEmpty()) {
+            for (int r = 0; r < rows && !lines.isEmpty(); ++r)
+                table->cellAt(r, c).firstCursorPosition().insertText(lines.takeFirst());
+            c++; // yep
+        }
+    } else { // LeftToRight
+        int r = 0;
+        while (!lines.isEmpty()) {
+            for (int c = 0; c < columns && !lines.isEmpty(); ++c)
+                table->cellAt(r, c).firstCursorPosition().insertText(lines.takeFirst());
+            r++;
+        }
+    }
+    cursor.endEditBlock();
 }
 
 void MainWindow::on_actionNewPageSeries_triggered()

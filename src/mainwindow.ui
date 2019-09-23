@@ -155,6 +155,7 @@
      <string>&amp;Tools</string>
     </property>
     <addaction name="actionConvert_CID_v0_to_v1"/>
+    <addaction name="actionConvert_Table"/>
     <addaction name="separator"/>
     <addaction name="actionSettings"/>
    </widget>
@@ -554,6 +555,14 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+L</string>
+   </property>
+  </action>
+  <action name="actionConvert_Table">
+   <property name="text">
+    <string>Convert to table...</string>
+   </property>
+   <property name="toolTip">
+    <string>Convert selected lines to a table</string>
    </property>
   </action>
  </widget>

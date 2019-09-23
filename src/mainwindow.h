@@ -19,6 +19,7 @@
 #define MAINWINDOW_H
 
 #include <QJsonDocument>
+#include <QListView>
 #include <QMainWindow>
 #include <QMimeType>
 #include <QNetworkAccessManager>
@@ -93,6 +94,7 @@ private slots:
     void on_action_Paste_triggered();
     void on_action_Undo_triggered();
     void on_action_Redo_triggered();
+    void on_actionConvert_Table_triggered();
 
     void on_actionNewPageSeries_triggered();
 
@@ -105,6 +107,7 @@ private:
     void modifyIndentation(int amount);
     void newPageSeries();
     void insertLink(const QString &destination, const QString &text, const QString &title);
+    void convertToTable(QStringList lines, int columns, int rows, QListView::Flow flow);
 
     // to be kept in sync with items in ui->styleCB
     enum class Style {

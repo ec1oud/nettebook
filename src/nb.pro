@@ -23,6 +23,7 @@ SOURCES += \
     settings.cpp \
     settingsdialog.cpp \
     tablesizedialog.cpp \
+    tableviewdialog.cpp \
     thumbnailitem.cpp \
     thumbnailscene.cpp \
     thumbnailview.cpp \
@@ -39,6 +40,7 @@ HEADERS += \
     settings.h \
     settingsdialog.h \
     tablesizedialog.h \
+    tableviewdialog.h \
     thumbnailitem.h \
     thumbnailscene.h \
     thumbnailview.h \
@@ -47,7 +49,8 @@ FORMS += \
     linkdialog.ui \
     mainwindow.ui \
     settingsdialog.ui \
-    tablesizedialog.ui
+    tablesizedialog.ui \
+    tableviewdialog.ui
 
 RESOURCES += \
     resources/resources.qrc

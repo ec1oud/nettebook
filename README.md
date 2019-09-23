@@ -15,6 +15,9 @@ notebook, as well as being suitable for blogging and other informal publishing.
   files on your local MFS/unixfs instance or at a particular IPFS hash.  This
   can be built with earlier Qt versions such as 5.12.
 
+![screenshot](images/screenshot-ipfs.png)
+![screenshot](images/screenshot-dolphin.png)
+
 - - -
 The "old" branch of this repo also contains the historical version of nettebook
 which had similar ambitions but was implemented completely differently, around

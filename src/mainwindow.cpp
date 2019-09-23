@@ -441,7 +441,7 @@ void MainWindow::on_actionToggleEditMode_toggled(bool edit)
     ui->actionSave->setVisible(edit);
     ui->actionSave_As->setVisible(edit);
     ui->actionSave_to_IPFS->setVisible(edit);
-    ui->actionInsert_Horizontal_Rule->setVisible(edit);
+    ui->menuInsert->setEnabled(edit);
     ui->menuEdit->setEnabled(edit);
 }
 
@@ -633,7 +633,6 @@ void MainWindow::on_actionInsert_Link_triggered()
     }
     m_linkDialog->setSelectedText(m_mainWidget->textCursor().selectedText());
     m_linkDialog->setDocumentPath(m_document->contentSource());
-    m_editingLink = false;
     m_linkDialog->setMode(LinkDialog::Mode::InsertLink);
     m_linkDialog->show();
 }
@@ -655,7 +654,6 @@ void MainWindow::on_actionEdit_Link_triggered()
 //qDebug() << "anchor names" << cursor.charFormat().anchorHref() << cursor.charFormat().anchorNames();
     m_linkDialog->setDocumentPath(m_document->contentSource());
     m_linkDialog->setMode(LinkDialog::Mode::EditLink);
-    m_editingLink = true;
     m_linkDialog->show();
 }
 
@@ -678,19 +676,40 @@ void MainWindow::on_actionUnlink_triggered()
 void MainWindow::insertLink(const QString &destination, const QString &text, const QString &title)
 {
     Q_UNUSED(title) // markdown supports it, but QTextDocument doesn't (yet?)
-    QTextCursor cursor = (m_editingLink ? m_editingSelection : m_mainWidget->textCursor());
+    QTextCursor cursor = (m_linkDialog->mode() == LinkDialog::Mode::EditLink ?
+                              m_editingSelection : m_mainWidget->textCursor());
 //    qDebug() << destination << text << title;
     cursor.beginEditBlock();
     QTextCharFormat fmt = cursor.charFormat();
     fmt.setForeground(QPalette().link());
     fmt.setAnchor(true);
     fmt.setAnchorHref(destination);
-    if (text == cursor.selectedText()) {
+    if (m_linkDialog->mode() == LinkDialog::Mode::InsertImage) {
+        QTextImageFormat fmt;
+        fmt.setName(destination);
+        if (!text.isEmpty())
+            fmt.setProperty(QTextFormat::ImageAltText, text);
+        if (!title.isEmpty())
+            fmt.setProperty(QTextFormat::ImageTitle, title);
+        cursor.insertImage(fmt);
+    } else if (text == cursor.selectedText()) {
         cursor.setCharFormat(fmt);
     } else {
         cursor.insertText(text, fmt);
     }
     cursor.endEditBlock();
+}
+
+void MainWindow::on_actionInsert_Image_triggered()
+{
+    if (!m_linkDialog) {
+        m_linkDialog = new LinkDialog(this);
+        connect(m_linkDialog, &LinkDialog::insert, this, &MainWindow::insertLink);
+    }
+    m_linkDialog->setSelectedText(m_mainWidget->textCursor().selectedText());
+    m_linkDialog->setDocumentPath(m_document->contentSource());
+    m_linkDialog->setMode(LinkDialog::Mode::InsertImage);
+    m_linkDialog->show();
 }
 
 void MainWindow::on_actionInsert_Horizontal_Rule_triggered()

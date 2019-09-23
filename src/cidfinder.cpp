@@ -22,7 +22,7 @@ CidFinder::Result CidFinder::findIn(const QString &s)
         ret.length = 60;
         QByteArray b = s.toLatin1();
     }
-    qDebug() << s << ret.isValid() << ret.start << ret.length << ret.toString(s);
+//    qDebug() << s << ret.isValid() << ret.start << ret.length << ret.toString(s);
     return ret;
 }
 

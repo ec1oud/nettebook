@@ -51,7 +51,7 @@
     </widget>
    </item>
    <item row="2" column="0">
-    <widget class="QLabel" name="label_2">
+    <widget class="QLabel" name="textLabel">
      <property name="text">
       <string>Link text</string>
      </property>
@@ -63,7 +63,7 @@
    <item row="3" column="0">
     <widget class="QLabel" name="titleLabel">
      <property name="text">
-      <string>Link title</string>
+      <string>Title</string>
      </property>
     </widget>
    </item>

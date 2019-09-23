@@ -1,7 +1,9 @@
 #include "linkdialog.h"
 #include "ui_linkdialog.h"
 #include <QAbstractButton>
+#include <QDebug>
 #include <QFileDialog>
+#include <QImageReader>
 #include <QPushButton>
 
 LinkDialog::LinkDialog(QWidget *parent) :
@@ -61,13 +63,28 @@ void LinkDialog::setMode(LinkDialog::Mode mode) {
         ui->buttonBox->removeButton(m_okButton);
         ui->buttonBox->addButton(&m_insertButton, QDialogButtonBox::ApplyRole);
         m_insertButton.setDefault(true);
+        ui->textLabel->setText(tr("Link text"));
+        ui->titleLabel->setVisible(false);
+        ui->titleLE->setVisible(false);
         setWindowTitle(tr("Insert Link"));
         break;
     case Mode::EditLink:
         ui->buttonBox->removeButton(&m_insertButton);
         m_okButton = ui->buttonBox->addButton(QDialogButtonBox::Ok);
         m_okButton->setDefault(true);
+        ui->textLabel->setText(tr("Link text"));
+        ui->titleLabel->setVisible(false);
+        ui->titleLE->setVisible(false);
         setWindowTitle(tr("Edit Link"));
+        break;
+    case Mode::InsertImage:
+        ui->buttonBox->removeButton(m_okButton);
+        ui->buttonBox->addButton(&m_insertButton, QDialogButtonBox::ApplyRole);
+        m_insertButton.setDefault(true);
+        ui->textLabel->setText(tr("Description"));
+        ui->titleLabel->setVisible(true);
+        ui->titleLE->setVisible(true);
+        setWindowTitle(tr("Insert Image"));
         break;
     }
     m_mode = mode;
@@ -81,7 +98,19 @@ void LinkDialog::onClicked(QAbstractButton *button)
 
 void LinkDialog::on_chooseFileButton_clicked()
 {
-    m_destination = QFileDialog::getOpenFileUrl(this, tr("Choose the link destination"));
+    if (m_mode == Mode::InsertImage) {
+        QString imageFormats = tr("Images (");
+        int i = 0;
+        for (auto f : QImageReader::supportedImageFormats()) {
+            if (i++)
+                imageFormats += QLatin1Char(' ');
+            imageFormats += QLatin1String("*.%1").arg(f);
+        }
+        imageFormats += tr(")");
+        m_destination = QFileDialog::getOpenFileUrl(this, tr("Choose an image"), QUrl(), imageFormats);
+    } else {
+        m_destination = QFileDialog::getOpenFileUrl(this, tr("Choose the link destination"));
+    }
     updateDestinationField();
 }
 

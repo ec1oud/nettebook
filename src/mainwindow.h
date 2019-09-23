@@ -77,6 +77,7 @@ private slots:
     void on_actionInsert_Link_triggered();
     void on_actionEdit_Link_triggered();
     void on_actionUnlink_triggered();
+    void on_actionInsert_Image_triggered();
     void on_actionInsert_Horizontal_Rule_triggered();
     void on_actionInsert_Table_triggered();
     void on_actionIndent_triggered();
@@ -131,7 +132,6 @@ private:
     QTextCursor m_editingSelection; // set in special cases only
     int m_hashBegin = 0, m_hashEnd = 0;
     bool m_programmaticUiSetting = false;
-    bool m_editingLink = false;
 };
 
 #endif // MAINWINDOW_H

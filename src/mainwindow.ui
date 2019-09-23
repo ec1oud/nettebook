@@ -169,7 +169,7 @@
     <addaction name="action_Copy"/>
     <addaction name="action_Paste"/>
    </widget>
-   <widget class="QMenu" name="menu_Insert">
+   <widget class="QMenu" name="menuInsert">
     <property name="title">
      <string>&amp;Insert</string>
     </property>
@@ -182,7 +182,7 @@
    <addaction name="menuEdit"/>
    <addaction name="menuView"/>
    <addaction name="menuTools"/>
-   <addaction name="menu_Insert"/>
+   <addaction name="menuInsert"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">
@@ -213,6 +213,7 @@
    <addaction name="actionStrikeOut"/>
    <addaction name="actionMonospace"/>
    <addaction name="actionInsert_Link"/>
+   <addaction name="actionInsert_Image"/>
    <addaction name="actionInsert_Horizontal_Rule"/>
    <addaction name="actionIndent"/>
    <addaction name="actionUnindent"/>
@@ -424,6 +425,9 @@
    <property name="text">
     <string>Horizontal &amp;Rule</string>
    </property>
+   <property name="toolTip">
+    <string>Insert Horizontal Rule</string>
+   </property>
   </action>
   <action name="action_Local_IPFS_files">
    <property name="text">
@@ -523,8 +527,18 @@
    </property>
   </action>
   <action name="actionInsert_Image">
+   <property name="icon">
+    <iconset resource="resources/resources.qrc">
+     <normaloff>:/32/insert-image.png</normaloff>:/32/insert-image.png</iconset>
+   </property>
    <property name="text">
-    <string>Local &amp;Image</string>
+    <string>Ima&amp;ge</string>
+   </property>
+   <property name="toolTip">
+    <string>Insert Image</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+G</string>
    </property>
   </action>
   <action name="actionInsert_Link">
@@ -534,6 +548,9 @@
    </property>
    <property name="text">
     <string>&amp;Link</string>
+   </property>
+   <property name="toolTip">
+    <string>Insert Link</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+L</string>

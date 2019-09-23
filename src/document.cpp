@@ -236,25 +236,25 @@ void Document::saveResources(const QUrl &dir, const QString &subdir)
         QTextCharFormat fmt = cursor.charFormat();
         if (fmt.isImageFormat()) {
             QTextImageFormat ifmt = fmt.toImageFormat();
-            QString desc = ifmt.stringProperty(QTextFormat::ImageAltText);
-            QString title = ifmt.stringProperty(QTextFormat::ImageTitle);
-            QVariant image = loadResource(ImageResource, ifmt.name());
-            if (image.isValid()) {
-                QUrl url(ifmt.name());
-                QString path = d.absoluteFilePath(url.fileName());
-                qDebug() << "saving image" << ifmt.name() << "->" << path;
-                if (needToCreateDir) {
-                    d.mkdir(subdir);
-                    d.cd(subdir);
-                    needToCreateDir = false;
-                }
-                QFile out(path);
-                if (out.open(QFile::WriteOnly | QIODevice::Truncate)) {
-                    out.write(image.toByteArray());
-                    out.close();
-                    ifmt.setName(subdir + QDir::separator() + url.fileName());
-                    cursor.select(QTextCursor::BlockUnderCursor);
-                    cursor.setCharFormat(ifmt);
+            if (!QFileInfo(ifmt.name()).exists() && !QUrl(ifmt.name()).isLocalFile()) {
+                QVariant image = loadResource(ImageResource, ifmt.name());
+                if (image.isValid()) {
+                    QUrl url(ifmt.name());
+                    QString path = d.absoluteFilePath(url.fileName());
+                    qDebug() << "saving image" << ifmt.name() << "->" << path;
+                    if (needToCreateDir) {
+                        d.mkdir(subdir);
+                        d.cd(subdir);
+                        needToCreateDir = false;
+                    }
+                    QFile out(path);
+                    if (out.open(QFile::WriteOnly | QIODevice::Truncate)) {
+                        out.write(image.toByteArray());
+                        out.close();
+                        ifmt.setName(subdir + QDir::separator() + url.fileName());
+                        cursor.select(QTextCursor::BlockUnderCursor);
+                        cursor.setCharFormat(ifmt);
+                    }
                 }
             }
         }

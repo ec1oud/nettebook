@@ -25,10 +25,12 @@ public:
 
     enum class Mode {
         InsertLink,
-        EditLink
+        EditLink,
+        InsertImage
     };
     Q_ENUM(Mode)
 
+    Mode mode() { return m_mode; }
     void setMode(Mode mode);
 
 signals:

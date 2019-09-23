@@ -3,6 +3,8 @@ Nettebook is still trying to figure out what to be when it grows up.
 At present it's at least a browser and WYSIWYG editor for Markdown files,
 locally and on [IPFS](https://ipfs.io).
 
+![screenshot](images/screenshot.png)
+
 It has ambitions to lean into the direction of being a personal all-purpose
 notebook, as well as being suitable for blogging and other informal publishing.
 

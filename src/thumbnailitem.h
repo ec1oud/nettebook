@@ -46,7 +46,7 @@ public:
     void paint ( QPainter * painter, const QStyleOptionGraphicsItem * option, QWidget * widget = nullptr ) override;
 
 protected:
-    void mouseMoveEvent ( QGraphicsSceneMouseEvent * ev );
+    void mouseMoveEvent ( QGraphicsSceneMouseEvent * ev ) override;
 };
 
 #endif // THUMBNAILITEM_H

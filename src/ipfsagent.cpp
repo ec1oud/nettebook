@@ -17,7 +17,10 @@
 #include "ipfsagent.h"
 #include <QHttpPart>
 #include <QNetworkReply>
+
+#ifndef NETTEBOOK_NO_KIO
 #include <KIO/Job>
+#endif
 
 IpfsAgent::IpfsAgent(QObject *parent) : QObject(parent)
 {
@@ -61,6 +64,7 @@ QJsonDocument IpfsAgent::execPost(const QString &suffix, const QString &query, c
     return ret;
 }
 
+#ifndef NETTEBOOK_NO_KIO
 void IpfsAgent::getFileKIO(const QUrl &url, std::function<void (QByteArray)> handleResult)
 {
 qDebug() << "GET" << url;
@@ -93,3 +97,4 @@ void IpfsAgent::fileDataReceiveDone(KJob *job)
     m_resourceLoaders.remove(url);
     m_resourceResponders.value(url)(m_loadedResources.value(url));
 }
+#endif

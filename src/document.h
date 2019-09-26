@@ -8,12 +8,15 @@
 #include <QTextDocument>
 #include <QTextFragment>
 #include <QUrl>
+
+#ifndef NETTEBOOK_NO_KIO
 #include <KIO/ListJob>
 
 namespace KIO {
 class Job;
 class TransferJob;
 }
+#endif
 
 class Document;
 class QTextEdit;
@@ -58,11 +61,13 @@ protected:
     void saveResources(const QUrl &dir, const QString &subdir);
 
 private slots:
+#ifndef NETTEBOOK_NO_KIO
     void resourceDataReceived(KIO::Job *, const QByteArray &data);
     void resourceReceiveDone(KJob *);
     void fileListReceived(KIO::Job *job, const KIO::UDSEntryList &list);
     void onSaveDataReq(KIO::Job *job, QByteArray &dest);
     void onSaveDone(KJob *job);
+#endif
 
 private:
     enum ResourceTypeExt {
@@ -70,13 +75,15 @@ private:
         OdtResource
     };
 
+#ifndef NETTEBOOK_NO_KIO
     QHash<QUrl, KJob*> m_resourceLoaders;
+    KIO::UDSEntryList m_fileList;
+    KIO::TransferJob *m_transferJob = nullptr;
+#endif
     QHash<QUrl, QByteArray> m_loadedResources;
     QUrl m_mainFile;
     QUrl m_saveUrl;
-    KIO::UDSEntryList m_fileList;
     QString m_errorText;
-    KIO::TransferJob *m_transferJob = nullptr;
     int m_saveType = UnknownResource;
     Status m_status = NullStatus;
     bool m_saveDone = false;

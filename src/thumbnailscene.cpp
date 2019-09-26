@@ -25,7 +25,10 @@
 #include <QJsonArray>
 #include <QJsonObject>
 #include <QPainter>
+
+#ifndef NETTEBOOK_NO_KIO
 #include <KIO/Job>
+#endif
 
 ThumbnailScene::ThumbnailScene() :
     QGraphicsScene()
@@ -194,8 +197,9 @@ void ThumbnailScene::selectionChanged()
 void ThumbnailScene::saveAllToIpfs()
 {
     for (ThumbnailItem * item : items) {
-        QUrl url("ipfs:///");
         item->saved = false;
+#ifndef NETTEBOOK_NO_KIO
+        QUrl url("ipfs:///");
         KIO::TransferJob *job = KIO::put(url, -1, KIO::Overwrite);
         job->addMetaData("content-type", QLatin1String("text/markdown"));
         m_saveJobs.insert(job, item);
@@ -207,9 +211,11 @@ void ThumbnailScene::saveAllToIpfs()
             item->saved = true;
         });
         connect (job, SIGNAL(result(KJob*)), this, SLOT(saveJobResult(KJob*)));
+#endif
     }
 }
 
+#ifndef NETTEBOOK_NO_KIO
 void ThumbnailScene::saveJobResult(KJob *job)
 {
     QString hash = static_cast<KIO::Job *>(job)->metaData().value(QLatin1String("Hash"), QString());
@@ -235,3 +241,4 @@ void ThumbnailScene::saveJobResult(KJob *job)
         emit seriesCidChanged(QUrl("ipfs:///" + cid));
     }
 }
+#endif

@@ -22,12 +22,14 @@
 #include <QNetworkAccessManager>
 #include <QUrl>
 
+#ifndef NETTEBOOK_NO_KIO
 namespace KIO {
 class Job;
 class TransferJob;
 }
 
 class KJob;
+#endif
 
 class IpfsAgent : public QObject
 {
@@ -40,18 +42,23 @@ signals:
 public slots:
     QJsonDocument execGet(const QString &suffix, const QString &query);
     QJsonDocument execPost(const QString &suffix, const QString &query, const QJsonDocument &body);
+
+#ifndef NETTEBOOK_NO_KIO
     void getFileKIO(const QUrl &url, std::function<void(QByteArray)> handleResult);
 
 protected slots:
     void fileDataReceived(KIO::Job *job, const QByteArray &data);
     void fileDataReceiveDone(KJob *job);
+#endif
 
 private:
     QNetworkAccessManager m_nam;
     QUrl m_apiBaseUrl = QUrl(QLatin1String("http://localhost:5001/api/v0/"));
     QEventLoop m_eventLoop;
+#ifndef NETTEBOOK_NO_KIO
     QHash<QUrl, KJob*> m_resourceLoaders;
     QHash<QUrl, std::function<void (QByteArray)>> m_resourceResponders;
+#endif
     QHash<QUrl, QByteArray> m_loadedResources;
 };
 

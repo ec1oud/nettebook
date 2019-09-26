@@ -13,8 +13,11 @@
 #include <QTextCodec>
 #include <QTextFrame>
 #include <QTextDocumentWriter>
+
+#ifndef NETTEBOOK_NO_KIO
 #include <KIO/Job>
 #include <KIO/ListJob>
+#endif
 
 static const QString ipfsScheme = QStringLiteral("ipfs");
 static const QString fileScheme = QStringLiteral("file");
@@ -39,6 +42,7 @@ QVariant Document::loadResource(int t, const QUrl &name)
         qDebug() << "resolving relative URL" << url << "base" << baseUrl() << "meta" << metaInformation(DocumentUrl);
         url = baseUrl().resolved(url);
     }
+#ifndef NETTEBOOK_NO_KIO
     if (m_resourceLoaders.contains(name))
         return QVariant(); // still waiting
     else if (!m_loadedResources.contains(name))
@@ -86,6 +90,7 @@ qDebug() << "GET" << name << job;
         connect (job, SIGNAL(result(KJob*)), this, SLOT(resourceReceiveDone(KJob*)));
         m_resourceLoaders.insert(name, job);
     }
+#endif
     // Waiting for now, but this function can't block.  We'll be nagged again soon.
     return QVariant();
 }
@@ -96,6 +101,7 @@ void Document::setStatus(Document::Status s)
     // TODO emit?
 }
 
+#ifndef NETTEBOOK_NO_KIO
 void Document::resourceDataReceived(KIO::Job *job, const QByteArray & data)
 {
     QUrl url = m_resourceLoaders.key(job);
@@ -175,6 +181,7 @@ QByteArray Document::fileListMarkdown()
     qDebug() << ret;
     return ret;
 }
+#endif
 
 void Document::clearCache(const QUrl &url)
 {
@@ -219,11 +226,13 @@ void Document::saveAs(QUrl url, const QString &mimeType)
     else if (mimeType == QLatin1String("text/html") ||
              mimeType == QLatin1String("application/xhtml+xml"))
         m_saveType = HtmlResource;
+#ifndef NETTEBOOK_NO_KIO
     KIO::TransferJob *job = KIO::put(url, -1, KIO::Overwrite);
     job->addMetaData("content-type", mt);
     connect (job, SIGNAL(dataReq(KIO::Job *, QByteArray &)),
              this, SLOT(onSaveDataReq(KIO::Job *, QByteArray &)));
     connect (job, SIGNAL(result(KJob*)), this, SLOT(onSaveDone(KJob*)));
+#endif
 }
 
 void Document::saveResources(const QUrl &dir, const QString &subdir)
@@ -267,6 +276,7 @@ void Document::saveResources(const QUrl &dir, const QString &subdir)
 */
 void Document::saveToIpfs()
 {
+#ifndef NETTEBOOK_NO_KIO
     m_saveDone = false;
     QString mt;
     switch (m_saveType) {
@@ -287,8 +297,10 @@ void Document::saveToIpfs()
     connect (m_transferJob, SIGNAL(dataReq(KIO::Job *, QByteArray &)),
              this, SLOT(onSaveDataReq(KIO::Job *, QByteArray &)));
     connect (m_transferJob, SIGNAL(result(KJob*)), this, SLOT(onSaveDone(KJob*)));
+#endif
 }
 
+#ifndef NETTEBOOK_NO_KIO
 void Document::onSaveDataReq(KIO::Job *job, QByteArray &dest)
 {
     Q_UNUSED(job)
@@ -341,3 +353,4 @@ void Document::onSaveDone(KJob *job)
     m_transferJob = nullptr;
     m_saveUrl.clear();
 }
+#endif

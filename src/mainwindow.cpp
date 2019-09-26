@@ -182,12 +182,14 @@ void MainWindow::load(QString url)
                 QString path = v.toString(); // in practice probably just a CID
                 QUrl u("/" + path);
                 u.setScheme(ipfsScheme);
+#ifndef NETTEBOOK_NO_KIO
                 m_ipfsAgent.getFileKIO(u, [path,this,i](QByteArray content) {
                     QString s = QString::fromUtf8(content);
                     if (i == 0)
                         m_document->setMarkdown(s);
                     m_thumbs->append(path, s);
                 });
+#endif
                 ++i;
             }
         }

@@ -81,7 +81,9 @@ protected:
 
 protected slots:
     void selectionChanged();
+#ifndef NETTEBOOK_NO_KIO
     void saveJobResult(KJob *job);
+#endif
 
 protected:
     int cols = 2;

@@ -46,6 +46,11 @@ public:
     static const QString styleGroup;
     static const QString codeBlockBackground;
 
+    const QString tasksGroup = QLatin1String("Tasks");
+    const QString moveTasksUnderHeading = QLatin1String("moveTasksUnderHeading");
+    const QString doneTasksHeadings = QLatin1String("doneTasksHeadings");
+    const QString moveTasksToBottom = QLatin1String("moveTasksToBottom");
+
 protected:
     Settings(QObject* parent = nullptr);
     ~Settings();

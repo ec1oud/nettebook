@@ -16,6 +16,9 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
     ui->journalFilenameFormat->setText(settings->stringOrDefault(settings->journalGroup, settings->journalFilenameFormat, QLatin1String("$date-$topics.md")));
     ui->useJournalTemplates->setChecked(settings->boolOrDefault(settings->journalGroup, settings->journalUsesTemplates, true));
     ui->codeBackgroundColorSwatch->setColor(QColor(settings->stringOrDefault(settings->styleGroup, settings->codeBlockBackground, "#EEE")));
+    ui->moveTasksUnderHeadingCB->setChecked(settings->boolOrDefault(settings->tasksGroup, settings->moveTasksUnderHeading, true));
+    ui->doneTasksHeadingsTE->setPlainText(settings->stringOrDefault(settings->tasksGroup, settings->doneTasksHeadings, tr("Done\nFerdig\nFinito")));
+    ui->moveTasksToBottomCB->setChecked(settings->boolOrDefault(settings->tasksGroup, settings->moveTasksToBottom, true));
     adjustSize();
 }
 
@@ -33,6 +36,9 @@ void SettingsDialog::on_SettingsDialog_accepted()
     settings->setString(settings->journalGroup, settings->journalFilenameFormat, ui->journalFilenameFormat->text());
     settings->setBool(settings->journalGroup, settings->journalUsesTemplates, ui->useJournalTemplates->checkState());
     settings->setString(settings->styleGroup, settings->codeBlockBackground, ui->codeBackgroundColorSwatch->color().name());
+    settings->setBool(settings->tasksGroup, settings->moveTasksUnderHeading, ui->moveTasksUnderHeadingCB->isChecked());
+    settings->setString(settings->tasksGroup, settings->doneTasksHeadings, ui->doneTasksHeadingsTE->toPlainText());
+    settings->setBool(settings->tasksGroup, settings->moveTasksToBottom, ui->moveTasksToBottomCB->isChecked());
 }
 
 void SettingsDialog::on_journalDirectoryChooseButton_clicked()

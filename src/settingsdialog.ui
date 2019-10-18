@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
+    <width>421</width>
     <height>300</height>
    </rect>
   </property>
@@ -113,6 +113,59 @@
        </item>
        <item row="0" column="1">
         <widget class="ColorSwatch" name="codeBackgroundColorSwatch" native="true"/>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tasksTab">
+      <attribute name="title">
+       <string>Tasks</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_2">
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout">
+         <item>
+          <widget class="QCheckBox" name="moveTasksUnderHeadingCB">
+           <property name="text">
+            <string>Move checked tasks under the first of these headings:</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <widget class="QPlainTextEdit" name="doneTasksHeadingsTE">
+         <property name="toolTip">
+          <string>You can specify the possible &quot;done&quot; task headings in order of preference, one per line.</string>
+         </property>
+         <property name="toolTipDuration">
+          <number>-7</number>
+         </property>
+         <property name="plainText">
+          <string>Done
+Finito
+Ferdig</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="moveTasksToBottomCB">
+         <property name="text">
+          <string>Otherwise move checked tasks to bottom of list</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
        </item>
       </layout>
      </widget>

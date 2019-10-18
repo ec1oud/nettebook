@@ -26,6 +26,15 @@
 static const QString ipfsScheme = QStringLiteral("ipfs");
 static const QString fileScheme = QStringLiteral("file");
 
+struct BlockUserData : public QTextBlockUserData {
+    ~BlockUserData() { }
+
+    QTextList *list;
+    QTextDocumentFragment frag;
+    int idx;
+    int pos;
+};
+
 Document::Document(QObject *parent) : QTextDocument(parent)
 {
 }
@@ -242,6 +251,127 @@ void Document::dumpBlocks() {
         ++iterator;
         ++i;
     }
+}
+
+/*!
+    React to the user's triggering of the toggle-checkbox action:
+    move the task list item in the way settings tell us to.
+*/
+void Document::onTaskItemToggled(QTextBlock &block, bool checked)
+{
+    if (checked) {
+        Settings *settings = Settings::instance();
+        bool movedToSpecificList = false;
+        if (settings->boolOrDefault(settings->tasksGroup, settings->moveTasksUnderHeading, false)) {
+            // find the list under the appropriate heading
+            QStringList destHeadings = settings->stringOrDefault(settings->tasksGroup, settings->doneTasksHeadings)
+                    .split(QLatin1Char('\n'), Qt::SkipEmptyParts);
+            QTextCursor cursor(this);
+            bool moved = true;
+            bool foundHeading = false;
+            bool listIsNew = false;
+            QTextList *destList = nullptr;
+            do {
+                if (cursor.blockFormat().headingLevel()) {
+                    if (foundHeading) {
+                        Q_ASSERT(!destList);
+                        // next heading after the correct one, with no list found: need to
+                        // create a list under the prevous block, whatever it is
+                        cursor.movePosition(QTextCursor::PreviousBlock);
+                        break;
+                    }
+                    // so we are still looking for the right heading: is this it?
+                    QString headingText = cursor.block().text();
+                    // qDebug() << "comparing heading" << headingText << "to" << destHeadings;
+                    for (const auto &expected : destHeadings)
+                        if (!headingText.compare(expected, Qt::CaseInsensitive)) {
+                            foundHeading = true;
+                            qDebug() << "found destination heading" << headingText;
+                        }
+                } else if (foundHeading && !destList && cursor.block().textList()) {
+                    qDebug() << "found destination list under heading";
+                    destList = cursor.block().textList();
+                    break;
+                }
+                moved = cursor.movePosition(QTextCursor::NextBlock);
+            } while (moved);
+            if (foundHeading && !destList) {
+                qDebug() << "no list under heading; creating one";
+                cursor.movePosition(QTextCursor::EndOfBlock);
+                destList = cursor.insertList(QTextListFormat::ListDisc);
+                listIsNew = true;
+            }
+            // Now destList should be the one to move this item into, if set.
+            // Move the item to the bottom of that list.
+            if (destList) {
+                moveListItem(block, destList);
+                movedToSpecificList = true;
+                if (listIsNew) {
+                    // delete the empty first item which was created along with the list
+                    // (and which stupidly has inherited heading format)
+                    cursor.setPosition(destList->item(0).position());
+                    destList->removeItem(0);
+                    cursor.deleteChar();
+                }
+            }
+        }
+        if (!movedToSpecificList && settings->boolOrDefault(settings->tasksGroup, settings->moveTasksToBottom, false)) {
+            // Just move it to the bottom of the same list
+            moveListItem(block, block.textList());
+        }
+    }
+}
+
+/*!
+    Move the given \a block to a different list \a toList at index \a position.
+    If position is negative it means move it to the end.
+    If \a undoable is true, try to remember the block's previous location.
+    If the block was not in a list, then this movement cannot be undone.
+*/
+void Document::moveListItem(QTextBlock &block, QTextList *toList, int position, bool undoable)
+{
+    if (!toList) {
+        qWarning() << "no destination list";
+        return;
+    }
+    auto list = block.textList();
+    if (!list) {
+        qWarning() << "block wasn't in list:" << block.text();
+        return;
+    }
+
+    qDebug() << "moving list item" << block.text() << "from list with" << block.textList()->count() << "items to list with" << toList->count() << "items";
+
+    // select and copy
+    QTextCursor cursor(block);
+    cursor.select(QTextCursor::BlockUnderCursor);
+    BlockUserData *bud = new BlockUserData;
+    bud->list = list;
+    bud->idx = list->itemNumber(block);
+    bud->pos = block.position();
+    bud->frag = cursor.selection();
+
+    // remove from old location
+    list->remove(block);
+    cursor.removeSelectedText();
+
+    // insert at new location
+    if (position < 0) {
+        const int lastItemIdx = toList->count() - 1;
+        const int lastItemPos = toList->item(lastItemIdx).position();
+        cursor.setPosition(lastItemPos);
+        cursor.movePosition(QTextCursor::EndOfBlock);
+    } else {
+        cursor.setPosition(toList->item(position >= 0 ? position : toList->count() - 1).position());
+    }
+    cursor.insertFragment(bud->frag);
+    toList->add(block);
+
+    // save for undo, if requested
+    if (undoable)
+        block.setUserData(bud);
+    else
+        delete bud;
 }
 
 void Document::saveAs(QUrl url, const QString &mimeType)

@@ -49,6 +49,9 @@ public:
     void dumpBlocks();
     QTextFragment fragmentAtCursor(const QTextCursor &cursor);
 
+    void onTaskItemToggled(QTextBlock &block, bool checked);
+    void moveListItem(QTextBlock &block, QTextList *toList, int position = -1, bool undoable = true);
+
 signals:
     void errorTextChanged(const QString &text);
     void allResourcesLoaded();

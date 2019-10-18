@@ -350,14 +350,14 @@ void MainWindow::cursorPositionChanged()
             break;
         }
         switch (m_mainWidget->textCursor().block().blockFormat().marker()) {
-        case QTextBlockFormat::NoMarker:
+        case QTextBlockFormat::MarkerType::NoMarker:
 //            actionToggleCheckState->setChecked(false);
             break;
-        case QTextBlockFormat::Unchecked:
+        case QTextBlockFormat::MarkerType::Unchecked:
             ui->styleCB->setCurrentIndex(int(Style::Unchecked));
 //            actionToggleCheckState->setChecked(false);
             break;
-        case QTextBlockFormat::Checked:
+        case QTextBlockFormat::MarkerType::Checked:
             ui->styleCB->setCurrentIndex(int(Style::Checked));
 //            actionToggleCheckState->setChecked(true);
             break;
@@ -494,7 +494,7 @@ void MainWindow::on_styleCB_activated(int index)
         return;
     QTextCursor cursor = m_mainWidget->textCursor();
     QTextListFormat::Style listStyle = QTextListFormat::ListStyleUndefined;
-    QTextBlockFormat::MarkerType marker = QTextBlockFormat::NoMarker;
+    QTextBlockFormat::MarkerType marker = QTextBlockFormat::MarkerType::NoMarker;
     QTextBlockFormat blockFmt = cursor.blockFormat();
     cursor.beginEditBlock();
 
@@ -513,14 +513,14 @@ void MainWindow::on_styleCB_activated(int index)
             listStyle = cursor.currentList()->format().style();
         else
             listStyle = QTextListFormat::ListDisc;
-        marker = QTextBlockFormat::Unchecked;
+        marker = QTextBlockFormat::MarkerType::Unchecked;
         break;
     case Style::Checked:
         if (cursor.currentList())
             listStyle = cursor.currentList()->format().style();
         else
             listStyle = QTextListFormat::ListDisc;
-        marker = QTextBlockFormat::Checked;
+        marker = QTextBlockFormat::MarkerType::Checked;
         break;
     case Style::Numbered:
         listStyle = QTextListFormat::ListDecimal;

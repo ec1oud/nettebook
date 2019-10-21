@@ -2,6 +2,8 @@
     <qresource prefix="/">
         <file>16/nettebook.png</file>
         <file>32/nettebook.png</file>
+        <file>32/checkbox.png</file>
+        <file>32/checkbox-checked.png</file>
         <file>32/document-new.png</file>
         <file>32/document-open.png</file>
         <file>32/document-print-preview.png</file>

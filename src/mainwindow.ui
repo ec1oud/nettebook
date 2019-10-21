@@ -169,6 +169,7 @@
     <addaction name="actionCut"/>
     <addaction name="action_Copy"/>
     <addaction name="action_Paste"/>
+    <addaction name="actionToggle_Checkbox"/>
    </widget>
    <widget class="QMenu" name="menuInsert">
     <property name="title">
@@ -213,6 +214,7 @@
    <addaction name="actionStrongEmphasis"/>
    <addaction name="actionStrikeOut"/>
    <addaction name="actionMonospace"/>
+   <addaction name="actionToggle_Checkbox"/>
    <addaction name="actionInsert_Link"/>
    <addaction name="actionInsert_Image"/>
    <addaction name="actionInsert_Horizontal_Rule"/>
@@ -563,6 +565,24 @@
    </property>
    <property name="toolTip">
     <string>Convert selected lines to a table</string>
+   </property>
+  </action>
+  <action name="actionToggle_Checkbox">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources/resources.qrc">
+     <normaloff>:/32/checkbox-checked.png</normaloff>:/32/checkbox-checked.png</iconset>
+   </property>
+   <property name="text">
+    <string>Toggle Chec&amp;kbox</string>
+   </property>
+   <property name="toolTip">
+    <string>Make a line checkable or toggle the check mark</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+K</string>
    </property>
   </action>
  </widget>

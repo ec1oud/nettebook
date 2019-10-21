@@ -351,15 +351,15 @@ void MainWindow::cursorPositionChanged()
         }
         switch (m_mainWidget->textCursor().block().blockFormat().marker()) {
         case QTextBlockFormat::MarkerType::NoMarker:
-//            actionToggleCheckState->setChecked(false);
+            ui->actionToggle_Checkbox->setChecked(false);
             break;
         case QTextBlockFormat::MarkerType::Unchecked:
             ui->styleCB->setCurrentIndex(int(Style::Unchecked));
-//            actionToggleCheckState->setChecked(false);
+            ui->actionToggle_Checkbox->setChecked(false);
             break;
         case QTextBlockFormat::MarkerType::Checked:
             ui->styleCB->setCurrentIndex(int(Style::Checked));
-//            actionToggleCheckState->setChecked(true);
+            ui->actionToggle_Checkbox->setChecked(true);
             break;
         }
     } else {
@@ -376,6 +376,7 @@ void MainWindow::cursorPositionChanged()
         if (blockQuoteLevel)
             ui->styleCB->setCurrentIndex(int(Style::BlockQuote));
         // TODO some of these can be nested, but the combobox is only for mutually-exclusive styles
+        ui->actionToggle_Checkbox->setChecked(false);
     }
 //    int indentLevel = m_mainWidget->textCursor().blockFormat().indent();
     m_programmaticUiSetting = false;
@@ -486,6 +487,14 @@ void MainWindow::on_actionMonospace_toggled(bool a)
         f.setFamily(m_monoFont.family());
     fmt.setFont(f);
     mergeFormatOnWordOrSelection(fmt);
+}
+
+void MainWindow::on_actionToggle_Checkbox_toggled(bool checked)
+{
+    if (m_mainWidget->textCursor().blockFormat().marker() == QTextBlockFormat::MarkerType::NoMarker)
+        on_styleCB_activated(int(Style::Unchecked));
+    else
+        on_styleCB_activated(int(checked ? Style::Checked : Style::Unchecked));
 }
 
 void MainWindow::on_styleCB_activated(int index)

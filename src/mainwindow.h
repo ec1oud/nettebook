@@ -75,6 +75,7 @@ private slots:
     void on_actionEmphasis_toggled(bool a);
     void on_actionStrikeOut_toggled(bool a);
     void on_actionMonospace_toggled(bool a);
+    void on_actionToggle_Checkbox_toggled(bool checked);
     void on_actionInsert_Link_triggered();
     void on_actionEdit_Link_triggered();
     void on_actionUnlink_triggered();

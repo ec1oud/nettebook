@@ -104,6 +104,8 @@ private slots:
 
     void on_actionSettings_triggered();
 
+    void on_actionTodays_journal_triggered();
+
 private:
     void mergeFormatOnWordOrSelection(const QTextCharFormat &format);
     void modifyIndentation(int amount);

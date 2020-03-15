@@ -891,3 +891,8 @@ void MainWindow::on_actionSettings_triggered()
     SettingsDialog *d = new SettingsDialog();
     d->show();
 }
+
+void MainWindow::on_actionTodays_journal_triggered()
+{
+    loadJournal();
+}

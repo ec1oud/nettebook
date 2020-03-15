@@ -135,6 +135,7 @@
     </widget>
     <addaction name="menu_New"/>
     <addaction name="actionOpen"/>
+    <addaction name="actionTodays_journal"/>
     <addaction name="actionReload"/>
     <addaction name="actionSave"/>
     <addaction name="actionSave_As"/>
@@ -583,6 +584,15 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+K</string>
+   </property>
+  </action>
+  <action name="actionTodays_journal">
+   <property name="icon">
+    <iconset resource="resources/resources.qrc">
+     <normaloff>:/32/journal.png</normaloff>:/32/journal.png</iconset>
+   </property>
+   <property name="text">
+    <string>Today's &amp;journal</string>
    </property>
   </action>
  </widget>

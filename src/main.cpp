@@ -31,7 +31,6 @@ int main(int argc, char *argv[])
     QCoreApplication::setApplicationVersion(QLatin1String("0.0.1"));
 
     QCommandLineParser parser;
-//    parser.setOptionsAfterPositionalArgumentsMode(QCommandLineParser::ParseAsPositionalArguments);
     const QCommandLineOption helpOption = parser.addHelpOption();
     const QCommandLineOption versionOption = parser.addVersionOption();
 
@@ -45,8 +44,11 @@ int main(int argc, char *argv[])
 
     QCommandLineOption journalOption(QStringList() << QStringLiteral("j") << QStringLiteral("journal"),
             QCoreApplication::translate("main",
-                "Edit a journal entry: today's by default, or give a date (yyyymmdd or yyyy-mm-dd) or 'yesterday' or 'tomorrow'"));
+                "Edit a journal entry: today's by default, or give a date (yyyymmdd or yyyy-mm-dd) "
+                "or 'today', 'yesterday' or 'tomorrow'.  Topics or keywords can be added after the date."));
     parser.addOption(journalOption);
+
+    parser.addPositionalArgument(QLatin1String("[url]"), QCoreApplication::translate("main", "Optional filename or URL to open"));
 
     if (!parser.parse(QCoreApplication::arguments())) {
         qWarning() << parser.errorText();
@@ -68,7 +70,7 @@ int main(int argc, char *argv[])
             w.setBrowserStyle(QUrl::fromLocalFile(parser.value(cssOption)));
         }
         if (parser.isSet(journalOption))
-            w.loadJournal(toLoad);
+            w.loadJournal(parser.positionalArguments());
         else
             w.load(toLoad);
     } else {

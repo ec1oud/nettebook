@@ -220,11 +220,14 @@ void MainWindow::load(QString url)
     }
 }
 
-void MainWindow::loadJournal(QString dateString)
+void MainWindow::loadJournal(QStringList dateAndTopics)
 {
+    QString dateString = dateAndTopics.isEmpty() ? QString() : dateAndTopics.first();
     QDate date = (dateString.isEmpty() ? QDate::currentDate() : QDate::fromString(dateString, Qt::ISODate));
     if (!date.isValid()) {
-        if (dateString == QLatin1String("yesterday") || dateString == tr("yesterday"))
+        if (dateString == QLatin1String("today") || dateString == tr("today"))
+            date = QDate::currentDate();
+        else if (dateString == QLatin1String("yesterday") || dateString == tr("yesterday"))
             date = QDate::currentDate().addDays(-1);
         else if (dateString == QLatin1String("tomorrow") || dateString == tr("tomorrow"))
             date = QDate::currentDate().addDays(1);
@@ -248,8 +251,15 @@ void MainWindow::loadJournal(QString dateString)
     }
     QDir path = Settings::instance()->stringOrDefault(Settings::journalGroup, Settings::journalDirectory,
                                                       QDir::home().filePath(QLatin1String("journal")));
-    QString filename = Settings::instance()->stringOrDefault(Settings::journalGroup, Settings::journalFilenameFormat, QLatin1String("$date.md"));
+    QString filename = Settings::instance()->stringOrDefault(Settings::journalGroup, Settings::journalFilenameFormat, QLatin1String("$date-$topics.md"));
     filename.replace(QLatin1String("$date"), date.toString(QLatin1String("yyyyMMdd")));
+    QString topics;
+    if (dateAndTopics.count() > 1) {
+        dateAndTopics.removeFirst();
+        topics = dateAndTopics.join(filename.contains("-$topics") ? QLatin1Char('-') : QLatin1Char(' '));
+    }
+    filename.replace(QLatin1String("-$topics"), topics.isEmpty() ? topics : QLatin1Char('-') + topics);
+    filename.replace(QLatin1String("$topics"), topics);
     setEditMode();
     load(path.filePath(filename));
 }

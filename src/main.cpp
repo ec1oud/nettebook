@@ -16,6 +16,7 @@
 ****************************************************************************/
 
 #include "mainwindow.h"
+#include "settings.h"
 #include <QApplication>
 #include <QCommandLineOption>
 #include <QCommandLineParser>
@@ -37,6 +38,10 @@ int main(int argc, char *argv[])
     QCommandLineOption cssOption(QStringList() << QStringLiteral("s") << QStringLiteral("css"),
             QCoreApplication::translate("main", "Use the given CSS content style file."), QStringLiteral("path"));
     parser.addOption(cssOption);
+
+    QCommandLineOption templateOption(QStringList() << QStringLiteral("t") << QStringLiteral("template"),
+                                      QCoreApplication::translate("main", "Use the given template file."), QStringLiteral("name"));
+    parser.addOption(templateOption);
 
     QCommandLineOption editOption(QStringList() << QStringLiteral("e") << QStringLiteral("edit"),
             QCoreApplication::translate("main", "Open the file in edit mode."));
@@ -77,6 +82,11 @@ int main(int argc, char *argv[])
         if (parser.isSet(journalOption))
             w.loadJournal();
     }
+    if (parser.isSet(templateOption))
+        w.loadTemplate(parser.value(templateOption));
+    else if (parser.isSet(journalOption) && w.isEmpty() &&
+             Settings::instance()->boolOrDefault(Settings::journalGroup, Settings::journalUsesTemplates, true))
+        w.loadTemplate(QLatin1String("journal"));
     w.show();
     if (!preloadCss && parser.isSet(cssOption))
         w.setBrowserStyle(QUrl::fromLocalFile(parser.value(cssOption)));

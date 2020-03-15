@@ -16,7 +16,10 @@
 ****************************************************************************/
 
 #include "settings.h"
+#include <QApplication>
 #include <QDebug>
+#include <QDir>
+#include <QStandardPaths>
 
 const QString Settings::writingGroup(QLatin1String("Writing"));
 const QString Settings::saveResourcesWithDocuments(QLatin1String("saveResourcesWithDocuments"));
@@ -24,6 +27,7 @@ const QString Settings::resourceDirectorySuffix(QLatin1String("resourceDirectory
 const QString Settings::journalGroup(QLatin1String("Journal"));
 const QString Settings::journalDirectory(QLatin1String("journalDirectory"));
 const QString Settings::journalFilenameFormat(QLatin1String("journalFilenameFormat"));
+const QString Settings::journalUsesTemplates(QLatin1String("journalUsesTemplates"));
 
 Settings* Settings::instance()
 {
@@ -32,7 +36,13 @@ Settings* Settings::instance()
 }
 
 Settings::Settings(QObject* parent) :
+#ifdef Q_OS_LINUX
+    // correct for QTBUG-82888
+    QSettings(QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation) + QDir::separator() +
+              QApplication::applicationName() + QLatin1String(".conf"), QSettings::NativeFormat, parent)
+#else
     QSettings(parent)
+#endif
 {
     qDebug() << "settings stored at" << fileName();
 }

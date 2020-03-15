@@ -14,6 +14,8 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
     ui->resourcesSuffix->setText(settings->stringOrDefault(settings->writingGroup, settings->resourceDirectorySuffix, QLatin1String("_resources")));
     ui->journalDirectory->setText(settings->stringOrDefault(settings->journalGroup, settings->journalDirectory, QLatin1String("~/journal")));
     ui->journalFilenameFormat->setText(settings->stringOrDefault(settings->journalGroup, settings->journalFilenameFormat, QLatin1String("$date-$topics.md")));
+    ui->useJournalTemplates->setChecked(settings->boolOrDefault(settings->journalGroup, settings->journalUsesTemplates, true));
+    adjustSize();
 }
 
 SettingsDialog::~SettingsDialog()
@@ -28,6 +30,7 @@ void SettingsDialog::on_SettingsDialog_accepted()
     settings->setString(settings->writingGroup, settings->resourceDirectorySuffix, ui->resourcesSuffix->text());
     settings->setString(settings->journalGroup, settings->journalDirectory, ui->journalDirectory->text());
     settings->setString(settings->journalGroup, settings->journalFilenameFormat, ui->journalFilenameFormat->text());
+    settings->setBool(settings->journalGroup, settings->journalUsesTemplates, ui->useJournalTemplates->checkState());
 }
 
 void SettingsDialog::on_journalDirectoryChooseButton_clicked()

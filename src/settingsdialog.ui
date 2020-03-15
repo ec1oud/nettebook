@@ -55,7 +55,14 @@
        <item row="2" column="1">
         <layout class="QHBoxLayout" name="horizontalLayout">
          <item>
-          <widget class="QLineEdit" name="journalDirectory"/>
+          <widget class="QLineEdit" name="journalDirectory">
+           <property name="minimumSize">
+            <size>
+             <width>200</width>
+             <height>0</height>
+            </size>
+           </property>
+          </widget>
          </item>
          <item>
           <widget class="QPushButton" name="journalDirectoryChooseButton">
@@ -79,6 +86,13 @@
        </item>
        <item row="3" column="1">
         <widget class="QLineEdit" name="journalFilenameFormat"/>
+       </item>
+       <item row="4" column="0" colspan="2">
+        <widget class="QCheckBox" name="useJournalTemplates">
+         <property name="text">
+          <string>Journal entries always use templates</string>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>

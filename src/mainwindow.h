@@ -47,10 +47,12 @@ public:
     ~MainWindow();
 
     void closeEvent(QCloseEvent *event) override;
+    bool isEmpty() const;
 
 public slots:
     void load(QString url);
     void loadJournal(QStringList dateAndTopics = {});
+    void loadTemplate(QString name);
     bool maybeSave();
     bool setBrowserStyle(QUrl url);
     void setEditMode(bool mode = true);

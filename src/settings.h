@@ -42,6 +42,7 @@ public:
     static const QString journalGroup;
     static const QString journalDirectory;
     static const QString journalFilenameFormat;
+    static const QString journalUsesTemplates;
 
 protected:
     Settings(QObject* parent = nullptr);

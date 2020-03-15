@@ -35,6 +35,7 @@
 #include <QMessageBox>
 #include <QMimeDatabase>
 #include <QNetworkReply>
+#include <QStandardPaths>
 #include <QTextCodec>
 #include <QTextDocumentFragment>
 #include <QTextEdit>
@@ -117,6 +118,11 @@ void MainWindow::closeEvent(QCloseEvent *event)
         event->accept();
     else
         event->ignore();
+}
+
+bool MainWindow::isEmpty() const
+{
+    return m_document->isEmpty();
 }
 
 bool MainWindow::maybeSave()
@@ -262,6 +268,44 @@ void MainWindow::loadJournal(QStringList dateAndTopics)
     filename.replace(QLatin1String("$topics"), topics);
     setEditMode();
     load(path.filePath(filename));
+}
+
+void MainWindow::loadTemplate(QString name)
+{
+    const QLatin1String templatesSubdir("templates");
+    QFileInfo contentFi(m_document->contentSource().fileName());
+    QString fileName = name + QLatin1Char('.') + contentFi.suffix();
+    QDir documentDir = QFileInfo(m_document->contentSource().toLocalFile()).dir();
+    documentDir.cd(QLatin1String(".templates"));
+    QFileInfo fi(documentDir, fileName);
+    if (!fi.isReadable())
+        fi = QFileInfo(QStandardPaths::locate(QStandardPaths::AppConfigLocation,
+                                              templatesSubdir + QDir::separator() + fileName));
+    if (fi.isReadable()) {
+        qDebug() << "loading template" << fi.canonicalFilePath();
+        QFile f(fi.canonicalFilePath());
+        if (!f.open(QIODevice::ReadOnly))
+            return; // should never happen because we pre-checked
+        QString content = QString::fromLocal8Bit(f.readAll());
+        // actually it's kindof a silly limitation that for a markdown file, only a markdown template can be used, only html for html, etc.
+        // but it's more trouble to look for all possible templates with different extensions in different places
+        if (contentFi.suffix() == QLatin1String("md")) {
+            // workaround for missing QTextCursor::insertMarkdown()
+            QTextDocument qtd;
+            qtd.setMarkdown(content);
+            m_mainWidget->textCursor().insertHtml(qtd.toHtml());
+        } else if (contentFi.suffix() == QLatin1String("html")) {
+            m_mainWidget->textCursor().insertHtml(content);
+        } else {
+            m_mainWidget->textCursor().insertText(content);
+        }
+        m_mainWidget->textCursor().insertBlock(QTextBlockFormat(), QTextCharFormat());
+    } else {
+        QStringList paths;
+        for (auto p : QStandardPaths::standardLocations(QStandardPaths::AppConfigLocation))
+            paths << p + QDir::separator() + templatesSubdir;
+        qWarning() << "failed to find template" << name << "in" << documentDir.path() << "or" << paths;
+    }
 }
 
 bool MainWindow::on_actionSave_triggered()

@@ -18,8 +18,14 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "cidfinder.h"
+#include "datepickerdialog.h"
 #include "document.h"
 #include "ipfsagent.h"
+#include "jsonview.h"
+#include "settings.h"
+#include "settingsdialog.h"
+#include "tablesizedialog.h"
+#include "tableviewdialog.h"
 
 #include <QDebug>
 #include <QFileDialog>
@@ -36,10 +42,6 @@
 #include <QTextTableCell>
 #include <iostream>
 #include <sstream>
-#include "jsonview.h"
-#include "settingsdialog.h"
-#include "tablesizedialog.h"
-#include "tableviewdialog.h"
 
 static const QString ipfsScheme = QStringLiteral("ipfs");
 static const QString fileScheme = QStringLiteral("file");
@@ -216,6 +218,40 @@ void MainWindow::load(QString url)
             m_mainWidget->setSource(u, directory ? QTextDocument::MarkdownResource : QTextDocument::UnknownResource);
         updateUrlField(u);
     }
+}
+
+void MainWindow::loadJournal(QString dateString)
+{
+    QDate date = (dateString.isEmpty() ? QDate::currentDate() : QDate::fromString(dateString, Qt::ISODate));
+    if (!date.isValid()) {
+        if (dateString == QLatin1String("yesterday") || dateString == tr("yesterday"))
+            date = QDate::currentDate().addDays(-1);
+        else if (dateString == QLatin1String("tomorrow") || dateString == tr("tomorrow"))
+            date = QDate::currentDate().addDays(1);
+        else {
+            date = QDate::fromString(dateString, QLatin1String("yyyyMMdd"));
+            if (!date.isValid())
+                date = QDate::fromString(dateString, Qt::RFC2822Date);
+            if (!date.isValid())
+                date = QDate::fromString(dateString, Qt::DefaultLocaleShortDate); // 2-digit years are problematic though: QTBUG-82886
+            if (!date.isValid())
+                date = QDate::fromString(dateString, Qt::DefaultLocaleLongDate);
+        }
+    }
+    if (!date.isValid()) {
+        date = DatePickerDialog::choose(this, tr("Failed to parse date"),
+            tr("Sorry but I don't understand\n%1.\nYou can pick a date:").arg(dateString));
+    }
+    if (!date.isValid()) {
+        qWarning() << tr("%1 is not a valid date").arg(dateString);
+        return;
+    }
+    QDir path = Settings::instance()->stringOrDefault(Settings::journalGroup, Settings::journalDirectory,
+                                                      QDir::home().filePath(QLatin1String("journal")));
+    QString filename = Settings::instance()->stringOrDefault(Settings::journalGroup, Settings::journalFilenameFormat, QLatin1String("$date.md"));
+    filename.replace(QLatin1String("$date"), date.toString(QLatin1String("yyyyMMdd")));
+    setEditMode();
+    load(path.filePath(filename));
 }
 
 bool MainWindow::on_actionSave_triggered()

@@ -18,6 +18,8 @@ public:
 private slots:
     void on_SettingsDialog_accepted();
 
+    void on_journalDirectoryChooseButton_clicked();
+
 private:
     Ui::SettingsDialog *ui;
 };

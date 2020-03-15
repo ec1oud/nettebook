@@ -50,6 +50,7 @@ public:
 
 public slots:
     void load(QString url);
+    void loadJournal(QString dateString = QString());
     bool maybeSave();
     bool setBrowserStyle(QUrl url);
     void setEditMode(bool mode = true);

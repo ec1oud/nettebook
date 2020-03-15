@@ -43,6 +43,11 @@ int main(int argc, char *argv[])
             QCoreApplication::translate("main", "Open the file in edit mode."));
     parser.addOption(editOption);
 
+    QCommandLineOption journalOption(QStringList() << QStringLiteral("j") << QStringLiteral("journal"),
+            QCoreApplication::translate("main",
+                "Edit a journal entry: today's by default, or give a date (yyyymmdd or yyyy-mm-dd) or 'yesterday' or 'tomorrow'"));
+    parser.addOption(journalOption);
+
     if (!parser.parse(QCoreApplication::arguments())) {
         qWarning() << parser.errorText();
         exit(1);
@@ -62,7 +67,13 @@ int main(int argc, char *argv[])
             preloadCss = true;
             w.setBrowserStyle(QUrl::fromLocalFile(parser.value(cssOption)));
         }
-        w.load(toLoad);
+        if (parser.isSet(journalOption))
+            w.loadJournal(toLoad);
+        else
+            w.load(toLoad);
+    } else {
+        if (parser.isSet(journalOption))
+            w.loadJournal();
     }
     w.show();
     if (!preloadCss && parser.isSet(cssOption))

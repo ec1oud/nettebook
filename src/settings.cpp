@@ -18,6 +18,13 @@
 #include "settings.h"
 #include <QDebug>
 
+const QString Settings::writingGroup(QLatin1String("Writing"));
+const QString Settings::saveResourcesWithDocuments(QLatin1String("saveResourcesWithDocuments"));
+const QString Settings::resourceDirectorySuffix(QLatin1String("resourceDirectorySuffix"));
+const QString Settings::journalGroup(QLatin1String("Journal"));
+const QString Settings::journalDirectory(QLatin1String("journalDirectory"));
+const QString Settings::journalFilenameFormat(QLatin1String("journalFilenameFormat"));
+
 Settings* Settings::instance()
 {
     static Settings* self = new Settings();

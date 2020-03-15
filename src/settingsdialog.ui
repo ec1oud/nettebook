@@ -45,6 +45,41 @@
        <item row="1" column="1">
         <widget class="QLineEdit" name="resourcesSuffix"/>
        </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="label_2">
+         <property name="text">
+          <string>Journal directory</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <layout class="QHBoxLayout" name="horizontalLayout">
+         <item>
+          <widget class="QLineEdit" name="journalDirectory"/>
+         </item>
+         <item>
+          <widget class="QPushButton" name="journalDirectoryChooseButton">
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="resources/resources.qrc">
+             <normaloff>:/32/folder-open.png</normaloff>:/32/folder-open.png</iconset>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item row="3" column="0">
+        <widget class="QLabel" name="label_3">
+         <property name="text">
+          <string>Journal filename format</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="1">
+        <widget class="QLineEdit" name="journalFilenameFormat"/>
+       </item>
       </layout>
      </widget>
     </widget>

@@ -36,9 +36,12 @@ public:
     QString stringOrDefault(QString group, QString key, QString defaultVal = QString());
     void setString(QString group, QString key, QString val);
 
-    const QString writingGroup = QLatin1String("Writing");
-    const QString saveResourcesWithDocuments = QLatin1String("saveResourcesWithDocuments");
-    const QString resourceDirectorySuffix = QLatin1String("resourceDirectorySuffix");
+    static const QString writingGroup;
+    static const QString saveResourcesWithDocuments;
+    static const QString resourceDirectorySuffix;
+    static const QString journalGroup;
+    static const QString journalDirectory;
+    static const QString journalFilenameFormat;
 
 protected:
     Settings(QObject* parent = nullptr);

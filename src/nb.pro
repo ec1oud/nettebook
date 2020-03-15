@@ -14,6 +14,7 @@ no_kio: DEFINES += NETTEBOOK_NO_KIO
 
 SOURCES += \
     cidfinder.cpp \
+    datepickerdialog.cpp \
     document.cpp \
     ipfsagent.cpp \
     linkdialog.cpp \
@@ -32,6 +33,7 @@ SOURCES += \
 
 HEADERS += \
     cidfinder.h \
+    datepickerdialog.h \
     document.h \
     ipfsagent.h \
     linkdialog.h \
@@ -48,6 +50,7 @@ HEADERS += \
     thumbnailview.h \
 
 FORMS += \
+    datepickerdialog.ui \
     linkdialog.ui \
     mainwindow.ui \
     settingsdialog.ui \

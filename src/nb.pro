@@ -1,4 +1,4 @@
-QT += core gui widgets network
+QT += core gui widgets network printsupport
 TARGET = nb
 TEMPLATE = app
 DEFINES += QT_DEPRECATED_WARNINGS

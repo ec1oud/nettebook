@@ -108,6 +108,8 @@ private slots:
 
     void on_actionTodays_journal_triggered();
 
+    void on_actionPrint_triggered();
+
 private:
     void mergeFormatOnWordOrSelection(const QTextCharFormat &format);
     void modifyIndentation(int amount);

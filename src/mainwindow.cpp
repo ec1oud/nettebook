@@ -35,6 +35,8 @@
 #include <QMessageBox>
 #include <QMimeDatabase>
 #include <QNetworkReply>
+#include <QPrintDialog>
+#include <QPrinter>
 #include <QStandardPaths>
 #include <QTextCodec>
 #include <QTextDocumentFragment>
@@ -100,6 +102,10 @@ MainWindow::MainWindow(QWidget *parent) :
 
     on_actionToggleEditMode_toggled(false);
     ui->thumbnailsDock->hide();
+
+#if defined(QT_PRINTSUPPORT_LIB) && QT_CONFIG(printdialog)
+    ui->actionPrint->setEnabled(true);
+#endif
 }
 
 MainWindow::~MainWindow()
@@ -949,4 +955,17 @@ void MainWindow::on_actionSettings_triggered()
 void MainWindow::on_actionTodays_journal_triggered()
 {
     loadJournal();
+}
+
+void MainWindow::on_actionPrint_triggered()
+{
+#if defined(QT_PRINTSUPPORT_LIB) && QT_CONFIG(printdialog)
+    QPrinter printer(QPrinter::HighResolution);
+    QPrintDialog *dlg = new QPrintDialog(&printer, this);
+    if (m_mainWidget->textCursor().hasSelection())
+        dlg->addEnabledOption(QAbstractPrintDialog::PrintSelection);
+    if (dlg->exec() == QDialog::Accepted)
+        m_mainWidget->print(&printer);
+    delete dlg;
+#endif
 }

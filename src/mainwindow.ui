@@ -140,6 +140,7 @@
     <addaction name="actionSave"/>
     <addaction name="actionSave_As"/>
     <addaction name="actionSave_to_IPFS"/>
+    <addaction name="actionPrint"/>
     <addaction name="actionToggleEditMode"/>
     <addaction name="actionQuit"/>
    </widget>
@@ -499,7 +500,7 @@
     <string>&amp;Paste</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+P</string>
+    <string>Ctrl+V</string>
    </property>
   </action>
   <action name="actionInsert_Table">
@@ -597,6 +598,21 @@
    </property>
    <property name="text">
     <string>Today's &amp;journal</string>
+   </property>
+  </action>
+  <action name="actionPrint">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="resources/resources.qrc">
+     <normaloff>:/32/document-print.png</normaloff>:/32/document-print.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Print...</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+P</string>
    </property>
   </action>
  </widget>

@@ -251,8 +251,8 @@
   </action>
   <action name="actionQuit">
    <property name="icon">
-    <iconset theme="application-exit">
-     <normaloff>.</normaloff>.</iconset>
+    <iconset theme="application-exit" resource="resources/resources.qrc">
+     <normaloff>:/32/application-exit.png</normaloff>:/32/application-exit.png</iconset>
    </property>
    <property name="text">
     <string>E&amp;xit</string>
@@ -412,6 +412,10 @@
    </property>
   </action>
   <action name="actionSave_to_IPFS">
+   <property name="icon">
+    <iconset resource="resources/resources.qrc">
+     <normaloff>:/64/ipfs.png</normaloff>:/64/ipfs.png</iconset>
+   </property>
    <property name="text">
     <string>Save to &amp;IPFS</string>
    </property>

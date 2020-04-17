@@ -2,6 +2,7 @@
     <qresource prefix="/">
         <file>16/nettebook.png</file>
         <file>32/nettebook.png</file>
+        <file>32/application-exit.png</file>
         <file>32/checkbox.png</file>
         <file>32/checkbox-checked.png</file>
         <file>32/document-new.png</file>
@@ -32,6 +33,7 @@
         <file>32/insert-link.png</file>
         <file>32/journal.png</file>
         <file>32/reload.png</file>
+        <file>64/ipfs.png</file>
         <file>64/nettebook.png</file>
         <file>128/empty-page.png</file>
     </qresource>

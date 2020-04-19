@@ -43,6 +43,8 @@ public:
     static const QString journalDirectory;
     static const QString journalFilenameFormat;
     static const QString journalUsesTemplates;
+    static const QString styleGroup;
+    static const QString codeBlockBackground;
 
 protected:
     Settings(QObject* parent = nullptr);

@@ -27,6 +27,7 @@
 #include <QTextBrowser>
 #include <QUrl>
 #include "markdownbrowser.h"
+#include "codeblockhighlighter.h"
 #include "ipfsagent.h"
 #include "linkdialog.h"
 #include "thumbnailscene.h"
@@ -135,6 +136,7 @@ private:
     Ui::MainWindow *ui;
     MarkdownBrowser *m_mainWidget;
     Document *m_document;
+    CodeBlockHighlighter *m_highlighter;
     QJsonDocument m_jsonDocument;
     ThumbnailScene *m_thumbs = nullptr;
     LinkDialog *m_linkDialog = nullptr;

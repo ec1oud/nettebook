@@ -20,6 +20,9 @@
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <widget class="QTabWidget" name="tabWidget">
+     <property name="currentIndex">
+      <number>0</number>
+     </property>
      <widget class="QWidget" name="writingTab">
       <attribute name="title">
        <string>Writing</string>
@@ -96,6 +99,23 @@
        </item>
       </layout>
      </widget>
+     <widget class="QWidget" name="styleTab">
+      <attribute name="title">
+       <string>Style</string>
+      </attribute>
+      <layout class="QFormLayout" name="formLayout_2">
+       <item row="0" column="0">
+        <widget class="QLabel" name="codeBlockBackgroundLabel">
+         <property name="text">
+          <string>Code block background</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="ColorSwatch" name="codeBackgroundColorSwatch" native="true"/>
+       </item>
+      </layout>
+     </widget>
     </widget>
    </item>
    <item>
@@ -110,6 +130,14 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ColorSwatch</class>
+   <extends>QWidget</extends>
+   <header>colorswatch.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="resources/resources.qrc"/>
  </resources>

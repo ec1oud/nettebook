@@ -15,6 +15,7 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
     ui->journalDirectory->setText(settings->stringOrDefault(settings->journalGroup, settings->journalDirectory, QLatin1String("~/journal")));
     ui->journalFilenameFormat->setText(settings->stringOrDefault(settings->journalGroup, settings->journalFilenameFormat, QLatin1String("$date-$topics.md")));
     ui->useJournalTemplates->setChecked(settings->boolOrDefault(settings->journalGroup, settings->journalUsesTemplates, true));
+    ui->codeBackgroundColorSwatch->setColor(QColor(settings->stringOrDefault(settings->styleGroup, settings->codeBlockBackground, "#EEE")));
     adjustSize();
 }
 
@@ -31,6 +32,7 @@ void SettingsDialog::on_SettingsDialog_accepted()
     settings->setString(settings->journalGroup, settings->journalDirectory, ui->journalDirectory->text());
     settings->setString(settings->journalGroup, settings->journalFilenameFormat, ui->journalFilenameFormat->text());
     settings->setBool(settings->journalGroup, settings->journalUsesTemplates, ui->useJournalTemplates->checkState());
+    settings->setString(settings->styleGroup, settings->codeBlockBackground, ui->codeBackgroundColorSwatch->color().name());
 }
 
 void SettingsDialog::on_journalDirectoryChooseButton_clicked()

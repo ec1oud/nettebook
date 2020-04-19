@@ -28,6 +28,8 @@ const QString Settings::journalGroup(QLatin1String("Journal"));
 const QString Settings::journalDirectory(QLatin1String("journalDirectory"));
 const QString Settings::journalFilenameFormat(QLatin1String("journalFilenameFormat"));
 const QString Settings::journalUsesTemplates(QLatin1String("journalUsesTemplates"));
+const QString Settings::styleGroup(QLatin1String("Style"));
+const QString Settings::codeBlockBackground(QLatin1String("codeBlockBackground"));
 
 Settings* Settings::instance()
 {

@@ -14,6 +14,8 @@ no_kio: DEFINES += NETTEBOOK_NO_KIO
 
 SOURCES += \
     cidfinder.cpp \
+    codeblockhighlighter.cpp \
+    colorswatch.cpp \
     datepickerdialog.cpp \
     document.cpp \
     ipfsagent.cpp \
@@ -33,6 +35,8 @@ SOURCES += \
 
 HEADERS += \
     cidfinder.h \
+    codeblockhighlighter.h \
+    colorswatch.h \
     datepickerdialog.h \
     document.h \
     ipfsagent.h \

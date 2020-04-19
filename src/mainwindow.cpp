@@ -60,6 +60,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     m_mainWidget = ui->browser;
     m_mainWidget->setDocument(m_document);
+    m_highlighter = new CodeBlockHighlighter(m_document);
     connect(m_mainWidget, &QTextEdit::currentCharFormatChanged,
             this, &MainWindow::currentCharFormatChanged);
     connect(m_mainWidget, &QTextEdit::cursorPositionChanged,

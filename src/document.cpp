@@ -217,15 +217,15 @@ void Document::saveAs(QUrl url, const QString &mimeType)
         m_saveType = OdtResource;
     else if (mimeType == QLatin1String("text/plain"))
         m_saveType = PlainTextResource;
-    else if (m_saveType == ResourceType::HtmlResource)
-        mt = QLatin1String("application/xhtml+xml");
-    else if (m_saveType == ResourceType::MarkdownResource)
-        mt = QLatin1String("text/markdown");
     else if (mimeType == QLatin1String("text/markdown"))
         m_saveType = MarkdownResource;
     else if (mimeType == QLatin1String("text/html") ||
              mimeType == QLatin1String("application/xhtml+xml"))
         m_saveType = HtmlResource;
+    else if (m_saveType == ResourceType::HtmlResource)
+        mt = QLatin1String("application/xhtml+xml");
+    else if (m_saveType == ResourceType::MarkdownResource)
+        mt = QLatin1String("text/markdown");
 #ifndef NETTEBOOK_NO_KIO
     KIO::TransferJob *job = KIO::put(url, -1, KIO::Overwrite);
     job->addMetaData("content-type", mt);

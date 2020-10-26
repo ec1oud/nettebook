@@ -598,6 +598,8 @@ void MainWindow::on_styleCB_activated(int index)
 {
     if (m_programmaticUiSetting)
         return;
+//qDebug() << index << "BEFORE:";
+//m_document->dumpBlocks();
     QTextCursor cursor = m_mainWidget->textCursor();
     QTextListFormat::Style listStyle = QTextListFormat::ListStyleUndefined;
     QTextBlockFormat::MarkerType marker = QTextBlockFormat::MarkerType::NoMarker;
@@ -672,20 +674,36 @@ void MainWindow::on_styleCB_activated(int index)
     blockFmt.setMarker(marker);
     cursor.setBlockFormat(blockFmt);
 
-    if (listStyle != QTextListFormat::ListStyleUndefined) {
-        QTextListFormat listFmt;
-        if (cursor.currentList()) {
-            listFmt = cursor.currentList()->format();
+    // If the block shall become a list item but wasn't already in a list, then
+    // place it either into an adjacent list if there is one, or create a new list.
+    if (listStyle != QTextListFormat::ListStyleUndefined && !cursor.currentList()) {
+//        blockFmt.setIndent(0);
+        cursor.setBlockFormat(blockFmt);
+        QTextCursor explorer = m_mainWidget->textCursor();
+        explorer.movePosition(QTextCursor::StartOfBlock);
+        explorer.movePosition(QTextCursor::PreviousBlock);
+        if (QTextList *adjacentList = explorer.currentList()) {
+            adjacentList->add(cursor.block());
         } else {
-            listFmt.setIndent(blockFmt.indent() + 1);
-            blockFmt.setIndent(0);
-            cursor.setBlockFormat(blockFmt);
+            explorer = m_mainWidget->textCursor();
+            explorer.movePosition(QTextCursor::EndOfBlock);
+            explorer.movePosition(QTextCursor::NextBlock);
+            if (QTextList *adjacentList = explorer.currentList()) {
+                adjacentList->add(cursor.block());
+            } else {
+                QTextListFormat listFmt;
+                listFmt.setStyle(listStyle);
+//                listFmt.setIndent(blockFmt.indent() + 1);
+                cursor.createList(listFmt);
+            }
         }
-        listFmt.setStyle(listStyle);
-        cursor.createList(listFmt);
     }
 
     cursor.endEditBlock();
+    ui->actionToggle_Checkbox->setChecked(marker == QTextBlockFormat::MarkerType::Checked);
+
+//qDebug() << "AFTER";
+//m_document->dumpBlocks();
 }
 
 void MainWindow::on_headingLevelSB_valueChanged(int headingLevel)

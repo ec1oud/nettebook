@@ -12,12 +12,16 @@
 #include <QJsonObject>
 #include <QTextCodec>
 #include <QTextFrame>
+#include <QTextList>
+#include <QTextDocumentFragment>
 #include <QTextDocumentWriter>
 
 #ifndef NETTEBOOK_NO_KIO
 #include <KIO/Job>
 #include <KIO/ListJob>
 #endif
+
+#include <iostream>
 
 static const QString ipfsScheme = QStringLiteral("ipfs");
 static const QString fileScheme = QStringLiteral("file");
@@ -197,6 +201,47 @@ QTextFragment Document::fragmentAtCursor(const QTextCursor &cursor)
             return currentFragment;
     }
     return QTextFragment();
+}
+
+void Document::dumpBlocks() {
+
+    QTextFrame::iterator iterator = rootFrame()->begin();
+    QTextFrame *currentFrame = iterator.currentFrame();
+    int i = 0;
+    QTextList *list = nullptr;
+    int li = 0;
+    qDebug();
+    while (!iterator.atEnd()) {
+        if (iterator.currentFrame() != currentFrame)
+            qDebug() << "child frame?";
+        const QTextBlock block = iterator.currentBlock();
+        const auto bfmt = block.blockFormat();
+        QStringList desc;
+        if (bfmt.headingLevel() > 0)
+            desc << (QLatin1String("<h") + QString::number(bfmt.headingLevel()) + ">");
+        if (block.blockFormat().hasProperty(QTextFormat::BlockTrailingHorizontalRulerWidth))
+            desc << "horzrule";
+        if (block.textList()) {
+            if (block.textList() != list) {
+                list = block.textList();
+                desc << (QLatin1String("<list len=") + QString::number(block.textList()->count()) + ">");
+                li = 0;
+            } else {
+                ++li;
+            }
+            desc << (QLatin1String("<li i=") + QString::number(li) + '>');
+            if (bfmt.marker() == QTextBlockFormat::MarkerType::Unchecked)
+                desc << "☐";
+            else if (bfmt.marker() == QTextBlockFormat::MarkerType::Checked)
+                desc << "🗹";
+        }
+        desc << block.text().left(20);
+        if (block.text().length() > 20)
+            desc << QString::fromUtf8("…");
+        std::cout << desc.join(' ').toStdString() << std::endl;
+        ++iterator;
+        ++i;
+    }
 }
 
 void Document::saveAs(QUrl url, const QString &mimeType)

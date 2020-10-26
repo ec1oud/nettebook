@@ -46,6 +46,7 @@ public:
     Status status() { return m_status; }
     QString errorText() { return m_errorText; }
     void clearCache(const QUrl &url);
+    void dumpBlocks();
     QTextFragment fragmentAtCursor(const QTextCursor &cursor);
 
 signals:

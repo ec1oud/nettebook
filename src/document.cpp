@@ -133,7 +133,7 @@ void Document::resourceReceiveDone(KJob *job)
     if (!m_loadedResources.value(url).size()) {
         if (m_status == LoadingMain)
             setStatus(ErrorEmpty);
-        m_loadedResources[url].append(QString());
+        m_loadedResources[url].append(QByteArray());
     } else {
         QMimeType type = QMimeDatabase().mimeTypeForFileNameAndData(url.fileName(), m_loadedResources[url]);
         qDebug() << "detected mime type" << type.name();
@@ -185,11 +185,11 @@ QByteArray Document::fileListMarkdown()
             name += QDir::separator();
         auto hash = f.stringValue(KIO::UDSEntry::UDS_LINK_DEST);
         qint64 size = f.numberValue(KIO::UDSEntry::UDS_SIZE);
-        ret += "|[" + name + "](" + name + ")|" + hash +
+        ret += ("|[" + name + "](" + name + ")|" + hash +
                 "|" + QLocale().formattedDataSize(size) +
 //                "|" + f.stringValue(KIO::UDSEntry::UDS_CREATION_TIME) +
 //                "|" + f.stringValue(KIO::UDSEntry::UDS_MIME_TYPE) +
-                "|\n";
+                "|\n").toUtf8();
     }
     qDebug() << ret;
     return ret;

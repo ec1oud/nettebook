@@ -22,6 +22,7 @@
 #include "document.h"
 #include "ipfsagent.h"
 #include "jsonview.h"
+#include "kanbancolumnview.h"
 #include "settings.h"
 #include "settingsdialog.h"
 #include "tablesizedialog.h"
@@ -989,4 +990,11 @@ void MainWindow::on_actionPrint_triggered()
         m_mainWidget->print(&printer);
     delete dlg;
 #endif
+}
+
+void MainWindow::on_actionKanban_triggered()
+{
+    KanbanColumnView *kv = new KanbanColumnView();
+    kv->setDocument(m_document);
+    kv->show();
 }

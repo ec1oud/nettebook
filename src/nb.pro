@@ -18,7 +18,9 @@ SOURCES += \
     colorswatch.cpp \
     datepickerdialog.cpp \
     document.cpp \
+    textlistmodel.cpp \
     ipfsagent.cpp \
+    kanbancolumnview.cpp \
     linkdialog.cpp \
     main.cpp \
     mainwindow.cpp \
@@ -39,7 +41,9 @@ HEADERS += \
     colorswatch.h \
     datepickerdialog.h \
     document.h \
+    textlistmodel.h \
     ipfsagent.h \
+    kanbancolumnview.h \
     linkdialog.h \
     mainwindow.h \
     markdownbrowser.h \

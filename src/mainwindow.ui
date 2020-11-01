@@ -151,6 +151,7 @@
     <addaction name="actionBack"/>
     <addaction name="action_Local_IPFS_files"/>
     <addaction name="action_Raw_DAG_node"/>
+    <addaction name="actionKanban"/>
    </widget>
    <widget class="QMenu" name="menuTools">
     <property name="title">
@@ -613,6 +614,11 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+P</string>
+   </property>
+  </action>
+  <action name="actionKanban">
+   <property name="text">
+    <string>Kanban</string>
    </property>
   </action>
  </widget>

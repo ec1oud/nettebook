@@ -8,6 +8,9 @@ locally and on [IPFS](https://ipfs.io).
 It has ambitions to lean into the direction of being a personal all-purpose
 notebook, as well as being suitable for blogging and other informal publishing.
 
+Since QTextDocument supports Markdown task lists, a Kanban mode is under
+development.
+
 - requires Qt 5.14 to build the main application (in src/)
 - includes code for a KIO slave for reading and writing via IPFS, which also
   enables KDE applications like [kate](https://kate-editor.org) and 

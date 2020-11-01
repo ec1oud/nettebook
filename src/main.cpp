@@ -53,6 +53,10 @@ int main(int argc, char *argv[])
                 "or 'today', 'yesterday' or 'tomorrow'.  Topics or keywords can be added after the date."));
     parser.addOption(journalOption);
 
+    QCommandLineOption kanbanOption(QStringLiteral("kanban"),
+            QCoreApplication::translate("main", "Open the file in kanban mode."));
+    parser.addOption(kanbanOption);
+
     parser.addPositionalArgument(QLatin1String("[url]"), QCoreApplication::translate("main", "Optional filename or URL to open"));
 
     if (!parser.parse(QCoreApplication::arguments())) {
@@ -90,6 +94,9 @@ int main(int argc, char *argv[])
     w.show();
     if (!preloadCss && parser.isSet(cssOption))
         w.setBrowserStyle(QUrl::fromLocalFile(parser.value(cssOption)));
+
+    if (parser.isSet(kanbanOption))
+        w.on_actionKanban_triggered();
 
     return app.exec();
 }

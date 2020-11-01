@@ -59,6 +59,7 @@ public slots:
     void setEditMode(bool mode = true);
     void updateUrlField(QUrl url);
     void showJsonWindow(QUrl url);
+    void on_actionKanban_triggered();
 
 private slots:
     void currentCharFormatChanged(const QTextCharFormat &format);
@@ -110,6 +111,7 @@ private slots:
     void on_actionTodays_journal_triggered();
 
     void on_actionPrint_triggered();
+
 
 private:
     void mergeFormatOnWordOrSelection(const QTextCharFormat &format);

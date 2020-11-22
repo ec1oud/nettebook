@@ -18,9 +18,13 @@
 #ifndef KANBANCOLUMNVIEW_H
 #define KANBANCOLUMNVIEW_H
 
+#include <QAction>
+#include <QMenu>
 #include <QSplitter>
 #include "document.h"
 #include "textlistmodel.h"
+
+class QTreeView;
 
 class KanbanColumnView : public QSplitter
 {
@@ -31,10 +35,17 @@ public:
     ~KanbanColumnView();
     void setDocument(Document *doc);
 
+protected:
+    void onContextMenuRequested(QTreeView *view, TextListModel *model, const QPoint &pos);
+
 private:
     Document *m_doc;
     QVector<TextListModel *> m_kanbanTrees;
     QTextList *m_doneList = nullptr;
+    QMenu *m_itemContextMenu = new QMenu(this);
+    QMenu *m_contextMenu = new QMenu(this);
+    QAction *m_deleteAction = nullptr;
+    QAction *m_addAction = nullptr;
 };
 
 #endif // KANBANCOLUMNVIEW_H

@@ -24,10 +24,29 @@
 KanbanColumnView::KanbanColumnView(QWidget *parent) :
     QSplitter(parent)
 {
+    m_deleteAction = m_itemContextMenu->addAction(tr("Remove"));
+    m_addAction = m_contextMenu->addAction(tr("Add"));
 }
 
 KanbanColumnView::~KanbanColumnView()
 {
+}
+
+void KanbanColumnView::onContextMenuRequested(QTreeView *view, TextListModel *model, const QPoint &pos)
+{
+    QModelIndex idx = view->indexAt(pos);
+    QAction *act = nullptr;
+    if (idx.isValid())
+        act = m_itemContextMenu->exec(view->mapToGlobal(pos));
+    else
+        act = m_contextMenu->exec(view->mapToGlobal(pos));
+    qDebug() << view << pos << idx << "; selected" << act;
+    if (act == m_deleteAction)
+        model->removeRow(idx.row());
+    else if (act == m_addAction) {
+        idx = model->insertRowDefaultText(model->rowCount());
+        view->edit(idx);
+    }
 }
 
 void KanbanColumnView::setDocument(Document *doc)
@@ -81,6 +100,9 @@ void KanbanColumnView::setDocument(Document *doc)
                 tree->setDefaultDropAction(Qt::MoveAction);
                 tree->setSelectionMode(QAbstractItemView::ExtendedSelection);
                 tree->setModel(model);
+                tree->setContextMenuPolicy(Qt::CustomContextMenu);
+                connect(tree, &QTreeView::customContextMenuRequested,
+                        [this, tree, model](const QPoint &pos) { onContextMenuRequested(tree, model, pos); });
                 addWidget(tree); // add to QSplitter
             }
             // else: skip any nested lists within this one, for now

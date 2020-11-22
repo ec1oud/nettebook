@@ -125,6 +125,16 @@ bool TextListModel::removeRows(int row, int count, const QModelIndex &parent)
     return true;
 }
 
+QModelIndex TextListModel::insertRowDefaultText(int row)
+{
+    beginInsertRows(QModelIndex(), row, row);
+    insertRow(row);
+    auto idx = index(row);
+    setData(idx, tr("new task"));
+    endInsertRows();
+    return idx;
+}
+
 Qt::ItemFlags TextListModel::flags(const QModelIndex &index) const
 {
     if (!index.isValid())

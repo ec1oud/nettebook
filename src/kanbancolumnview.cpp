@@ -67,7 +67,10 @@ void KanbanColumnView::setDocument(Document *doc)
                 list = curList;
                 if (isDoneList)
                     m_doneList = list;
-                TextListModel *model = new TextListModel(m_doc, heading, list, this);
+                TextListModel *model = new TextListModel(m_doc, heading, list,
+                                                         isDoneList ? QTextBlockFormat::MarkerType::Checked :
+                                                                      QTextBlockFormat::MarkerType::Unchecked,
+                                                         this);
                 m_kanbanTrees.append(model);
                 qDebug() << "found" << heading.text() << "list with" << model->rowCount() << list->count() << "items";
 

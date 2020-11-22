@@ -30,7 +30,6 @@
 # doing
 
 - [ ] automatically move tasks to the done column when checked
-- [ ] automatically check tasks when moved to the done column
 
 # done
 
@@ -41,6 +40,7 @@
 - [x] DnD between boards (different md files)
 - [x] kanban treeviews are missing edit notifications and can be temporarily out of
   sync
+- [x] automatically check tasks when moved to the done column
 
 # research
 

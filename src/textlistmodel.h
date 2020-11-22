@@ -33,7 +33,9 @@ public:
 //    };
 //    Q_ENUM(Role)
 
-    explicit TextListModel(Document *doc, QTextBlock heading, QTextList *list, QObject *parent = nullptr);
+    explicit TextListModel(Document *doc, QTextBlock heading, QTextList *list,
+                           QTextBlockFormat::MarkerType marker = QTextBlockFormat::MarkerType::Unchecked,
+                           QObject *parent = nullptr);
 
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 
@@ -65,6 +67,7 @@ protected:
     Document *m_doc;
     QTextBlock m_headingBlock;
     QTextList *m_list;
+    QTextBlockFormat::MarkerType m_defaultMarker = QTextBlockFormat::MarkerType::Unchecked;
 };
 
 #endif // TEXTLISTMODEL_H

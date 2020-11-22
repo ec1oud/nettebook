@@ -22,8 +22,9 @@
 #include <QTextDocumentFragment>
 #include <QTextList>
 
-TextListModel::TextListModel(Document *doc, QTextBlock heading, QTextList *list, QObject *parent)
-    : QAbstractListModel(parent), m_doc(doc), m_headingBlock(heading), m_list(list)
+TextListModel::TextListModel(Document *doc, QTextBlock heading, QTextList *list,
+                             QTextBlockFormat::MarkerType marker, QObject *parent)
+    : QAbstractListModel(parent), m_doc(doc), m_headingBlock(heading), m_list(list), m_defaultMarker(marker)
 {
 }
 
@@ -154,19 +155,15 @@ Qt::DropActions TextListModel::supportedDropActions() const
 QStringList TextListModel::mimeTypes() const
 {
     QStringList types;
-    types << "application/vnd.text.list" << "text/plain" << "text/html" << "text/markdown";
+    types << "text/plain" << "text/html" << "text/markdown";
     return types;
 }
 
 QMimeData *TextListModel::mimeData(const QModelIndexList &indices) const
 {
     QMimeData *mimeData = new QMimeData;
-    QByteArray encodedTextData;
-    QDataStream textStream(&encodedTextData, QIODevice::WriteOnly);
     QTextDocument itemDocument;
     QTextCursor cursor(&itemDocument);
-
-    encodeData(indices, textStream);
 
     for (const QModelIndex &index : indices) {
         if (index.isValid()) {
@@ -180,7 +177,6 @@ QMimeData *TextListModel::mimeData(const QModelIndexList &indices) const
     mimeData->setText(itemDocument.toPlainText());
     mimeData->setHtml(itemDocument.toHtml());
     mimeData->setData("text/markdown", itemDocument.toMarkdown().toUtf8());
-    mimeData->setData("application/vnd.text.list", encodedTextData);
     return mimeData;
 }
 
@@ -192,8 +188,7 @@ bool TextListModel::canDropMimeData(const QMimeData *data,
     Q_UNUSED(column);
     Q_UNUSED(parent);
 
-    if (!data->hasFormat("application/vnd.text.list") &&
-            !data->hasFormat("text/markdown") && !data->hasText())
+    if (!data->hasFormat("text/markdown") && !data->hasText())
         return false;
 
 //    qDebug() << "OK for" << action << row << "parent" << parent;
@@ -205,11 +200,10 @@ bool TextListModel::dropMimeData(const QMimeData *data, Qt::DropAction action, i
     if (!canDropMimeData(data, action, row, column, destParent))
         return false;
     qDebug() << action << row << column << destParent << data->text();
-    if (data->hasFormat("application/vnd.text.list")) {
-        // decode and insert
-        QByteArray encoded = data->data("application/vnd.text.list");
-        QDataStream stream(&encoded, QIODevice::ReadOnly);
 
+    // TODO Qt needs QTextCursor::insertMarkdown() so that we can use it directly without losing formatting
+    if (data->hasFormat("text/markdown")) {
+        // decode and insert
         QTextCursor cursor(m_doc);
         if (Q_UNLIKELY(row >= rowCount(destParent)))
             row = rowCount(destParent) - 1;
@@ -221,21 +215,27 @@ bool TextListModel::dropMimeData(const QMimeData *data, Qt::DropAction action, i
         }
         qDebug() << "inserting before row" << row << "position" << cursor.position() << "text" << m_list->item(row).text();
 
-        while (!stream.atEnd()) {
-            int r, c;
-            QMap<int, QVariant> v;
-            stream >> r >> c >> v;
-            beginInsertRows(destParent, row, row);
-            QTextBlockFormat fmt;
-            fmt.setMarker(v.value(Qt::CheckStateRole) == Qt::Checked ?
-                              QTextBlockFormat::MarkerType::Checked : QTextBlockFormat::MarkerType::Unchecked);
-            if (row < 0)
-                cursor.insertText(QLatin1String("\n") + v.value(Qt::DisplayRole).toString());
-            else
-                cursor.insertText(v.value(Qt::DisplayRole).toString() + QLatin1Char('\n'));
-            cursor.setBlockFormat(fmt);
-            m_list->add(cursor.block());
-            endInsertRows();
+        int rowCount = 0;
+        QTextDocument tmpDoc;
+        tmpDoc.setMarkdown(QString::fromUtf8(data->data(QLatin1String("text/markdown"))));
+        // copy text of each task
+        QTextCursor tmpCursor(&tmpDoc);
+        QTextBlockFormat fmt;
+        fmt.setMarker(m_defaultMarker);
+        bool hasNext = true;
+        while (hasNext) {
+            if (tmpCursor.block().textList()) {
+                ++rowCount;
+                beginInsertRows(destParent, row + rowCount, row + rowCount);
+                if (row < 0)
+                    cursor.insertText(QLatin1String("\n") + tmpCursor.block().text());
+                else
+                    cursor.insertText(tmpCursor.block().text() + QLatin1Char('\n'));
+                cursor.setBlockFormat(fmt);
+                m_list->add(cursor.block());
+                endInsertRows();
+            }
+            hasNext = tmpCursor.movePosition(QTextCursor::NextBlock);
         }
     }
     return true;

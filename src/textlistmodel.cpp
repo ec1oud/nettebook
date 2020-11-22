@@ -125,11 +125,10 @@ bool TextListModel::insertRows(int row, int count, const QModelIndex &parent)
 Qt::ItemFlags TextListModel::flags(const QModelIndex &index) const
 {
     if (!index.isValid())
-        return QAbstractListModel::flags(index);
+        return QAbstractListModel::flags(index) | Qt::ItemIsDropEnabled;
 
     return QAbstractListModel::flags(index) | Qt::ItemIsUserCheckable |
-            Qt::ItemIsDragEnabled  | Qt::ItemIsDropEnabled |
-            Qt::ItemNeverHasChildren | Qt::ItemIsEditable;
+            Qt::ItemIsDragEnabled | Qt::ItemNeverHasChildren | Qt::ItemIsEditable;
 }
 
 Qt::DropActions TextListModel::supportedDropActions() const
@@ -184,6 +183,7 @@ bool TextListModel::canDropMimeData(const QMimeData *data,
             !data->hasFormat("text/markdown") && !data->hasText())
         return false;
 
+//    qDebug() << "OK for" << action << row << "parent" << parent;
     return true;
 }
 
@@ -193,17 +193,20 @@ bool TextListModel::dropMimeData(const QMimeData *data, Qt::DropAction action, i
         return false;
     qDebug() << action << row << column << destParent << data->text();
     if (data->hasFormat("application/vnd.text.list")) {
-        row = destParent.row();
-        if (row < 0 || row >= rowCount(destParent))
-            row = rowCount(destParent) - 1;
         // decode and insert
         QByteArray encoded = data->data("application/vnd.text.list");
         QDataStream stream(&encoded, QIODevice::ReadOnly);
 
         QTextCursor cursor(m_doc);
-        cursor.setPosition(m_list->item(row).position());
-        cursor.movePosition(QTextCursor::EndOfBlock);
-        qDebug() << "inserting after row" << row << "position" << cursor.position() << "text" << m_list->item(row).text();
+        if (Q_UNLIKELY(row >= rowCount(destParent)))
+            row = rowCount(destParent) - 1;
+        if (row < 0) {
+            cursor.setPosition(m_list->item(rowCount(destParent) - 1).position());
+            cursor.movePosition(QTextCursor::EndOfBlock);
+        } else {
+            cursor.setPosition(m_list->item(row).position());
+        }
+        qDebug() << "inserting before row" << row << "position" << cursor.position() << "text" << m_list->item(row).text();
 
         quintptr srcList;
         stream >> srcList;
@@ -213,12 +216,14 @@ bool TextListModel::dropMimeData(const QMimeData *data, Qt::DropAction action, i
             int r, c;
             QMap<int, QVariant> v;
             stream >> r >> c >> v;
-            beginInsertRows(destParent, row + 1, row + 1);
-            cursor.insertBlock();
-            cursor.insertText(v.value(Qt::DisplayRole).toString());
-            auto fmt = cursor.blockFormat();
+            beginInsertRows(destParent, row, row);
+            QTextBlockFormat fmt;
             fmt.setMarker(v.value(Qt::CheckStateRole) == Qt::Checked ?
                               QTextBlockFormat::MarkerType::Checked : QTextBlockFormat::MarkerType::Unchecked);
+            if (row < 0)
+                cursor.insertText(QLatin1String("\n") + v.value(Qt::DisplayRole).toString());
+            else
+                cursor.insertText(v.value(Qt::DisplayRole).toString() + QLatin1Char('\n'));
             cursor.setBlockFormat(fmt);
             m_list->add(cursor.block());
             endInsertRows();
@@ -226,6 +231,8 @@ bool TextListModel::dropMimeData(const QMimeData *data, Qt::DropAction action, i
             if (action == Qt::MoveAction) {
                 // TODO is that really the receiver's responsibility? what if we drag from one nettebook process to another?
                 QTextList *sourceList = (QTextList *)(srcList);
+                if (row < r && sourceList == m_list)
+                    r++;
                 qDebug() << "deleting row" << r << "of" << sourceList->count();
                 QTextCursor srcCursor(sourceList->item(r));
                 srcCursor.select(QTextCursor::BlockUnderCursor);

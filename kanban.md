@@ -20,10 +20,7 @@
 - [ ] kanban creation wizard to select common columns and ordering
 - [ ] kanban view in main window as alternative to QTextBrowser view (tabs?)
 - [ ] come up with plugin architecture, make kanban-mode a plugin?
-- [ ] DnD between columns
-- [ ] DnD within columns to re-order
 - [ ] DnD between boards (different md files)
-- [ ] fix DnD to drop between existing items rather than onto them
 - [ ] transplant immediately when checked/unchecked
   (on_actionToggle_Checkbox_toggled isn't the best place because it doesn't
   change state until the cursor moves after clicking the checkbox)
@@ -36,10 +33,14 @@
 # doing
 
 - [ ] automatically move tasks to the done column when checked
+- [ ] automatically check tasks when moved to the done column
 
 # done
 
 - [x] arbitrary columns in kanban view (treeview for every heading)
+- [x] DnD between columns
+- [x] DnD within columns to re-order
+- [x] fix DnD to drop between existing items rather than onto them
 
 # research
 

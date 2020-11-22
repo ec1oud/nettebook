@@ -188,7 +188,7 @@ bool TextListModel::canDropMimeData(const QMimeData *data,
     Q_UNUSED(column);
     Q_UNUSED(parent);
 
-    if (!data->hasFormat("text/markdown") && !data->hasText())
+    if (!data->hasFormat("text/markdown") && !data->hasText() && !data->hasHtml())
         return false;
 
 //    qDebug() << "OK for" << action << row << "parent" << parent;
@@ -201,42 +201,51 @@ bool TextListModel::dropMimeData(const QMimeData *data, Qt::DropAction action, i
         return false;
     qDebug() << action << row << column << destParent << data->text();
 
-    // TODO Qt needs QTextCursor::insertMarkdown() so that we can use it directly without losing formatting
+    bool expectListItems = true;
+    QTextDocument tmpDoc;
     if (data->hasFormat("text/markdown")) {
-        // decode and insert
-        QTextCursor cursor(m_doc);
-        if (Q_UNLIKELY(row >= rowCount(destParent)))
-            row = rowCount(destParent) - 1;
-        if (row < 0) {
-            cursor.setPosition(m_list->item(rowCount(destParent) - 1).position());
-            cursor.movePosition(QTextCursor::EndOfBlock);
-        } else {
-            cursor.setPosition(m_list->item(row).position());
-        }
-        qDebug() << "inserting before row" << row << "position" << cursor.position() << "text" << m_list->item(row).text();
-
-        int rowCount = 0;
-        QTextDocument tmpDoc;
         tmpDoc.setMarkdown(QString::fromUtf8(data->data(QLatin1String("text/markdown"))));
-        // copy text of each task
-        QTextCursor tmpCursor(&tmpDoc);
-        QTextBlockFormat fmt;
-        fmt.setMarker(m_defaultMarker);
-        bool hasNext = true;
-        while (hasNext) {
-            if (tmpCursor.block().textList()) {
-                ++rowCount;
-                beginInsertRows(destParent, row + rowCount, row + rowCount);
-                if (row < 0)
-                    cursor.insertText(QLatin1String("\n") + tmpCursor.block().text());
-                else
-                    cursor.insertText(tmpCursor.block().text() + QLatin1Char('\n'));
-                cursor.setBlockFormat(fmt);
-                m_list->add(cursor.block());
-                endInsertRows();
-            }
-            hasNext = tmpCursor.movePosition(QTextCursor::NextBlock);
-        }
+    } else if (data->hasHtml()) {
+        tmpDoc.setHtml(data->html());
+    } else if (data->hasText()) {
+        tmpDoc.setPlainText(data->text());
+        expectListItems = false;
     }
+
+    // decode and insert
+    QTextCursor cursor(m_doc);
+    if (Q_UNLIKELY(row >= rowCount(destParent)))
+        row = rowCount(destParent) - 1;
+    if (row < 0) {
+        cursor.setPosition(m_list->item(rowCount(destParent) - 1).position());
+        cursor.movePosition(QTextCursor::EndOfBlock);
+    } else {
+        cursor.setPosition(m_list->item(row).position());
+    }
+    qDebug() << "inserting before row" << row << "position" << cursor.position() << "text" << m_list->item(row).text();
+
+    int rowCount = 0;
+    QTextCursor tmpCursor(&tmpDoc);
+    QTextBlockFormat fmt;
+    fmt.setMarker(m_defaultMarker);
+    bool hasNext = true;
+    // copy text of each task
+    while (hasNext) {
+        if (tmpCursor.block().textList() || !expectListItems) {
+            ++rowCount;
+            beginInsertRows(destParent, row + rowCount, row + rowCount);
+            QString text = tmpCursor.block().text().trimmed();
+            // TODO Qt needs QTextCursor::insertMarkdown() so that we can avoid losing formatting
+            if (row < 0)
+                cursor.insertText(QLatin1String("\n") + text);
+            else
+                cursor.insertText(text + QLatin1Char('\n'));
+            cursor.setBlockFormat(fmt);
+            m_list->add(cursor.block());
+            endInsertRows();
+        }
+        hasNext = tmpCursor.movePosition(QTextCursor::NextBlock);
+    }
+
     return true;
 }

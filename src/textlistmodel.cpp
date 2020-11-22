@@ -83,6 +83,7 @@ QVariant TextListModel::data(const QModelIndex &index, int role) const
         return {};
 
     switch (role) {
+    case Qt::ToolTipRole:
     case Qt::DisplayRole:
         return m_list->item(index.row()).text();
         break;

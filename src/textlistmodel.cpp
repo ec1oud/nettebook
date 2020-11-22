@@ -42,16 +42,6 @@ QVariant TextListModel::headerData(int section, Qt::Orientation orientation, int
     return {};
 }
 
-//bool DocumentTreeModel::setHeaderData(int section, Qt::Orientation orientation, const QVariant &value, int role)
-//{
-//    if (value != headerData(section, orientation, role)) {
-//        // FIXME: Implement me!
-//        emit headerDataChanged(orientation, section, section);
-//        return true;
-//    }
-//    return false;
-//}
-
 //QModelIndex TextListModel::index(int row, int column, const QModelIndex &parent) const
 //{
 //    Q_UNUSED(parent)
@@ -70,14 +60,6 @@ int TextListModel::rowCount(const QModelIndex &parent) const
     return m_list->count();
 }
 
-//int TextListModel::columnCount(const QModelIndex &parent) const
-//{
-//    if (!parent.isValid())
-//        return 0;
-
-//    return 1;
-//}
-
 QVariant TextListModel::data(const QModelIndex &index, int role) const
 {
     if (!index.isValid())
@@ -86,6 +68,7 @@ QVariant TextListModel::data(const QModelIndex &index, int role) const
     switch (role) {
     case Qt::ToolTipRole:
     case Qt::DisplayRole:
+    case Qt::EditRole:
         return m_list->item(index.row()).text();
         break;
     case Qt::CheckStateRole:
@@ -103,7 +86,11 @@ bool TextListModel::setData(const QModelIndex &index, const QVariant &value, int
 {
 qDebug() << index << role << value;
     if (data(index, role) != value) {
-        // FIXME: Implement me!
+
+        QTextCursor cursor(m_doc);
+        cursor.setPosition(m_list->item(index.row()).position());
+        cursor.movePosition(QTextCursor::EndOfBlock, QTextCursor::KeepAnchor);
+        cursor.insertText(value.toString());
         emit dataChanged(index, index, QVector<int>() << role);
         return true;
     }

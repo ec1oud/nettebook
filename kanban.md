@@ -2,8 +2,6 @@
 
 - [ ] saving resources to doc dir instead of the resource dir
 - [ ] task cut & paste loses the checkbox (Qt bug probably)
-- [ ] kanban treeviews are missing edit notifications and can be temporarily out of
-  sync
 - [ ] crash on ctrl-k sometimes
 
 # todo
@@ -20,7 +18,6 @@
 - [ ] kanban creation wizard to select common columns and ordering
 - [ ] kanban view in main window as alternative to QTextBrowser view (tabs?)
 - [ ] come up with plugin architecture, make kanban-mode a plugin?
-- [ ] DnD between boards (different md files)
 - [ ] transplant immediately when checked/unchecked
   (on_actionToggle_Checkbox_toggled isn't the best place because it doesn't
   change state until the cursor moves after clicking the checkbox)
@@ -41,6 +38,9 @@
 - [x] DnD between columns
 - [x] DnD within columns to re-order
 - [x] fix DnD to drop between existing items rather than onto them
+- [x] DnD between boards (different md files)
+- [x] kanban treeviews are missing edit notifications and can be temporarily out of
+  sync
 
 # research
 

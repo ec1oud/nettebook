@@ -123,6 +123,20 @@ bool TextListModel::insertRows(int row, int count, const QModelIndex &parent)
     return true;
 }
 
+bool TextListModel::removeRows(int row, int count, const QModelIndex &parent)
+{
+    qDebug() << row << count << parent;
+    beginRemoveRows(parent, row, row + count - 1);
+    for (int r = row; r < row + count; ++r) {
+        QTextCursor cursor(m_list->item(row));
+        cursor.select(QTextCursor::BlockUnderCursor);
+        m_list->removeItem(row);
+        cursor.removeSelectedText();
+    }
+    endRemoveRows();
+    return true;
+}
+
 Qt::ItemFlags TextListModel::flags(const QModelIndex &index) const
 {
     if (!index.isValid())
@@ -152,8 +166,6 @@ QMimeData *TextListModel::mimeData(const QModelIndexList &indices) const
     QTextDocument itemDocument;
     QTextCursor cursor(&itemDocument);
 
-    qDebug() << "sending source list" << (quintptr)(m_list);
-    textStream << (quintptr)(m_list);
     encodeData(indices, textStream);
 
     for (const QModelIndex &index : indices) {
@@ -209,10 +221,6 @@ bool TextListModel::dropMimeData(const QMimeData *data, Qt::DropAction action, i
         }
         qDebug() << "inserting before row" << row << "position" << cursor.position() << "text" << m_list->item(row).text();
 
-        quintptr srcList;
-        stream >> srcList;
-        qDebug() << "receiving source list" << srcList;
-
         while (!stream.atEnd()) {
             int r, c;
             QMap<int, QVariant> v;
@@ -228,21 +236,7 @@ bool TextListModel::dropMimeData(const QMimeData *data, Qt::DropAction action, i
             cursor.setBlockFormat(fmt);
             m_list->add(cursor.block());
             endInsertRows();
-
-            if (action == Qt::MoveAction) {
-                // TODO is that really the receiver's responsibility? what if we drag from one nettebook process to another?
-                QTextList *sourceList = (QTextList *)(srcList);
-                if (row < r && sourceList == m_list)
-                    r++;
-                qDebug() << "deleting row" << r << "of" << sourceList->count();
-                QTextCursor srcCursor(sourceList->item(r));
-                srcCursor.select(QTextCursor::BlockUnderCursor);
-                sourceList->removeItem(r);
-                srcCursor.removeSelectedText();
-            }
         }
-        beginResetModel();
-        endResetModel();
     }
     return true;
 }

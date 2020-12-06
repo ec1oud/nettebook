@@ -28,7 +28,7 @@
 #include <KJobUiDelegate>
 
 static const QString base58HashPrefix = QStringLiteral("Qm");
-static const QString base32HashPrefix = QStringLiteral("bafybei");
+static const QString base32HashPrefix = QStringLiteral("baf");
 static const QString unixfsPrefix = QStringLiteral("local");
 static const QString ipnsPrefix = QStringLiteral("/ipns/");
 static const QChar slash = QLatin1Char('/');

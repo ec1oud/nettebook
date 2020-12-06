@@ -76,7 +76,10 @@ void IpfsSlave::get(const QUrl &url)
     m_apiUrl.setPath(m_baseUrl.path(QUrl::DecodeReserved) + (unixFs ?  QLatin1String("files/read") : QLatin1String("cat")));
     m_apiUrl.setQuery("arg=" + urlString);
     qDebug() << Q_FUNC_INFO << url << url.fileName() << m_apiUrl.toString();
-    m_reply = m_nam.get(QNetworkRequest(m_apiUrl));
+    QNetworkRequest req(m_apiUrl);
+    req.setHeader(QNetworkRequest::ContentTypeHeader, m_defaultContentType);
+    req.setHeader(QNetworkRequest::UserAgentHeader, m_userAgent);
+    m_reply = m_nam.post(req, QByteArray());
     connect(m_reply, &QNetworkReply::finished, this, &IpfsSlave::onCatReceiveDone);
     m_eventLoop.exec();
 }
@@ -92,9 +95,13 @@ void IpfsSlave::listDir(const QUrl &url)
     // files/ls happens to work for both local unixfs and for hashes
     m_apiUrl.setPath(m_baseUrl.path(QUrl::DecodeReserved) +
                      (unixFs ? QLatin1String("files/ls") : QLatin1String("ls")));
-    m_apiUrl.setQuery(QLatin1String("arg=") + urlString + QLatin1String("&l=true"));
+
+    m_apiUrl.setQuery(QLatin1String("arg=") + (urlString.isEmpty() ? "/" : urlString) + m_querySuffix);
     qDebug() << Q_FUNC_INFO << url << urlString << m_apiUrl.toString();
-    m_reply = m_nam.get(QNetworkRequest(m_apiUrl));
+    QNetworkRequest req(m_apiUrl);
+    req.setHeader(QNetworkRequest::ContentTypeHeader, m_defaultContentType);
+    req.setHeader(QNetworkRequest::UserAgentHeader, m_userAgent);
+    m_reply = m_nam.post(req, QByteArray());
     connect(m_reply, &QNetworkReply::finished, this, &IpfsSlave::onLsReceiveDone);
     m_eventLoop.exec();
 }
@@ -114,9 +121,12 @@ void IpfsSlave::stat(const QUrl &url)
     // files/stat may have been intended for unixfs, but happens to work just as well with hashes.
     // It always provides more info than block/stat, and block/stat doesn't work with unixfs.
     m_apiUrl.setPath(m_baseUrl.path(QUrl::DecodeReserved) + QLatin1String("files/stat"));
-    m_apiUrl.setQuery("arg=/ipfs/" + urlString);
+    m_apiUrl.setQuery((unixFs ? "arg=/" : "arg=/ipfs/") + urlString + m_querySuffix);
     qDebug() << Q_FUNC_INFO << this << url << urlString << m_apiUrl.toString();
-    m_reply = m_nam.get(QNetworkRequest(m_apiUrl));
+    QNetworkRequest req(m_apiUrl);
+    req.setHeader(QNetworkRequest::ContentTypeHeader, m_defaultContentType);
+    req.setHeader(QNetworkRequest::UserAgentHeader, m_userAgent);
+    m_reply = m_nam.post(req, QByteArray());
     connect(m_reply, &QNetworkReply::finished, this, &IpfsSlave::onStatReceiveDone);
     m_eventLoop.exec();
 }
@@ -131,6 +141,7 @@ qDebug() << url << urlString << permissions << flags;
         if (url.scheme() == QLatin1String("ipfs")) {
             m_apiUrl = m_baseUrl;
             m_apiUrl.setPath(m_baseUrl.path(QUrl::DecodeReserved) + QLatin1String("add"));
+            m_apiUrl.setQuery(QLatin1String("cid-version=1"));
             qDebug() << "writing new object" << m_apiUrl;
             m_newObject = true;
         } else {
@@ -176,6 +187,7 @@ qDebug() << url << urlString << permissions << flags;
         type = QLatin1String("text/plain");
     textPart.setHeader(QNetworkRequest::ContentTypeHeader, type);
     textPart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"file\""));
+    req.setHeader(QNetworkRequest::UserAgentHeader, m_userAgent);
     textPart.setBody(acc);
     multiPart->append(textPart);
     m_reply = m_nam.post(req, multiPart);
@@ -186,6 +198,7 @@ qDebug() << url << urlString << permissions << flags;
 
 void IpfsSlave::onCatReceiveDone()
 {
+    m_eventLoop.exit();
     if (m_reply->error()) {
         qDebug() << Q_FUNC_INFO << m_reply->errorString();
         error(KIO::ERR_SLAVE_DEFINED, m_reply->errorString());
@@ -199,11 +212,11 @@ void IpfsSlave::onCatReceiveDone()
     mimeType(type.name());
     data(buf);
     finished();
-    m_eventLoop.exit();
 }
 
 void IpfsSlave::onLsReceiveDone()
 {
+    m_eventLoop.exit();
     if (m_reply->error()) {
         qDebug() << Q_FUNC_INFO << m_reply->errorString();
         error(KIO::ERR_SLAVE_DEFINED, m_reply->errorString());
@@ -219,15 +232,18 @@ void IpfsSlave::onLsReceiveDone()
     } else if (jdoc.object().value(QLatin1String("Entries")) != QJsonValue::Undefined) {
         ls = jdoc.object().value(QLatin1String("Entries")).toArray();
     }
-qDebug() << Q_FUNC_INFO << m_fileUrl << ls.count();
+//qDebug() << Q_FUNC_INFO << m_fileUrl << ls.count();
     KIO::UDSEntryList entries;
     for (int i = 0; i < ls.count(); ++i) {
         QJsonObject eo = ls.at(i).toObject();
-//        qDebug() << eo;
         bool isDir = (eo.value(QStringLiteral("Type")).toInt() == 1);
+        QString name = eo.value(QStringLiteral("Name")).toString();
+//        if (isDir && !name.endsWith(slash))
+//            name.append(slash);
+//qDebug() << Q_FUNC_INFO << "   " << i << (isDir ? "dir" : "file") << eo;
         KIO::UDSEntry e;
         e.reserve(5);
-        e.fastInsert(KIO::UDSEntry::UDS_NAME, eo.value(QStringLiteral("Name")).toString());
+        e.fastInsert(KIO::UDSEntry::UDS_NAME, name);
         e.fastInsert(KIO::UDSEntry::UDS_LINK_DEST, eo.value(QStringLiteral("Hash")).toString());
         e.fastInsert(KIO::UDSEntry::UDS_SIZE, eo.value(QStringLiteral("Size")).toInt());
         // TODO figure out what other file types there are; from experience it looks like 2 is a normal file, 1 is a directory
@@ -237,17 +253,16 @@ qDebug() << Q_FUNC_INFO << m_fileUrl << ls.count();
     }
     listEntries(entries);
     finished();
-    m_eventLoop.exit();
 }
 
 void IpfsSlave::onStatReceiveDone()
 {
+    m_eventLoop.exit();
     if (m_reply->error()) {
         qDebug() << Q_FUNC_INFO << m_reply->errorString();
         error(KIO::ERR_SLAVE_DEFINED, m_reply->errorString());
         return;
     }
-    qDebug() << Q_FUNC_INFO << this << m_fileUrl;
     QJsonObject jo = QJsonDocument::fromJson(m_reply->readAll()).object();
     m_reply->deleteLater();
     m_reply = nullptr;
@@ -264,6 +279,7 @@ void IpfsSlave::onStatReceiveDone()
         }
     }
     bool isDir = (jo.value(QStringLiteral("Type")).toString() == QLatin1String("directory"));
+//    qDebug() << Q_FUNC_INFO << this << m_fileUrl << (isDir ? "dir" : "file") << jo;
     KIO::UDSEntry e;
     e.reserve(4);
     e.fastInsert(KIO::UDSEntry::UDS_NAME, m_fileUrl.toString());
@@ -273,7 +289,6 @@ void IpfsSlave::onStatReceiveDone()
     // TODO there should be more
     statEntry(e);
     finished();
-    m_eventLoop.exit();
 }
 
 void IpfsSlave::onPutDone()
@@ -305,7 +320,10 @@ QString IpfsSlave::ipnsLookup(const QString &path)
     m_apiUrl.setPath(m_baseUrl.path(QUrl::DecodeReserved) + QLatin1String("name/resolve"));
     m_apiUrl.setQuery("arg=" + path + "&dht-timeout=3s");
     qDebug() << Q_FUNC_INFO << path << m_apiUrl.toString();
-    m_reply = m_nam.get(QNetworkRequest(m_apiUrl));
+    QNetworkRequest req(m_apiUrl);
+    req.setHeader(QNetworkRequest::ContentTypeHeader, m_defaultContentType);
+    req.setHeader(QNetworkRequest::UserAgentHeader, m_userAgent);
+    m_reply = m_nam.post(req, QByteArray());
     connect(m_reply, &QNetworkReply::finished, [=]() { m_eventLoop.exit(); } );
     m_eventLoop.exec();
     QJsonObject jo = QJsonDocument::fromJson(m_reply->readAll()).object();

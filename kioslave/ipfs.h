@@ -50,6 +50,9 @@ private:
 private:
     QMimeDatabase m_mimeDb;
     QEventLoop m_eventLoop;
+    QByteArray m_defaultContentType = "application/octet-stream";
+    QByteArray m_userAgent = "kio";
+    QString m_querySuffix = QLatin1String("&cid-base=base32");
     QUrl m_baseUrl = QUrl(QLatin1String("http://localhost:5001/api/v0/"));
     QUrl m_apiUrl;
     QUrl m_fileUrl;

@@ -40,7 +40,6 @@ public:
 signals:
 
 public slots:
-    QJsonDocument execGet(const QString &suffix, const QString &query);
     QJsonDocument execPost(const QString &suffix, const QString &query, const QJsonDocument &body);
 
 #ifndef NETTEBOOK_NO_KIO
@@ -54,6 +53,7 @@ protected slots:
 private:
     QNetworkAccessManager m_nam;
     QUrl m_apiBaseUrl = QUrl(QLatin1String("http://localhost:5001/api/v0/"));
+    QByteArray m_userAgent = "nettebook";
     QEventLoop m_eventLoop;
 #ifndef NETTEBOOK_NO_KIO
     QHash<QUrl, KJob*> m_resourceLoaders;

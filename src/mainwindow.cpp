@@ -185,7 +185,7 @@ void MainWindow::load(QString url)
     if (cidResult.isValid()) {
         // fetch the raw DAG node
         IpfsAgent agent;
-        m_jsonDocument = agent.execGet("dag/get", "arg=/ipfs/" + url.mid(cidResult.start));
+        m_jsonDocument = agent.execPost("dag/get", "arg=/ipfs/" + url.mid(cidResult.start) + "&cid-base=base32", {});
         ui->action_Raw_DAG_node->setEnabled(!m_jsonDocument.isEmpty());
         qDebug() << "raw DAG node" << m_jsonDocument.object();
         // deal with special cases like page series
@@ -748,7 +748,7 @@ void MainWindow::on_actionConvert_CID_v0_to_v1_triggered()
     if (m_hashBegin >= 0) {
         m_hashEnd = m_hashBegin + cidResult.length;
         IpfsAgent agent;
-        QJsonObject jo = agent.execGet("cid/base32", "arg=" + cidResult.toString(text)).object();
+        QJsonObject jo = agent.execPost("cid/base32", "arg=" + cidResult.toString(text), {}).object();
         qDebug() << jo;
         QString cid = jo.value(QLatin1String("Formatted")).toString();
         QString newText(text);

@@ -15,6 +15,7 @@
 **
 ****************************************************************************/
 
+#include "application.h"
 #include "mainwindow.h"
 #include "settings.h"
 #include <QApplication>
@@ -25,7 +26,7 @@
 
 int main(int argc, char *argv[])
 {
-    QApplication app(argc, argv);
+    Application app(argc, argv);
 
     app.setApplicationName("NetteBook");
     app.setOrganizationDomain("nettebook.org");
@@ -69,6 +70,7 @@ int main(int argc, char *argv[])
         parser.showHelp();
 
     MainWindow w;
+    w.connect(&app, &Application::load, &w, &MainWindow::load);
     if (parser.isSet(editOption))
         w.setEditMode(true);
     bool preloadCss = false;

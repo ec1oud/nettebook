@@ -13,6 +13,7 @@ CONFIG += c++11
 no_kio: DEFINES += NETTEBOOK_NO_KIO
 
 SOURCES += \
+    application.cpp \
     cidfinder.cpp \
     codeblockhighlighter.cpp \
     colorswatch.cpp \
@@ -36,6 +37,7 @@ SOURCES += \
     thumbnailview.cpp \
 
 HEADERS += \
+    application.h \
     cidfinder.h \
     codeblockhighlighter.h \
     colorswatch.h \
@@ -69,6 +71,9 @@ RESOURCES += \
     resources/resources.qrc
 
 mac {
+	TARGET = NetteBook
+	OTHER_FILES += resources/Info.plist
+	QMAKE_INFO_PLIST = resources/Info.plist
 	ICON = resources/nettebook.icns
 }
 

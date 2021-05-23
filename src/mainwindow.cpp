@@ -272,6 +272,12 @@ void MainWindow::loadJournal(QStringList dateAndTopics)
     }
     QDir path = Settings::instance()->stringOrDefault(Settings::journalGroup, Settings::journalDirectory,
                                                       QDir::home().filePath(QLatin1String("journal")));
+    if (!path.exists()) {
+        if (QMessageBox::question(this, tr("Create directory?"), tr("No journal directory.  Create?")) == QMessageBox::Yes) {
+            if (!QDir::home().mkpath(path.path()))
+                ui->statusBar->showMessage(tr("Failed to create %1").arg(path.path()));
+        }
+    }
     QString filename = Settings::instance()->stringOrDefault(Settings::journalGroup, Settings::journalFilenameFormat, QLatin1String("$date-$topics.md"));
     filename.replace(QLatin1String("$date"), date.toString(QLatin1String("yyyyMMdd")));
     QString topics;

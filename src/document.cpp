@@ -181,7 +181,7 @@ void Document::fileListReceived(KIO::Job *job, const KIO::UDSEntryList &list)
         m_fileList = list;
         if (list.count() == 0) {
             m_errorText = tr("no files in %1").arg(url.toString());
-            setStatus(ErrorEmpty);
+            setStatus(ErrorWithText);
         } else {
             setStatus(Ready);
         }
@@ -396,8 +396,10 @@ void Document::saveAs(QUrl url, const QString &mimeType)
     QUrl dir = url.adjusted(QUrl::RemoveFilename);
     if (url.isLocalFile())
         url.setPath(QDir(dir.toLocalFile()).absoluteFilePath(url.fileName()));
+    else if (url.scheme().isEmpty())
+        url.setScheme(QLatin1String("file"));
     m_saveUrl = url;
-    qDebug() << url << mimeType << dir;
+    qDebug() << Q_FUNC_INFO << url << mimeType << dir;
     Settings *settings = Settings::instance();
     if (settings->boolOrDefault(settings->writingGroup, settings->saveResourcesWithDocuments, true)) {
         QString suffix = settings->stringOrDefault(settings->writingGroup, settings->resourceDirectorySuffix, QLatin1String("_resources"));
@@ -438,8 +440,8 @@ void Document::saveAs(QUrl url, const QString &mimeType)
             setStatus(ErrorWithText);
         }
     } else {
-        m_errorText = tr("saving to non-file URLs is only possible via KIO, so far");
-        setStatus(ErrorEmpty);
+        m_errorText = tr("saving to non-file URLs is only possible via KIO, so far: '%1'").arg(m_saveUrl.toString());
+        setStatus(ErrorWithText);
     }
 #else
     KIO::TransferJob *job = KIO::put(url, -1, KIO::Overwrite);

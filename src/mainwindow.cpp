@@ -39,7 +39,6 @@
 #include <QPrintDialog>
 #include <QPrinter>
 #include <QStandardPaths>
-#include <QTextCodec>
 #include <QTextDocumentFragment>
 #include <QTextEdit>
 #include <QTextList>
@@ -255,10 +254,12 @@ void MainWindow::loadJournal(QStringList dateAndTopics)
             date = QDate::fromString(dateString, QLatin1String("yyyyMMdd"));
             if (!date.isValid())
                 date = QDate::fromString(dateString, Qt::RFC2822Date);
-            if (!date.isValid())
-                date = QDate::fromString(dateString, Qt::DefaultLocaleShortDate); // 2-digit years are problematic though: QTBUG-82886
-            if (!date.isValid())
-                date = QDate::fromString(dateString, Qt::DefaultLocaleLongDate);
+            if (!date.isValid()) {
+                QLocale locale;
+                date = locale.toDate(dateString, QLocale::ShortFormat); // 2-digit years are problematic though: QTBUG-82886
+                if (!date.isValid())
+                    date = locale.toDate(dateString, QLocale::LongFormat);
+            }
         }
     }
     if (!date.isValid()) {
@@ -991,7 +992,7 @@ void MainWindow::on_actionPrint_triggered()
     QPrinter printer(QPrinter::HighResolution);
     QPrintDialog *dlg = new QPrintDialog(&printer, this);
     if (m_mainWidget->textCursor().hasSelection())
-        dlg->addEnabledOption(QAbstractPrintDialog::PrintSelection);
+        dlg->setOption(QAbstractPrintDialog::PrintSelection);
     if (dlg->exec() == QDialog::Accepted)
         m_mainWidget->print(&printer);
     delete dlg;

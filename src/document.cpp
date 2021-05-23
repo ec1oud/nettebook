@@ -10,7 +10,6 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
-#include <QTextCodec>
 #include <QTextFrame>
 #include <QTextList>
 #include <QTextDocumentFragment>

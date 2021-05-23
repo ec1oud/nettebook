@@ -11,14 +11,15 @@ notebook, as well as being suitable for blogging and other informal publishing.
 Since QTextDocument supports Markdown task lists, a Kanban mode is under
 development.
 
-- requires Qt 5.14 to build the main application (in src/)
+- requires Qt 5.14 or newer (Qt 6 is OK) to build the main application (in src/)
 - includes code for a KIO slave for reading and writing via IPFS, which also
   enables KDE applications like [kate](https://kate-editor.org) and 
   [dolphin](https://kde.org/applications/system/org.kde.dolphin) to see the
   files on your local MFS/unixfs instance or at a particular IPFS hash.  This
   can be built with earlier Qt versions such as 5.12.
+- to build the main application without KIO, use `qmake -config no_kio`
 
-![screenshot](images/screenshot-ipfs.png)
+![screenshot](images/screenshot-ipfs.png) 
 ![screenshot](images/screenshot-dolphin.png)
 
 - - -

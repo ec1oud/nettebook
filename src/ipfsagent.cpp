@@ -78,7 +78,7 @@ void IpfsAgent::fileDataReceiveDone(KJob *job)
     QUrl url = m_resourceLoaders.key(job);
     qDebug() << "for" << url.toString() << "got" << m_loadedResources.value(url).size() << "bytes";
     if (!m_loadedResources.value(url).size()) {
-        m_loadedResources[url].append(QString());
+        m_loadedResources[url].append(QByteArray());
     }
     m_resourceLoaders.remove(url);
     m_resourceResponders.value(url)(m_loadedResources.value(url));

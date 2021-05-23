@@ -27,8 +27,10 @@ class MarkdownBrowser : public QTextBrowser
     Q_OBJECT
 public:
     MarkdownBrowser(QWidget *parent = nullptr);
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     void setSource(const QUrl &name) override;
     void setSource(const QUrl &name, QTextDocument::ResourceType type);
+#endif
     QVariant loadResource(int type, const QUrl &name) override;
     void reload() override;
     void updateWatcher();
@@ -38,6 +40,9 @@ signals:
     void unlink();
 
 protected:
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    void doSetSource(const QUrl &name, QTextDocument::ResourceType type = QTextDocument::UnknownResource) override;
+#endif
     void contextMenuEvent(QContextMenuEvent *event) override;
 
 private:

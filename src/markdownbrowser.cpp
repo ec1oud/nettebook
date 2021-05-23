@@ -29,6 +29,8 @@ MarkdownBrowser::MarkdownBrowser(QWidget *parent)
     connect(&m_watcher, &QFileSystemWatcher::fileChanged, this, &MarkdownBrowser::onFileChanged);
 }
 
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+
 void MarkdownBrowser::setSource(const QUrl &name)
 {
     m_loading = name;
@@ -44,6 +46,18 @@ void MarkdownBrowser::setSource(const QUrl &name, QTextDocument::ResourceType ty
     m_loading = name;
     QTextBrowser::setSource(name, type);
 }
+
+#else
+
+void MarkdownBrowser::doSetSource(const QUrl &name, QTextDocument::ResourceType type)
+{
+    m_loading = name;
+    if (name.fileName().isEmpty()) // directory listing will be markdown
+        type = QTextDocument::MarkdownResource;
+    QTextBrowser::doSetSource(name, type);
+}
+
+#endif
 
 QVariant MarkdownBrowser::loadResource(int type, const QUrl &name)
 {

@@ -68,6 +68,10 @@ FORMS += \
 RESOURCES += \
     resources/resources.qrc
 
+mac {
+	ICON = resources/nettebook.icns
+}
+
 INCLUDEPATH += /usr/include/KF5/KIOCore ../deps/QJsonModel
 !no_kio: INCLUDEPATH += /usr/include/KF5/KCoreAddons
 !no_kio: LIBS += -L/usr/lib/kf5 -lKF5KIOCore -lKF5CoreAddons

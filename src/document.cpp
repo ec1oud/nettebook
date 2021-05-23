@@ -77,7 +77,9 @@ QVariant Document::loadResource(int t, const QUrl &name)
         connect (job, SIGNAL(entries(KIO::Job*, const KIO::UDSEntryList &)),
                  this, SLOT(fileListReceived(KIO::Job*, const KIO::UDSEntryList &)));
         m_resourceLoaders.insert(name, job);
-    } else {
+    } else
+#endif
+    {
         bool main = false;
         if (type == ResourceType::HtmlResource || type == ResourceType::MarkdownResource) {
             m_mainFile = url;
@@ -96,14 +98,27 @@ QVariant Document::loadResource(int t, const QUrl &name)
             return m_loadedResources.value(name);
         }
         // not cached, so try to load it
+#ifdef NETTEBOOK_NO_KIO
+        if (name.isLocalFile()) {
+            QFile f(name.toLocalFile());
+            if (f.open(QFile::ReadOnly)) {
+                setStatus(Ready);
+                return f.readAll();
+            } else {
+                auto ret = tr("failed to open file '%1'").arg(name.toLocalFile());
+                setStatus(ErrorWithText);
+                return ret;
+            }
+        }
+#else
         KIO::Job* job = KIO::get(url);
 qDebug() << "GET" << name << job;
         connect (job, SIGNAL(data(KIO::Job *, const QByteArray &)),
                  this, SLOT(resourceDataReceived(KIO::Job *, const QByteArray &)));
         connect (job, SIGNAL(result(KJob*)), this, SLOT(resourceReceiveDone(KJob*)));
         m_resourceLoaders.insert(name, job);
-    }
 #endif
+    }
     // Waiting for now, but this function can't block.  We'll be nagged again soon.
     return QVariant();
 }
@@ -111,7 +126,9 @@ qDebug() << "GET" << name << job;
 void Document::setStatus(Document::Status s)
 {
     m_status = s;
-    // TODO emit?
+    if (s != ErrorWithText)
+        m_errorText.clear();
+    emit errorTextChanged(m_errorText);
 }
 
 #ifndef NETTEBOOK_NO_KIO
@@ -401,7 +418,31 @@ void Document::saveAs(QUrl url, const QString &mimeType)
         mt = QLatin1String("application/xhtml+xml");
     else if (m_saveType == ResourceType::MarkdownResource)
         mt = QLatin1String("text/markdown");
-#ifndef NETTEBOOK_NO_KIO
+#ifdef NETTEBOOK_NO_KIO
+    if (m_saveUrl.isLocalFile()) {
+        QFile f(m_saveUrl.toLocalFile());
+        if (f.open(QFile::WriteOnly)) {
+            QByteArray toWrite;
+            prepareWriteBuffer(toWrite);
+            if (toWrite.isEmpty())
+                qWarning() << "writing empty file";
+            if (f.write(toWrite) < 0) {
+                m_errorText = tr("failed to write '%1'").arg(m_saveUrl.toLocalFile());
+                setStatus(ErrorWithText);
+            } else {
+                f.close();
+                emit saved(m_saveUrl);
+                setStatus(Ready);
+            }
+        } else {
+            m_errorText = tr("failed to open for writing '%1'").arg(m_saveUrl.toLocalFile());
+            setStatus(ErrorWithText);
+        }
+    } else {
+        m_errorText = tr("saving to non-file URLs is only possible via KIO, so far");
+        setStatus(ErrorEmpty);
+    }
+#else
     KIO::TransferJob *job = KIO::put(url, -1, KIO::Overwrite);
     job->addMetaData("content-type", mt);
     connect (job, SIGNAL(dataReq(KIO::Job *, QByteArray &)),
@@ -475,12 +516,8 @@ void Document::saveToIpfs()
 #endif
 }
 
-#ifndef NETTEBOOK_NO_KIO
-void Document::onSaveDataReq(KIO::Job *job, QByteArray &dest)
+void Document::prepareWriteBuffer(QByteArray &dest)
 {
-    Q_UNUSED(job)
-    if (m_saveDone)
-        return;
     switch (m_saveType) {
     case ResourceType::HtmlResource:
         qDebug() << "writing HTML";
@@ -504,6 +541,15 @@ void Document::onSaveDataReq(KIO::Job *job, QByteArray &dest)
         qWarning() << "saving" << m_saveType << "isn't implemented";
         break;
     }
+}
+
+#ifndef NETTEBOOK_NO_KIO
+void Document::onSaveDataReq(KIO::Job *job, QByteArray &dest)
+{
+    Q_UNUSED(job)
+    if (m_saveDone)
+        return;
+    prepareWriteBuffer(dest);
     m_saveDone = true;
 }
 
@@ -524,6 +570,7 @@ void Document::onSaveDone(KJob *job)
     } else {
         qDebug() << m_saveUrl;
         emit saved(m_saveUrl);
+        setStatus(Ready);
     }
     m_transferJob = nullptr;
     m_saveUrl.clear();

@@ -77,6 +77,12 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(m_document, &Document::modificationChanged, this, &QWidget::setWindowModified);
     connect(m_document, &Document::undoAvailable, ui->action_Undo, &QAction::setEnabled);
     connect(m_document, &Document::redoAvailable, ui->action_Redo, &QAction::setEnabled);
+    connect(m_document, &Document::errorTextChanged, [this](const QString &text) {
+        if (text.isEmpty())
+            ui->statusBar->clearMessage();
+        else
+            ui->statusBar->showMessage(text);
+    });
     connect(m_mainWidget, &QTextEdit::copyAvailable, ui->actionCut, &QAction::setEnabled);
     connect(m_mainWidget, &QTextEdit::copyAvailable, ui->action_Copy, &QAction::setEnabled);
     connect(m_mainWidget, &MarkdownBrowser::editLink, this, &MainWindow::on_actionEdit_Link_triggered);

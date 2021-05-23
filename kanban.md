@@ -6,6 +6,7 @@
 
 # todo
 
+- [ ] don't change indent when converting bullet point to checkbox list item
 - [ ] deal with nested lists (indented subtasks)
 - [ ] make new lists when needed (when dragging to a column corresponding to an
   empty heading)

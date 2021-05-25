@@ -1,8 +1,13 @@
 # bugs
 
 - [ ] saving resources to doc dir instead of the resource dir
-- [ ] task cut & paste loses the checkbox (Qt bug probably)
+- [ ] task cut & paste loses the checkbox (QTBUG-103714)
+- [ ] never word-wrap on non-whitespace characters; e.g. don't break up long
+  ipfs://bafybei... URLs even if the markdown parser doesn't recognize them as
+  URLs
 - [ ] crash on ctrl-k sometimes
+- [ ] moving checkbox items from current list to done list seems to be triggering
+  even when it's not initially checked (control-k to convert bullet item)
 
 # todo
 
@@ -28,6 +33,14 @@
 - [ ] todo.txt format support: should look like kanban with only 2 columns (todo
   and done); support DnD between both kinds of lists
 - [ ] DnD to drop multiple files, in both reading and editing modes
+- [ ] table navigation: tab between columns, insert new rows when necessary
+- [ ] table editing features: insert and remove rows etc.
+- [ ] mini-spreadsheet?
+- [ ] dogfood the Qt 6 version
+- [ ] IPFS features without KIO (?)
+- [ ] link & anchor shapes
+- [ ] support text ranges in fragment identifiers
+- [ ] SDI: multiple docs in multiple windows; open links in new windows
 
 # doing
 

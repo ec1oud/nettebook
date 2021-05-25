@@ -34,6 +34,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QMessageBox>
+#include <QMimeData>
 #include <QMimeDatabase>
 #include <QNetworkReply>
 #include <QPrintDialog>
@@ -113,6 +114,7 @@ MainWindow::MainWindow(QWidget *parent) :
 #if defined(QT_PRINTSUPPORT_LIB) && QT_CONFIG(printdialog)
     ui->actionPrint->setEnabled(true);
 #endif
+    setAcceptDrops(true);
 }
 
 MainWindow::~MainWindow()
@@ -175,6 +177,20 @@ void MainWindow::on_actionReload_triggered()
 {
     if (maybeSave())
         m_mainWidget->reload();
+}
+
+void MainWindow::dragEnterEvent(QDragEnterEvent *event)
+{
+    if (event->mimeData()->hasFormat("text/uri-list"))
+        event->acceptProposedAction();
+}
+
+void MainWindow::dropEvent(QDropEvent *ev)
+{
+    if (ev->mimeData()->hasUrls()) {
+        load(ev->mimeData()->urls().first().toString());
+        ev->acceptProposedAction();
+    }
 }
 
 void MainWindow::load(QString url)

@@ -27,6 +27,7 @@
 - [ ] attempt quote styling (just draw lines in editor subclass?)
 - [ ] todo.txt format support: should look like kanban with only 2 columns (todo
   and done); support DnD between both kinds of lists
+- [ ] DnD to drop multiple files, in both reading and editing modes
 
 # doing
 

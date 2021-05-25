@@ -61,6 +61,10 @@ public slots:
     void showJsonWindow(QUrl url);
     void on_actionKanban_triggered();
 
+protected:
+    void dragEnterEvent(QDragEnterEvent *event);
+    void dropEvent(QDropEvent *ev) override;
+
 private slots:
     void currentCharFormatChanged(const QTextCharFormat &format);
     void cursorPositionChanged();

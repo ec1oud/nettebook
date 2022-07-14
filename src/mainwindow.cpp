@@ -27,6 +27,7 @@
 #include "settingsdialog.h"
 #include "tablesizedialog.h"
 #include "tableviewdialog.h"
+#include "util.h"
 
 #include <QDebug>
 #include <QFileDialog>
@@ -312,8 +313,9 @@ void MainWindow::loadTemplate(QString name)
     const QLatin1String templatesSubdir("templates");
     QFileInfo contentFi(m_document->contentSource().fileName());
     QString fileName = name + QLatin1Char('.') + contentFi.suffix();
-    QDir documentDir = QFileInfo(m_document->contentSource().toLocalFile()).dir();
+    QDir documentDir = QFileInfo(Util::toLocalFile(m_document->contentSource())).dir();
     documentDir.cd(QLatin1String(".templates"));
+qDebug() << "looking for" << fileName << "in" << documentDir << "which started with" << m_document->contentSource() << Util::toLocalFile(m_document->contentSource());
     QFileInfo fi(documentDir, fileName);
     if (!fi.isReadable())
         fi = QFileInfo(QStandardPaths::locate(QStandardPaths::AppConfigLocation,
@@ -396,7 +398,7 @@ bool MainWindow::setBrowserStyle(QUrl url)
     // TODO same url resolution as in load()
     if (url.isLocalFile()) {
         qDebug() << "setting style" << url;
-        QFile file(url.toLocalFile());
+        QFile file(Util::toLocalFile(url));
         if (file.open(QFile::ReadOnly)) {
             QByteArray data = file.readAll();
             m_document->setDefaultStyleSheet(QString::fromLatin1(data));
@@ -429,7 +431,7 @@ void MainWindow::showJsonWindow(QUrl url)
     JsonView *v = new JsonView();
     qDebug() << Q_FUNC_INFO << url;
     if (url.isLocalFile()) {
-        QFile f(url.toLocalFile());
+        QFile f(Util::toLocalFile(url));
         if (f.open(QFile::ReadOnly))
             v->load(f.readAll());
         else

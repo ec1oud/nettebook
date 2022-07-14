@@ -35,6 +35,7 @@ SOURCES += \
     thumbnailitem.cpp \
     thumbnailscene.cpp \
     thumbnailview.cpp \
+    util.cpp
 
 HEADERS += \
     application.h \
@@ -58,6 +59,7 @@ HEADERS += \
     thumbnailitem.h \
     thumbnailscene.h \
     thumbnailview.h \
+    util.h
 
 FORMS += \
     datepickerdialog.ui \

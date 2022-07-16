@@ -58,6 +58,8 @@ void LinkDialog::setLinkText(const QString &text)
 }
 
 void LinkDialog::setMode(LinkDialog::Mode mode) {
+    if (m_mode == mode)
+        return;
     switch (mode) {
     case Mode::InsertLink:
         ui->buttonBox->removeButton(m_okButton);

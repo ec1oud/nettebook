@@ -114,7 +114,7 @@ void MarkdownBrowser::contextMenuEvent(QContextMenuEvent *event)
 {
     if (!isReadOnly())
         setTextCursor(cursorForPosition(event->pos()));
-    QMenu *menu = createStandardContextMenu();
+    QMenu *menu = createStandardContextMenu(event->pos());
     if (!isReadOnly() && !textCursor().charFormat().anchorHref().isEmpty()) {
         menu->addSeparator();
         QAction *editLinkAction = menu->addAction(tr("Edit Link"));

@@ -134,10 +134,7 @@ QList<MarkdownBrowser::LinkInfo> MarkdownBrowser::viewportLinks()
                     bounds.translate(0, -verticalPos);
                     if (bounds.bottom() > 0 && bounds.top() < vpHeight)
                         relevant = true;
-                    if (linfo.region.isEmpty())
-                        linfo.region = bounds;
-                    else
-                        linfo.region = linfo.region.united(bounds);
+                    linfo.appendRegion(bounds);
                 }
                 if (!relevant)
                     continue;
@@ -161,8 +158,9 @@ void MarkdownBrowser::paintEvent(QPaintEvent *e)
     QPainter p(viewport());
     p.setPen(Qt::red);
     for (const auto &linfo : links) {
-        p.drawPolygon(linfo.region);
-        p.drawText(linfo.region.first(), linfo.linkOrAnchorName.toString());
+        for (const auto &poly : linfo.region)
+            p.drawPolygon(poly);
+        p.drawText(linfo.region.first().first(), linfo.linkOrAnchorName.toString());
     }
     QTextBrowser::paintEvent(e);
 }
@@ -197,11 +195,33 @@ void MarkdownBrowser::onFileChanged(const QString &path)
         reload();
 }
 
+static bool overlappingRange(qreal l1, qreal r1, qreal l2, qreal r2)
+{
+    // l1 is between l2 and r2 or
+    // r1 is between l2 and r2
+    return ((l1 >= l2 && l1 <= r2) || (r1 >= l2 && r1 <= r2));
+}
+
+void MarkdownBrowser::LinkInfo::appendRegion(QRectF p)
+{
+    if (!region.isEmpty()) {
+        QPolygonF &last = region.last();
+        const auto &lastBounds = last.boundingRect();
+        const qreal dy = qAbs(lastBounds.bottom() - p.top());
+        if (dy < 3 && overlappingRange(p.left(), p.right(), lastBounds.left(), lastBounds.right())) {
+            p.moveTop(p.top() - dy - 0.1);
+            region << region.takeLast().united(p);
+            return;
+        }
+    }
+    region << p;
+}
+
 #ifndef QT_NO_DEBUG_STREAM
 QDebug operator<<(QDebug dbg, const MarkdownBrowser::LinkInfo &info)
 {
     QDebugStateSaver saver(dbg);
-    dbg << info.linkOrAnchorName << info.region << "first y" << info.region.first().y();
+    dbg << info.linkOrAnchorName << info.region << "first y" << info.region.first().first().y();
     return dbg;
 }
 #endif // !QT_NO_DEBUG_STREAM

@@ -37,7 +37,9 @@ public:
 
     struct LinkInfo {
         QUrl linkOrAnchorName;
-        QPolygonF region;
+        QList<QPolygonF> region;
+
+        void appendRegion(QRectF p);
     };
     QList<LinkInfo> viewportLinks();
 

@@ -35,6 +35,12 @@ public:
     void reload() override;
     void updateWatcher();
 
+    struct LinkInfo {
+        QUrl linkOrAnchorName;
+        QPolygonF region;
+    };
+    QList<LinkInfo> viewportLinks();
+
 signals:
     void editLink();
     void unlink();
@@ -43,6 +49,7 @@ protected:
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
     void doSetSource(const QUrl &name, QTextDocument::ResourceType type = QTextDocument::UnknownResource) override;
 #endif
+    void paintEvent(QPaintEvent *e) override;
     void contextMenuEvent(QContextMenuEvent *event) override;
 
 private:
@@ -53,5 +60,9 @@ private:
     QUrl m_loading;
     QFileSystemWatcher m_watcher;
 };
+
+#ifndef QT_NO_DEBUG_STREAM
+    QDebug operator<<(QDebug dbg, const MarkdownBrowser::LinkInfo &info);
+#endif
 
 #endif // MARKDOWNBROWSER_H

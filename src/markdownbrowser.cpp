@@ -18,9 +18,12 @@
 #include "document.h"
 #include "markdownbrowser.h"
 #include <QDebug>
+#include <QAbstractTextDocumentLayout>
 #include <QApplication>
 #include <QMenu>
 #include <QMessageBox>
+#include <QPainter>
+#include <QScrollBar>
 #include <QThread>
 
 MarkdownBrowser::MarkdownBrowser(QWidget *parent)
@@ -110,6 +113,60 @@ void MarkdownBrowser::updateWatcher()
     qDebug() << "watching" << m_watcher.files();
 }
 
+QList<MarkdownBrowser::LinkInfo> MarkdownBrowser::viewportLinks()
+{
+    QList<MarkdownBrowser::LinkInfo> ret;
+    const int verticalPos = verticalScrollBar()->value();
+    const int vpHeight = viewport()->height();
+    for (QTextBlock block = document()->begin(); block != document()->end(); block = block.next()) {
+        for (auto fragIter = block.begin(); !fragIter.atEnd(); ++fragIter) {
+            const QTextFragment frag = fragIter.fragment();
+            const QTextCharFormat fmt = frag.charFormat();
+            const QStringList anames = fmt.anchorNames();
+            QTextLayout *layout = block.layout();
+            if (!anames.isEmpty() || fmt.isAnchor()) {
+                LinkInfo linfo;
+                QList<QGlyphRun> runs = frag.glyphRuns();
+                bool relevant = false;
+                for (const QGlyphRun &glrun : runs) {
+                    QRectF bounds = glrun.boundingRect();
+                    bounds.translate(layout->position());
+                    bounds.translate(0, -verticalPos);
+                    if (bounds.bottom() > 0 && bounds.top() < vpHeight)
+                        relevant = true;
+                    if (linfo.region.isEmpty())
+                        linfo.region = bounds;
+                    else
+                        linfo.region = linfo.region.united(bounds);
+                }
+                if (!relevant)
+                    continue;
+                if (!anames.isEmpty()) {
+                    linfo.linkOrAnchorName.setFragment(anames.first());
+                    qDebug() << "hyperlink destination" << linfo;
+                } else if (fmt.isAnchor()) {
+                    linfo.linkOrAnchorName = QUrl(fmt.anchorHref());
+                    qDebug() << "hyperlink source" << frag.text() << linfo;
+                }
+                ret << linfo;
+            }
+        }
+    }
+    return ret;
+}
+
+void MarkdownBrowser::paintEvent(QPaintEvent *e)
+{
+    QList<MarkdownBrowser::LinkInfo> links = viewportLinks();
+    QPainter p(viewport());
+    p.setPen(Qt::red);
+    for (const auto &linfo : links) {
+        p.drawPolygon(linfo.region);
+        p.drawText(linfo.region.first(), linfo.linkOrAnchorName.toString());
+    }
+    QTextBrowser::paintEvent(e);
+}
+
 void MarkdownBrowser::contextMenuEvent(QContextMenuEvent *event)
 {
     if (!isReadOnly())
@@ -139,3 +196,12 @@ void MarkdownBrowser::onFileChanged(const QString &path)
             tr("The file has changed.  Do you want to reload it?")) == QMessageBox::Yes)
         reload();
 }
+
+#ifndef QT_NO_DEBUG_STREAM
+QDebug operator<<(QDebug dbg, const MarkdownBrowser::LinkInfo &info)
+{
+    QDebugStateSaver saver(dbg);
+    dbg << info.linkOrAnchorName << info.region << "first y" << info.region.first().y();
+    return dbg;
+}
+#endif // !QT_NO_DEBUG_STREAM

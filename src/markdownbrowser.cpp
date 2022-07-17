@@ -22,9 +22,12 @@
 #include <QApplication>
 #include <QMenu>
 #include <QMessageBox>
+#include <QMetaMethod>
 #include <QPainter>
 #include <QScrollBar>
 #include <QThread>
+
+//#define PAINT_LINK_OUTLINES
 
 MarkdownBrowser::MarkdownBrowser(QWidget *parent)
     : QTextBrowser(parent)
@@ -113,11 +116,12 @@ void MarkdownBrowser::updateWatcher()
     qDebug() << "watching" << m_watcher.files();
 }
 
-QList<MarkdownBrowser::LinkInfo> MarkdownBrowser::viewportLinks()
+void MarkdownBrowser::updateViewportLinks()
 {
-    QList<MarkdownBrowser::LinkInfo> ret;
+    QList<LinkInfo> ret;
     const int verticalPos = verticalScrollBar()->value();
     const int vpHeight = viewport()->height();
+    bool sameAsStored = true;
     for (QTextBlock block = document()->begin(); block != document()->end(); block = block.next()) {
         for (auto fragIter = block.begin(); !fragIter.atEnd(); ++fragIter) {
             const QTextFragment frag = fragIter.fragment();
@@ -145,23 +149,34 @@ QList<MarkdownBrowser::LinkInfo> MarkdownBrowser::viewportLinks()
                     linfo.linkOrAnchorName = QUrl(fmt.anchorHref());
                     qDebug() << "hyperlink source" << frag.text() << linfo;
                 }
+                if (sameAsStored && (m_viewportLinks.size() <= ret.size() ||
+                                     linfo != m_viewportLinks.at(ret.size())))
+                    sameAsStored = false;
                 ret << linfo;
             }
         }
     }
-    return ret;
+    if (!sameAsStored) {
+        m_viewportLinks = ret;
+        emit viewportLinksChanged();
+    }
 }
 
 void MarkdownBrowser::paintEvent(QPaintEvent *e)
 {
-    QList<MarkdownBrowser::LinkInfo> links = viewportLinks();
+#ifndef PAINT_LINK_OUTLINES
+    if (isSignalConnected(QMetaMethod::fromSignal(&MarkdownBrowser::viewportLinksChanged)))
+#endif
+        updateViewportLinks();
+#ifdef PAINT_LINK_OUTLINES
     QPainter p(viewport());
     p.setPen(Qt::red);
-    for (const auto &linfo : links) {
+    for (const auto &linfo : viewportLinks()) {
         for (const auto &poly : linfo.region)
             p.drawPolygon(poly);
         p.drawText(linfo.region.first().first(), linfo.linkOrAnchorName.toString());
     }
+#endif
     QTextBrowser::paintEvent(e);
 }
 
@@ -215,6 +230,11 @@ void MarkdownBrowser::LinkInfo::appendRegion(QRectF p)
         }
     }
     region << p;
+}
+
+bool MarkdownBrowser::LinkInfo::operator==(const LinkInfo &other) const
+{
+    return linkOrAnchorName == other.linkOrAnchorName && region == other.region;
 }
 
 #ifndef QT_NO_DEBUG_STREAM

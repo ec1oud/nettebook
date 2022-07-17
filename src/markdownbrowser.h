@@ -40,12 +40,15 @@ public:
         QList<QPolygonF> region;
 
         void appendRegion(QRectF p);
+        bool operator==(const LinkInfo& other) const;
+        bool operator!=(const LinkInfo& other) const { return !operator==(other); }
     };
-    QList<LinkInfo> viewportLinks();
+    QList<LinkInfo> viewportLinks() { return m_viewportLinks; }
 
 signals:
     void editLink();
     void unlink();
+    void viewportLinksChanged();
 
 protected:
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
@@ -55,12 +58,14 @@ protected:
     void contextMenuEvent(QContextMenuEvent *event) override;
 
 private:
+    void updateViewportLinks();
     void onFileChanged(const QString &path);
 
 private:
     QTimer m_loadingTimeout;
     QUrl m_loading;
     QFileSystemWatcher m_watcher;
+    QList<LinkInfo> m_viewportLinks;
 };
 
 #ifndef QT_NO_DEBUG_STREAM

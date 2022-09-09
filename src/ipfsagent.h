@@ -31,6 +31,8 @@ class TransferJob;
 class KJob;
 #endif
 
+using namespace Qt::StringLiterals;
+
 class IpfsAgent : public QObject
 {
     Q_OBJECT
@@ -52,7 +54,7 @@ protected slots:
 
 private:
     QNetworkAccessManager m_nam;
-    QUrl m_apiBaseUrl = QUrl(QLatin1String("http://localhost:5001/api/v0/"));
+    QUrl m_apiBaseUrl = QUrl("http://localhost:5001/api/v0/"_L1);
     QByteArray m_userAgent = "nettebook";
     QEventLoop m_eventLoop;
 #ifndef NETTEBOOK_NO_KIO

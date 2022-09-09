@@ -21,15 +21,17 @@
 #include <QDir>
 #include <QStandardPaths>
 
-const QString Settings::writingGroup(QLatin1String("Writing"));
-const QString Settings::saveResourcesWithDocuments(QLatin1String("saveResourcesWithDocuments"));
-const QString Settings::resourceDirectorySuffix(QLatin1String("resourceDirectorySuffix"));
-const QString Settings::journalGroup(QLatin1String("Journal"));
-const QString Settings::journalDirectory(QLatin1String("journalDirectory"));
-const QString Settings::journalFilenameFormat(QLatin1String("journalFilenameFormat"));
-const QString Settings::journalUsesTemplates(QLatin1String("journalUsesTemplates"));
-const QString Settings::styleGroup(QLatin1String("Style"));
-const QString Settings::codeBlockBackground(QLatin1String("codeBlockBackground"));
+using namespace Qt::StringLiterals;
+
+const QString Settings::writingGroup("Writing"_L1);
+const QString Settings::saveResourcesWithDocuments("saveResourcesWithDocuments"_L1);
+const QString Settings::resourceDirectorySuffix("resourceDirectorySuffix"_L1);
+const QString Settings::journalGroup("Journal"_L1);
+const QString Settings::journalDirectory("journalDirectory"_L1);
+const QString Settings::journalFilenameFormat("journalFilenameFormat"_L1);
+const QString Settings::journalUsesTemplates("journalUsesTemplates"_L1);
+const QString Settings::styleGroup("Style"_L1);
+const QString Settings::codeBlockBackground("codeBlockBackground"_L1);
 
 Settings* Settings::instance()
 {
@@ -41,7 +43,7 @@ Settings::Settings(QObject* parent) :
 #ifdef Q_OS_LINUX
     // correct for QTBUG-82888
     QSettings(QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation) + QDir::separator() +
-              QApplication::applicationName() + QLatin1String(".conf"), QSettings::NativeFormat, parent)
+              QApplication::applicationName() + ".conf"_L1, QSettings::NativeFormat, parent)
 #else
     QSettings(parent)
 #endif

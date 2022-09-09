@@ -22,6 +22,8 @@
 #include <QTextDocumentFragment>
 #include <QTextList>
 
+using namespace Qt::StringLiterals;
+
 TextListModel::TextListModel(Document *doc, QTextBlock heading, QTextList *list,
                              QTextBlockFormat::MarkerType marker, QObject *parent)
     : QAbstractListModel(parent), m_doc(doc), m_headingBlock(heading), m_list(list), m_defaultMarker(marker)
@@ -201,7 +203,7 @@ bool TextListModel::dropMimeData(const QMimeData *data, Qt::DropAction action, i
     bool expectListItems = true;
     QTextDocument tmpDoc;
     if (data->hasFormat("text/markdown")) {
-        tmpDoc.setMarkdown(QString::fromUtf8(data->data(QLatin1String("text/markdown"))));
+        tmpDoc.setMarkdown(QString::fromUtf8(data->data("text/markdown"_L1)));
     } else if (data->hasHtml()) {
         tmpDoc.setHtml(data->html());
     } else if (data->hasText()) {
@@ -234,9 +236,9 @@ bool TextListModel::dropMimeData(const QMimeData *data, Qt::DropAction action, i
             QString text = tmpCursor.block().text().trimmed();
             // TODO Qt needs QTextCursor::insertMarkdown() so that we can avoid losing formatting
             if (row < 0)
-                cursor.insertText(QLatin1String("\n") + text);
+                cursor.insertText("\n"_L1 + text);
             else
-                cursor.insertText(text + QLatin1Char('\n'));
+                cursor.insertText(text + '\n'_L1);
             cursor.setBlockFormat(fmt);
             m_list->add(cursor.block());
             endInsertRows();

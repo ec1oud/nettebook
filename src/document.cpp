@@ -22,8 +22,10 @@
 
 #include <iostream>
 
-static const QString ipfsScheme = QStringLiteral("ipfs");
-static const QString fileScheme = QStringLiteral("file");
+using namespace Qt::StringLiterals;
+
+static const auto ipfsScheme = "ipfs"_L1;
+//static const auto fileScheme = "file"_L1;
 
 struct BlockUserData : public QTextBlockUserData {
     ~BlockUserData() { }
@@ -243,18 +245,18 @@ void Document::dumpBlocks() {
         const auto bfmt = block.blockFormat();
         QStringList desc;
         if (bfmt.headingLevel() > 0)
-            desc << (QLatin1String("<h") + QString::number(bfmt.headingLevel()) + ">");
+            desc << ("<h"_L1 + QString::number(bfmt.headingLevel()) + ">");
         if (block.blockFormat().hasProperty(QTextFormat::BlockTrailingHorizontalRulerWidth))
             desc << "horzrule";
         if (block.textList()) {
             if (block.textList() != list) {
                 list = block.textList();
-                desc << (QLatin1String("<list len=") + QString::number(block.textList()->count()) + ">");
+                desc << ("<list len="_L1 + QString::number(block.textList()->count()) + ">");
                 li = 0;
             } else {
                 ++li;
             }
-            desc << (QLatin1String("<li i=") + QString::number(li) + '>');
+            desc << ("<li i="_L1 + QString::number(li) + '>');
             if (bfmt.marker() == QTextBlockFormat::MarkerType::Unchecked)
                 desc << "☐";
             else if (bfmt.marker() == QTextBlockFormat::MarkerType::Checked)
@@ -397,28 +399,28 @@ void Document::saveAs(QUrl url, const QString &mimeType)
     if (url.isLocalFile())
         url.setPath(QDir(dir.toLocalFile()).absoluteFilePath(url.fileName()));
     else if (url.scheme().isEmpty())
-        url.setScheme(QLatin1String("file"));
+        url.setScheme("file"_L1);
     m_saveUrl = url;
     qDebug() << Q_FUNC_INFO << url << mimeType << dir;
     Settings *settings = Settings::instance();
     if (settings->boolOrDefault(settings->writingGroup, settings->saveResourcesWithDocuments, true)) {
-        QString suffix = settings->stringOrDefault(settings->writingGroup, settings->resourceDirectorySuffix, QLatin1String("_resources"));
+        QString suffix = settings->stringOrDefault(settings->writingGroup, settings->resourceDirectorySuffix, "_resources"_L1);
         saveResources(dir, QFileInfo(url.fileName()).baseName() + suffix);
     }
     QString mt = mimeType;
-    if (mimeType.contains(QLatin1String("opendocument")))
+    if (mimeType.contains("opendocument"_L1))
         m_saveType = OdtResource;
-    else if (mimeType == QLatin1String("text/plain"))
+    else if (mimeType == "text/plain"_L1)
         m_saveType = PlainTextResource;
-    else if (mimeType == QLatin1String("text/markdown"))
+    else if (mimeType == "text/markdown"_L1)
         m_saveType = MarkdownResource;
-    else if (mimeType == QLatin1String("text/html") ||
-             mimeType == QLatin1String("application/xhtml+xml"))
+    else if (mimeType == "text/html"_L1 ||
+             mimeType == "application/xhtml+xml"_L1)
         m_saveType = HtmlResource;
     else if (m_saveType == ResourceType::HtmlResource)
-        mt = QLatin1String("application/xhtml+xml");
+        mt = "application/xhtml+xml"_L1;
     else if (m_saveType == ResourceType::MarkdownResource)
-        mt = QLatin1String("text/markdown");
+        mt = "text/markdown"_L1;
 #ifdef NETTEBOOK_NO_KIO
     if (m_saveUrl.isLocalFile()) {
         QFile f(m_saveUrl.toLocalFile());
@@ -462,7 +464,7 @@ void Document::saveResources(const QUrl &dir, const QString &subdir)
         QTextCharFormat fmt = cursor.charFormat();
         if (fmt.isImageFormat()) {
             QTextImageFormat ifmt = fmt.toImageFormat();
-            if (!QFileInfo(ifmt.name()).exists() && !QUrl(ifmt.name()).isLocalFile()) {
+            if (!QFileInfo::exists(ifmt.name()) && !QUrl(ifmt.name()).isLocalFile()) {
                 QVariant image = loadResource(ImageResource, ifmt.name());
                 if (image.isValid()) {
                     QUrl url(ifmt.name());

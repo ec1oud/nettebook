@@ -6,10 +6,12 @@
 #include <QImageReader>
 #include <QPushButton>
 
+using namespace Qt::StringLiterals;
+
 LinkDialog::LinkDialog(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::LinkDialog),
-    m_insertButton(QIcon(QLatin1String(":/32/insert-link.png")), tr("Insert"), this)
+    m_insertButton(QIcon(":/32/insert-link.png"_L1), tr("Insert"), this)
 {
     ui->setupUi(this);
     ui->titleLE->hide();
@@ -33,8 +35,8 @@ void LinkDialog::setSelectedText(const QString &text)
 {
     QUrl destCandidate(text, QUrl::StrictMode);
     if (destCandidate.isValid() &&
-            (destCandidate.scheme().startsWith(QLatin1String("http"), Qt::CaseInsensitive) ||
-             destCandidate.scheme().startsWith(QLatin1String("ip"), Qt::CaseInsensitive))
+            (destCandidate.scheme().startsWith("http"_L1, Qt::CaseInsensitive) ||
+             destCandidate.scheme().startsWith("ip"_L1, Qt::CaseInsensitive))
             && !destCandidate.fileName().isEmpty()) {
         // If we detect something that looks like an URL, set destination
         m_destination = destCandidate;
@@ -106,7 +108,7 @@ void LinkDialog::on_chooseFileButton_clicked()
         for (auto f : QImageReader::supportedImageFormats()) {
             if (i++)
                 imageFormats += QLatin1Char(' ');
-            imageFormats += QLatin1String("*.%1").arg(f);
+            imageFormats += "*.%1"_L1.arg(f);
         }
         imageFormats += tr(")");
         m_destination = QFileDialog::getOpenFileUrl(this, tr("Choose an image"), QUrl(), imageFormats);

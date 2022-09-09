@@ -20,7 +20,6 @@
 ****************************************************************************/
 #include "thumbnailview.h"
 #include "thumbnailscene.h"
-#include "thumbnailitem.h"
 #include <QDebug>
 
 ThumbnailView::ThumbnailView(QWidget* parent) :

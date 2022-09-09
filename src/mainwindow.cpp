@@ -48,9 +48,11 @@
 #include <iostream>
 #include <sstream>
 
-static const QString ipfsScheme = QStringLiteral("ipfs");
-static const QString fileScheme = QStringLiteral("file");
-static const QString fileModifiedPlaceholder = QStringLiteral(" [*]");
+using namespace Qt::StringLiterals;
+
+static const auto ipfsScheme = "ipfs"_L1;
+static const auto fileScheme = "file"_L1;
+static const auto fileModifiedPlaceholder = " [*]"_L1;
 static const int BlockQuoteIndent = 40; // pixels, same as in QTextHtmlParserNode::initializeProperties
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -71,14 +73,14 @@ MainWindow::MainWindow(QWidget *parent) :
             this, &MainWindow::updateUrlField);
 
     // after all resources for a document are loaded, make the QTextBrowser call its d->relayoutDocument()
-    connect(m_document, &Document::allResourcesLoaded,
+    connect(m_document, &Document::allResourcesLoaded, m_document,
             [=]() { m_mainWidget->setDocument(m_document); });
     connect(m_document, &Document::saved, this, &MainWindow::updateUrlField);
     connect(m_document, &Document::contentSourceChanged, this, &MainWindow::updateUrlField);
     connect(m_document, &Document::modificationChanged, this, &QWidget::setWindowModified);
     connect(m_document, &Document::undoAvailable, ui->action_Undo, &QAction::setEnabled);
     connect(m_document, &Document::redoAvailable, ui->action_Redo, &QAction::setEnabled);
-    connect(m_document, &Document::errorTextChanged, [this](const QString &text) {
+    connect(m_document, &Document::errorTextChanged, m_document, [this](const QString &text) {
         if (text.isEmpty())
             ui->statusBar->clearMessage();
         else
@@ -198,7 +200,7 @@ void MainWindow::load(QString url)
 {
     // QUrl::fromUserInput knows how to guess about http and file URLs,
     // but mangles ipfs hashes by converting them to lowercase and setting scheme to http
-    bool directory = url.endsWith(QLatin1String("/"));
+    bool directory = url.endsWith("/"_L1);
     QUrl u(url);
     CidFinder::Result cidResult = CidFinder::findIn(url);
     m_jsonDocument = QJsonDocument();
@@ -261,14 +263,14 @@ void MainWindow::loadJournal(QStringList dateAndTopics)
     QString dateString = dateAndTopics.isEmpty() ? QString() : dateAndTopics.first();
     QDate date = (dateString.isEmpty() ? QDate::currentDate() : QDate::fromString(dateString, Qt::ISODate));
     if (!date.isValid()) {
-        if (dateString == QLatin1String("today") || dateString == tr("today"))
+        if (dateString == "today"_L1 || dateString == tr("today"))
             date = QDate::currentDate();
-        else if (dateString == QLatin1String("yesterday") || dateString == tr("yesterday"))
+        else if (dateString == "yesterday"_L1 || dateString == tr("yesterday"))
             date = QDate::currentDate().addDays(-1);
-        else if (dateString == QLatin1String("tomorrow") || dateString == tr("tomorrow"))
+        else if (dateString == "tomorrow"_L1 || dateString == tr("tomorrow"))
             date = QDate::currentDate().addDays(1);
         else {
-            date = QDate::fromString(dateString, QLatin1String("yyyyMMdd"));
+            date = QDate::fromString(dateString, "yyyyMMdd"_L1);
             if (!date.isValid())
                 date = QDate::fromString(dateString, Qt::RFC2822Date);
             if (!date.isValid()) {
@@ -288,33 +290,33 @@ void MainWindow::loadJournal(QStringList dateAndTopics)
         return;
     }
     QDir path = Settings::instance()->stringOrDefault(Settings::journalGroup, Settings::journalDirectory,
-                                                      QDir::home().filePath(QLatin1String("journal")));
+                                                      QDir::home().filePath("journal"_L1));
     if (!path.exists()) {
         if (QMessageBox::question(this, tr("Create directory?"), tr("No journal directory.  Create?")) == QMessageBox::Yes) {
             if (!QDir::home().mkpath(path.path()))
                 ui->statusBar->showMessage(tr("Failed to create %1").arg(path.path()));
         }
     }
-    QString filename = Settings::instance()->stringOrDefault(Settings::journalGroup, Settings::journalFilenameFormat, QLatin1String("$date-$topics.md"));
-    filename.replace(QLatin1String("$date"), date.toString(QLatin1String("yyyyMMdd")));
+    QString filename = Settings::instance()->stringOrDefault(Settings::journalGroup, Settings::journalFilenameFormat, "$date-$topics.md"_L1);
+    filename.replace("$date"_L1, date.toString("yyyyMMdd"_L1));
     QString topics;
     if (dateAndTopics.count() > 1) {
         dateAndTopics.removeFirst();
         topics = dateAndTopics.join(filename.contains("-$topics") ? QLatin1Char('-') : QLatin1Char(' '));
     }
-    filename.replace(QLatin1String("-$topics"), topics.isEmpty() ? topics : QLatin1Char('-') + topics);
-    filename.replace(QLatin1String("$topics"), topics);
+    filename.replace("-$topics"_L1, topics.isEmpty() ? topics : QLatin1Char('-') + topics);
+    filename.replace("$topics"_L1, topics);
     setEditMode();
     load(path.filePath(filename));
 }
 
 void MainWindow::loadTemplate(QString name)
 {
-    const QLatin1String templatesSubdir("templates");
+    const auto templatesSubdir ="templates"_L1;
     QFileInfo contentFi(m_document->contentSource().fileName());
     QString fileName = name + QLatin1Char('.') + contentFi.suffix();
     QDir documentDir = QFileInfo(Util::toLocalFile(m_document->contentSource())).dir();
-    documentDir.cd(QLatin1String(".templates"));
+    documentDir.cd(".templates"_L1);
 qDebug() << "looking for" << fileName << "in" << documentDir << "which started with" << m_document->contentSource() << Util::toLocalFile(m_document->contentSource());
     QFileInfo fi(documentDir, fileName);
     if (!fi.isReadable())
@@ -328,12 +330,12 @@ qDebug() << "looking for" << fileName << "in" << documentDir << "which started w
         QString content = QString::fromLocal8Bit(f.readAll());
         // actually it's kindof a silly limitation that for a markdown file, only a markdown template can be used, only html for html, etc.
         // but it's more trouble to look for all possible templates with different extensions in different places
-        if (contentFi.suffix() == QLatin1String("md")) {
+        if (contentFi.suffix() == "md"_L1) {
             // workaround for missing QTextCursor::insertMarkdown()
             QTextDocument qtd;
             qtd.setMarkdown(content);
             m_mainWidget->textCursor().insertHtml(qtd.toHtml());
-        } else if (contentFi.suffix() == QLatin1String("html")) {
+        } else if (contentFi.suffix() == "html"_L1) {
             m_mainWidget->textCursor().insertHtml(content);
         } else {
             m_mainWidget->textCursor().insertText(content);
@@ -341,7 +343,7 @@ qDebug() << "looking for" << fileName << "in" << documentDir << "which started w
         m_mainWidget->textCursor().insertBlock(QTextBlockFormat(), QTextCharFormat());
     } else {
         QStringList paths;
-        for (auto p : QStandardPaths::standardLocations(QStandardPaths::AppConfigLocation))
+        for (const auto &p : QStandardPaths::standardLocations(QStandardPaths::AppConfigLocation))
             paths << p + QDir::separator() + templatesSubdir;
         qWarning() << "failed to find template" << name << "in" << documentDir.path() << "or" << paths;
     }
@@ -383,7 +385,7 @@ bool MainWindow::on_actionSave_As_triggered()
 #endif
     if (fileDialog.exec() != QDialog::Accepted)
         return false;
-    m_document->saveAs(fileDialog.selectedUrls().first(), fileDialog.selectedMimeTypeFilter());
+    m_document->saveAs(fileDialog.selectedUrls().constFirst(), fileDialog.selectedMimeTypeFilter());
     return true;
 }
 
@@ -781,7 +783,7 @@ void MainWindow::on_actionConvert_CID_v0_to_v1_triggered()
         IpfsAgent agent;
         QJsonObject jo = agent.execPost("cid/base32", "arg=" + cidResult.toString(text), {}).object();
         qDebug() << jo;
-        QString cid = jo.value(QLatin1String("Formatted")).toString();
+        QString cid = jo.value("Formatted"_L1).toString();
         QString newText(text);
         ui->urlField->setText(newText.replace(m_hashBegin, cidResult.length, cid));
     }
@@ -895,7 +897,7 @@ void MainWindow::on_actionInsert_Table_triggered()
 
 void MainWindow::on_action_Local_IPFS_files_triggered()
 {
-    load(QLatin1String("ipfs:local"));
+    load("ipfs:local"_L1);
 }
 
 void MainWindow::on_actionCut_triggered()
@@ -975,13 +977,13 @@ void MainWindow::newPageSeries()
         m_thumbs->clear();
     else {
         m_thumbs = new ThumbnailScene();
-        connect(m_thumbs, &ThumbnailScene::currentPageChanging,
+        connect(m_thumbs, &ThumbnailScene::currentPageChanging, m_thumbs,
                 [=](ThumbnailItem *it) {
             QString content = m_document->toMarkdown();
             if (!content.isEmpty())
                 it->content = content;
         });
-        connect(m_thumbs, &ThumbnailScene::currentPageChanged,
+        connect(m_thumbs, &ThumbnailScene::currentPageChanged, m_thumbs,
                 [=](const QString &source, const QString &content) {
             Q_UNUSED(source)
             m_document->setMarkdown(content);

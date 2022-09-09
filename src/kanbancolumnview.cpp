@@ -21,6 +21,8 @@
 #include <QTextList>
 #include <QTreeView>
 
+using namespace Qt::StringLiterals;
+
 KanbanColumnView::KanbanColumnView(QWidget *parent) :
     QSplitter(parent)
 {
@@ -94,14 +96,14 @@ void KanbanColumnView::setDocument(Document *doc)
                 qDebug() << "found" << heading.text() << "list with" << model->rowCount() << list->count() << "items";
 
                 auto tree = new QTreeView(this);
-                tree->setObjectName(heading.text() + QLatin1String("View"));
+                tree->setObjectName(heading.text() + "View"_L1);
                 tree->setAcceptDrops(true);
                 tree->setDragDropMode(QAbstractItemView::DragDrop);
                 tree->setDefaultDropAction(Qt::MoveAction);
                 tree->setSelectionMode(QAbstractItemView::ExtendedSelection);
                 tree->setModel(model);
                 tree->setContextMenuPolicy(Qt::CustomContextMenu);
-                connect(tree, &QTreeView::customContextMenuRequested,
+                connect(tree, &QTreeView::customContextMenuRequested, tree,
                         [this, tree, model](const QPoint &pos) { onContextMenuRequested(tree, model, pos); });
                 addWidget(tree); // add to QSplitter
             }

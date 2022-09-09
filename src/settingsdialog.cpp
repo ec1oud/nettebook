@@ -3,6 +3,8 @@
 #include "settings.h"
 #include <QFileDialog>
 
+using namespace Qt::StringLiterals;
+
 SettingsDialog::SettingsDialog(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::SettingsDialog)
@@ -11,11 +13,11 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
     setAttribute(Qt::WA_DeleteOnClose);
     Settings *settings = Settings::instance();
     ui->saveResourcesCB->setChecked(settings->boolOrDefault(settings->writingGroup, settings->saveResourcesWithDocuments, true));
-    ui->resourcesSuffix->setText(settings->stringOrDefault(settings->writingGroup, settings->resourceDirectorySuffix, QLatin1String("_resources")));
-    ui->journalDirectory->setText(settings->stringOrDefault(settings->journalGroup, settings->journalDirectory, QLatin1String("~/journal")));
-    ui->journalFilenameFormat->setText(settings->stringOrDefault(settings->journalGroup, settings->journalFilenameFormat, QLatin1String("$date-$topics.md")));
+    ui->resourcesSuffix->setText(settings->stringOrDefault(settings->writingGroup, settings->resourceDirectorySuffix, "_resources"_L1));
+    ui->journalDirectory->setText(settings->stringOrDefault(settings->journalGroup, settings->journalDirectory, "~/journal"_L1));
+    ui->journalFilenameFormat->setText(settings->stringOrDefault(settings->journalGroup, settings->journalFilenameFormat, "$date-$topics.md"_L1));
     ui->useJournalTemplates->setChecked(settings->boolOrDefault(settings->journalGroup, settings->journalUsesTemplates, true));
-    ui->codeBackgroundColorSwatch->setColor(QColor(settings->stringOrDefault(settings->styleGroup, settings->codeBlockBackground, "#EEE")));
+    ui->codeBackgroundColorSwatch->setColor(QColor(settings->stringOrDefault(settings->styleGroup, settings->codeBlockBackground, "#EEE"_L1)));
     ui->moveTasksUnderHeadingCB->setChecked(settings->boolOrDefault(settings->tasksGroup, settings->moveTasksUnderHeading, true));
     ui->doneTasksHeadingsTE->setPlainText(settings->stringOrDefault(settings->tasksGroup, settings->doneTasksHeadings, tr("Done\nFerdig\nFinito")));
     ui->moveTasksToBottomCB->setChecked(settings->boolOrDefault(settings->tasksGroup, settings->moveTasksToBottom, true));

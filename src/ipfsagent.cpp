@@ -22,6 +22,8 @@
 #include <KIO/Job>
 #endif
 
+using namespace Qt::StringLiterals;
+
 IpfsAgent::IpfsAgent(QObject *parent) : QObject(parent)
 {
 }
@@ -36,13 +38,13 @@ QJsonDocument IpfsAgent::execPost(const QString &suffix, const QString &query, c
     req.setHeader(QNetworkRequest::UserAgentHeader, m_userAgent);
     QHttpMultiPart *multiPart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
     QHttpPart textPart;
-    textPart.setHeader(QNetworkRequest::ContentTypeHeader, QLatin1String("application/json"));
+    textPart.setHeader(QNetworkRequest::ContentTypeHeader, "application/json"_L1);
     textPart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"file\""));
     textPart.setBody(body.toJson());
     multiPart->append(textPart);
     QNetworkReply *reply = m_nam.post(req, multiPart);
     multiPart->setParent(reply); // delete the multiPart with the reply
-    connect(reply, &QNetworkReply::finished, [&]() {
+    connect(reply, &QNetworkReply::finished, reply, [this, &ret, reply]() {
         ret = QJsonDocument::fromJson(reply->readAll());
         m_eventLoop.exit();
     });

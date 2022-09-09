@@ -2,8 +2,10 @@
 
 #include <QDebug>
 
-static const QString base58HashPrefix = QStringLiteral("Qm");
-static const QString base32HashPrefix = QStringLiteral("baf");
+using namespace Qt::StringLiterals;
+
+static const auto base58HashPrefix = "Qm"_L1;
+static const auto base32HashPrefix = "baf"_L1;
 
 CidFinder::CidFinder()
 {
@@ -20,7 +22,7 @@ CidFinder::Result CidFinder::findIn(const QString &s)
         i = s.indexOf(base32HashPrefix);
         ret.start = i;
         ret.length = 60;
-        QByteArray b = s.toLatin1();
+//        QByteArray b = s.toLatin1();
     }
 //    qDebug() << s << ret.isValid() << ret.start << ret.length << ret.toString(s);
     return ret;

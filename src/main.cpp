@@ -30,7 +30,7 @@ int main(int argc, char *argv[])
 
     app.setApplicationName("NetteBook");
     app.setOrganizationDomain("nettebook.org");
-    QCoreApplication::setApplicationVersion(QLatin1String("0.0.1"));
+    QCoreApplication::setApplicationVersion("0.0.1"_L1);
 
     QCommandLineParser parser;
     const QCommandLineOption helpOption = parser.addHelpOption();
@@ -58,7 +58,7 @@ int main(int argc, char *argv[])
             QCoreApplication::translate("main", "Open the file in kanban mode."));
     parser.addOption(kanbanOption);
 
-    parser.addPositionalArgument(QLatin1String("[url]"), QCoreApplication::translate("main", "Optional filename or URL to open"));
+    parser.addPositionalArgument("[url]"_L1, QCoreApplication::translate("main", "Optional filename or URL to open"));
 
     if (!parser.parse(QCoreApplication::arguments())) {
         qWarning() << parser.errorText();
@@ -75,8 +75,8 @@ int main(int argc, char *argv[])
         w.setEditMode(true);
     bool preloadCss = false;
     if (parser.positionalArguments().count() > 0) {
-        QString toLoad = parser.positionalArguments().last();
-        if (toLoad.endsWith(QLatin1String(".html")) && parser.isSet(cssOption)) {
+        QString toLoad = parser.positionalArguments().constLast();
+        if (toLoad.endsWith(".html"_L1) && parser.isSet(cssOption)) {
             preloadCss = true;
             w.setBrowserStyle(QUrl::fromLocalFile(parser.value(cssOption)));
         }
@@ -92,7 +92,7 @@ int main(int argc, char *argv[])
         w.loadTemplate(parser.value(templateOption));
     else if (parser.isSet(journalOption) && w.isEmpty() &&
              Settings::instance()->boolOrDefault(Settings::journalGroup, Settings::journalUsesTemplates, true))
-        w.loadTemplate(QLatin1String("journal"));
+        w.loadTemplate("journal"_L1);
     w.show();
     if (!preloadCss && parser.isSet(cssOption))
         w.setBrowserStyle(QUrl::fromLocalFile(parser.value(cssOption)));

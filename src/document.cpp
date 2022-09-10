@@ -10,6 +10,9 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QNetworkAccessManager>
+#include <QNetworkRequest>
+#include <QNetworkReply>
 #include <QTextFrame>
 #include <QTextList>
 #include <QTextDocumentFragment>
@@ -24,6 +27,7 @@
 
 using namespace Qt::StringLiterals;
 
+static const auto httpScheme = "http"_L1;
 static const auto ipfsScheme = "ipfs"_L1;
 //static const auto fileScheme = "file"_L1;
 
@@ -42,6 +46,7 @@ Document::Document(QObject *parent) : QTextDocument(parent)
 
 QVariant Document::loadResource(int t, const QUrl &name)
 {
+//qDebug() << t << name;
     QTextDocument::ResourceType type = static_cast<QTextDocument::ResourceType>(t);
     if (m_status >= NullStatus && (type == ResourceType::HtmlResource || type == ResourceType::MarkdownResource))
         setStatus(LoadingMain);
@@ -110,6 +115,17 @@ QVariant Document::loadResource(int t, const QUrl &name)
                 setStatus(ErrorWithText);
                 return ret;
             }
+        } else if (name.scheme().startsWith(httpScheme)) {
+            if (!m_nam) {
+                m_nam = new QNetworkAccessManager(this);
+                connect(m_nam, &QNetworkAccessManager::finished, this, &Document::resourceDataReceived);
+            }
+            QNetworkRequest req(url);
+            req.setHeader(QNetworkRequest::UserAgentHeader, qApp->applicationName());
+            m_nam->get(req);
+            ++m_outstandingRequests;
+            // Waiting for now, but this function can't block.  We'll be nagged again soon.
+            return QVariant();
         }
 #else
         KIO::Job* job = KIO::get(url);
@@ -118,10 +134,11 @@ qDebug() << "GET" << name << job;
                  this, SLOT(resourceDataReceived(KIO::Job *, const QByteArray &)));
         connect (job, SIGNAL(result(KJob*)), this, SLOT(resourceReceiveDone(KJob*)));
         m_resourceLoaders.insert(name, job);
+        // Waiting for now, but this function can't block.  We'll be nagged again soon.
+        return QVariant();
 #endif
     }
-    // Waiting for now, but this function can't block.  We'll be nagged again soon.
-    return QVariant();
+    return QTextDocument::loadResource(t, name);
 }
 
 void Document::setStatus(Document::Status s)
@@ -544,6 +561,16 @@ void Document::prepareWriteBuffer(QByteArray &dest)
         qWarning() << "saving" << m_saveType << "isn't implemented";
         break;
     }
+}
+
+void Document::resourceDataReceived(QNetworkReply *reply)
+{
+//    qDebug() << reply->url() << reply->rawHeaderList();
+    m_loadedResources.insert(reply->url(), reply->readAll());
+    emit resourceLoaded(reply->url());
+    --m_outstandingRequests;
+    if (!m_outstandingRequests)
+        emit allResourcesLoaded();
 }
 
 #ifndef NETTEBOOK_NO_KIO

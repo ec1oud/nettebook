@@ -19,6 +19,8 @@ class TransferJob;
 #endif
 
 class Document;
+class QNetworkAccessManager;
+class QNetworkReply;
 class QTextEdit;
 class KJob;
 
@@ -66,7 +68,9 @@ protected:
     void prepareWriteBuffer(QByteArray &dest);
 
 private slots:
-#ifndef NETTEBOOK_NO_KIO
+#ifdef NETTEBOOK_NO_KIO
+    void resourceDataReceived(QNetworkReply *reply);
+#else
     void resourceDataReceived(KIO::Job *, const QByteArray &data);
     void resourceReceiveDone(KJob *);
     void fileListReceived(KIO::Job *job, const KIO::UDSEntryList &list);
@@ -80,7 +84,9 @@ private:
         OdtResource
     };
 
-#ifndef NETTEBOOK_NO_KIO
+#ifdef NETTEBOOK_NO_KIO
+    QNetworkAccessManager *m_nam = nullptr;
+#else
     QHash<QUrl, KJob*> m_resourceLoaders;
     KIO::UDSEntryList m_fileList;
     KIO::TransferJob *m_transferJob = nullptr;
@@ -90,6 +96,7 @@ private:
     QUrl m_saveUrl;
     QString m_errorText;
     int m_saveType = UnknownResource;
+    int m_outstandingRequests = 0;
     Status m_status = NullStatus;
     bool m_saveDone = false;
 

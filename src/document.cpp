@@ -18,6 +18,7 @@
 #include <QTextList>
 #include <QTextDocumentFragment>
 #include <QTextDocumentWriter>
+#include <QUrlQuery>
 
 #ifndef NETTEBOOK_NO_KIO
 #include <KIO/Job>
@@ -477,6 +478,7 @@ void Document::saveAs(QUrl url, const QString &mimeType)
 void Document::saveResources(const QUrl &dir, const QString &subdir)
 {
     QDir d(dir.toLocalFile());
+    qCDebug(lcRes) << dir << subdir;
     bool needToCreateDir = !d.exists(subdir);
     QTextCursor cursor(this);
     bool moved = true;
@@ -484,30 +486,53 @@ void Document::saveResources(const QUrl &dir, const QString &subdir)
         QTextCharFormat fmt = cursor.charFormat();
         if (fmt.isImageFormat()) {
             QTextImageFormat ifmt = fmt.toImageFormat();
+            qCDebug(lcRes) << "found an image" << ifmt.name();
             if (!QFileInfo::exists(ifmt.name()) && !QUrl(ifmt.name()).isLocalFile()) {
                 QVariant image = loadResource(ImageResource, ifmt.name());
                 if (image.isValid()) {
-                    QUrl url(ifmt.name());
-                    QString path = d.absoluteFilePath(url.fileName());
-                    qDebug() << "saving image" << ifmt.name() << "->" << path;
                     if (needToCreateDir) {
-                        d.mkdir(subdir);
-                        d.cd(subdir);
+                        if (!d.mkdir(subdir)) {
+                            qWarning() << "failed to create" << subdir << "under" << dir;
+                            return;
+                        }
                         needToCreateDir = false;
                     }
+                    QDir sd(d);
+                    if (!sd.cd(subdir))
+                        qWarning() << "failed to enter" << subdir << "under" << dir;
+                    QUrl url(ifmt.name());
+                    QFileInfo fi(sd, url.fileName());
+                    if (fi.suffix().isEmpty() && url.hasQuery()) {
+                        QUrlQuery uq(url);
+                        const auto pairs = uq.queryItems(QUrl::FullyDecoded);
+                        qCDebug(lcRes) << fi << ": empty suffix; checking query" << pairs;
+                        for (const auto &pair : pairs) {
+                            QFileInfo quf(QUrl(pair.second).fileName());
+                            if (!quf.suffix().isEmpty() && !quf.baseName().isEmpty()) {
+                                fi = QFileInfo(sd, quf.fileName());
+                                qCDebug(lcRes) << "replaced with" << fi;
+                            }
+                        }
+                    }
+                    QString path = fi.absoluteFilePath();
+                    qCDebug(lcRes) << "saving image" << url << url.fileName() << url.query() << "->" << path;
                     QFile out(path);
                     if (out.open(QFile::WriteOnly | QIODevice::Truncate)) {
                         out.write(image.toByteArray());
                         out.close();
-                        ifmt.setName(subdir + QDir::separator() + url.fileName());
+                        ifmt.setName(subdir + QDir::separator() + fi.fileName());
                         cursor.select(QTextCursor::BlockUnderCursor);
                         cursor.setCharFormat(ifmt);
+                    } else {
+                        qWarning() << "failed to write" << path;
                     }
                 }
             }
         }
-        moved = cursor.movePosition(QTextCursor::NextBlock);
+        // NextBlock ought to be good enough, but we miss some inline images that way
+        moved = cursor.movePosition(QTextCursor::NextCharacter);
     } while (moved);
+    qCDebug(lcRes) << "all known resources:" << m_loadedResources.keys();
 }
 
 /*!

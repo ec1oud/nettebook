@@ -1,6 +1,5 @@
 # bugs
 
-- [ ] saving resources to doc dir instead of the resource dir
 - [ ] task cut & paste loses the checkbox (QTBUG-103714)
 - [ ] never word-wrap on non-whitespace characters; e.g. don't break up long
   ipfs://bafybei... URLs even if the markdown parser doesn't recognize them as
@@ -8,6 +7,7 @@
 - [ ] crash on ctrl-k sometimes
 - [ ] moving checkbox items from current list to done list seems to be triggering
   even when it's not initially checked (control-k to convert bullet item)
+- [ ] Document::saveResources(): come up with a better way to find them all
 
 # todo
 
@@ -56,6 +56,7 @@
 - [x] kanban treeviews are missing edit notifications and can be temporarily out of
   sync
 - [x] automatically check tasks when moved to the done column
+- [x] saving resources to doc dir instead of the resource dir
 
 # research
 

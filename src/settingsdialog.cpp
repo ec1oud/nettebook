@@ -12,6 +12,7 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
     ui->setupUi(this);
     setAttribute(Qt::WA_DeleteOnClose);
     Settings *settings = Settings::instance();
+    ui->openLinksInNewWindowsCB->setChecked(settings->boolOrDefault(settings->readingGroup, settings->openLinksInNewWindows, true));
     ui->saveResourcesCB->setChecked(settings->boolOrDefault(settings->writingGroup, settings->saveResourcesWithDocuments, true));
     ui->resourcesSuffix->setText(settings->stringOrDefault(settings->writingGroup, settings->resourceDirectorySuffix, "_resources"_L1));
     ui->journalDirectory->setText(settings->stringOrDefault(settings->journalGroup, settings->journalDirectory, "~/journal"_L1));
@@ -32,6 +33,7 @@ SettingsDialog::~SettingsDialog()
 void SettingsDialog::on_SettingsDialog_accepted()
 {
     Settings *settings = Settings::instance();
+    settings->setBool(settings->readingGroup, settings->openLinksInNewWindows, ui->openLinksInNewWindowsCB->isChecked());
     settings->setBool(settings->writingGroup, settings->saveResourcesWithDocuments, ui->saveResourcesCB->isChecked());
     settings->setString(settings->writingGroup, settings->resourceDirectorySuffix, ui->resourcesSuffix->text());
     settings->setString(settings->journalGroup, settings->journalDirectory, ui->journalDirectory->text());

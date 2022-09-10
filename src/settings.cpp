@@ -23,7 +23,9 @@
 
 using namespace Qt::StringLiterals;
 
+const QString Settings::readingGroup("Reading"_L1);
 const QString Settings::writingGroup("Writing"_L1);
+const QString Settings::openLinksInNewWindows("openLinksInNewWindows"_L1);
 const QString Settings::saveResourcesWithDocuments("saveResourcesWithDocuments"_L1);
 const QString Settings::resourceDirectorySuffix("resourceDirectorySuffix"_L1);
 const QString Settings::journalGroup("Journal"_L1);

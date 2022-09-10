@@ -15,6 +15,7 @@
 **
 ****************************************************************************/
 
+#include "application.h"
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "cidfinder.h"
@@ -34,6 +35,7 @@
 #include <QFontDatabase>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QLoggingCategory>
 #include <QMessageBox>
 #include <QMimeData>
 #include <QMimeDatabase>
@@ -49,6 +51,8 @@
 #include <sstream>
 
 using namespace Qt::StringLiterals;
+
+Q_DECLARE_LOGGING_CATEGORY(lcWin);
 
 static const auto ipfsScheme = "ipfs"_L1;
 static const auto fileScheme = "file"_L1;
@@ -69,7 +73,7 @@ MainWindow::MainWindow(QWidget *parent) :
             this, &MainWindow::currentCharFormatChanged);
     connect(m_mainWidget, &QTextEdit::cursorPositionChanged,
             this, &MainWindow::cursorPositionChanged);
-    connect(m_mainWidget, &QTextBrowser::anchorClicked,
+    connect(m_mainWidget, &QTextBrowser::sourceChanged,
             this, &MainWindow::updateUrlField);
 
     // after all resources for a document are loaded, make the QTextBrowser call its d->relayoutDocument()
@@ -117,6 +121,7 @@ MainWindow::MainWindow(QWidget *parent) :
 #if defined(QT_PRINTSUPPORT_LIB) && QT_CONFIG(printdialog)
     ui->actionPrint->setEnabled(true);
 #endif
+    ui->actionBack->setVisible(!Settings::instance()->boolOrDefault(Settings::readingGroup, Settings::openLinksInNewWindows, true));
     setAcceptDrops(true);
 }
 
@@ -173,7 +178,14 @@ void MainWindow::on_actionOpen_triggered()
                                   << "text/plain");
     if (fileDialog.exec() != QDialog::Accepted)
         return;
-    load(fileDialog.selectedFiles().first());
+    const bool newWindow = m_mainWidget->source().isValid() &&
+            Settings::instance()->boolOrDefault(Settings::readingGroup, Settings::openLinksInNewWindows, true);
+    if (newWindow) {
+        for (const auto &url : fileDialog.selectedUrls())
+            static_cast<Application *>(qApp)->load(url);
+    } else {
+        loadUrl(fileDialog.selectedUrls().constFirst());
+    }
 }
 
 void MainWindow::on_actionReload_triggered()
@@ -437,10 +449,12 @@ bool MainWindow::setBrowserStyle(QUrl url)
 void MainWindow::setEditMode(bool mode)
 {
     ui->actionToggleEditMode->setChecked(mode);
+    ui->actionBack->setVisible(!Settings::instance()->boolOrDefault(Settings::readingGroup, Settings::openLinksInNewWindows, true));
 }
 
 void MainWindow::updateUrlField(QUrl url)
 {
+    qCDebug(lcWin) << this << url;
     ui->urlField->setText(url.toString());
     bool filenameOnly = (url.scheme() == ipfsScheme || url.scheme() == fileScheme) && !url.fileName().isEmpty();
     setWindowTitle((filenameOnly ? url.fileName() : url.toString()) + fileModifiedPlaceholder);
@@ -919,7 +933,13 @@ void MainWindow::on_actionInsert_Table_triggered()
 
 void MainWindow::on_action_Local_IPFS_files_triggered()
 {
-    load("ipfs:local"_L1);
+    const auto url = "ipfs:local"_L1;
+    const bool newWindow = m_mainWidget->source().isValid() &&
+            Settings::instance()->boolOrDefault(Settings::readingGroup, Settings::openLinksInNewWindows, true);
+    if (newWindow)
+        static_cast<Application *>(qApp)->load(url);
+    else
+        load(url);
 }
 
 void MainWindow::on_actionCut_triggered()

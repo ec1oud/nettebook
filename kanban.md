@@ -39,7 +39,6 @@
 - [ ] IPFS features without KIO (?)
 - [ ] link & anchor shapes
 - [ ] support text ranges in fragment identifiers
-- [ ] SDI: open links in new windows
 
 # doing
 
@@ -58,6 +57,7 @@
 - [x] saving resources to doc dir instead of the resource dir
 - [x] SDI: multiple docs in multiple windows
 - [x] task cut & paste loses the checkbox (QTBUG-103714)
+- [x] SDI: open links in new windows
 
 # research
 

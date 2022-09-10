@@ -15,8 +15,10 @@
 **
 ****************************************************************************/
 
+#include "application.h"
 #include "document.h"
 #include "markdownbrowser.h"
+#include "settings.h"
 #include <QDebug>
 #include <QApplication>
 #include <QMenu>
@@ -51,10 +53,17 @@ void MarkdownBrowser::setSource(const QUrl &name, QTextDocument::ResourceType ty
 
 void MarkdownBrowser::doSetSource(const QUrl &name, QTextDocument::ResourceType type)
 {
-    m_loading = name;
-    if (name.fileName().isEmpty()) // directory listing will be markdown
-        type = QTextDocument::MarkdownResource;
-    QTextBrowser::doSetSource(name, type);
+    const bool newWindow = document()->isModified() || (!m_loading.isEmpty() &&
+            Settings::instance()->boolOrDefault(Settings::readingGroup, Settings::openLinksInNewWindows, true));
+    qDebug() << this << m_loading << "->" << name << "new window?" << newWindow;
+    if (newWindow) {
+        static_cast<Application *>(qApp)->load(name);
+    } else {
+        m_loading = name;
+        if (name.fileName().isEmpty()) // directory listing will be markdown
+            type = QTextDocument::MarkdownResource;
+        QTextBrowser::doSetSource(name, type);
+    }
 }
 
 #endif

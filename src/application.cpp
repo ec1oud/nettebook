@@ -1,6 +1,9 @@
 #include "application.h"
 #include "mainwindow.h"
 #include <QFileOpenEvent>
+#include <QLoggingCategory>
+
+Q_LOGGING_CATEGORY(lcWin, "org.nettebook.windows");
 
 using namespace Qt::StringLiterals;
 
@@ -15,6 +18,7 @@ void Application::load(const QUrl &url)
 {
     MainWindow *w = existingWindow(url.toString());
     if (w) {
+        qCDebug(lcWin) << "activating existing window" << w->windowTitle();
         w->activateWindow();
         return;
     }
@@ -28,6 +32,7 @@ MainWindow *Application::load(const QString &src, const QString &cssSource, bool
 {
     MainWindow *w = existingWindow(src);
     if (w) {
+        qCDebug(lcWin) << "activating existing window" << w->windowTitle();
         w->activateWindow();
     } else {
         w = new MainWindow();
@@ -53,6 +58,7 @@ void Application::loadKanban(const QString &src)
 {
     MainWindow *w = existingWindow(src);
     if (w) {
+        qCDebug(lcWin) << "activating existing window" << w->windowTitle();
         w->activateWindow();
         return;
     }

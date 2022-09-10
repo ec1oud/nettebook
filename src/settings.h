@@ -36,7 +36,9 @@ public:
     QString stringOrDefault(QString group, QString key, QString defaultVal = QString());
     void setString(QString group, QString key, QString val);
 
+    static const QString readingGroup;
     static const QString writingGroup;
+    static const QString openLinksInNewWindows;
     static const QString saveResourcesWithDocuments;
     static const QString resourceDirectorySuffix;
     static const QString journalGroup;

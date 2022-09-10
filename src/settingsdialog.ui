@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>421</width>
+    <width>487</width>
     <height>300</height>
    </rect>
   </property>
@@ -23,6 +23,33 @@
      <property name="currentIndex">
       <number>0</number>
      </property>
+     <widget class="QWidget" name="readingTab">
+      <attribute name="title">
+       <string>Reading</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_3">
+       <item>
+        <widget class="QCheckBox" name="openLinksInNewWindowsCB">
+         <property name="text">
+          <string>Open links in new windows</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer_2">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
      <widget class="QWidget" name="writingTab">
       <attribute name="title">
        <string>Writing</string>

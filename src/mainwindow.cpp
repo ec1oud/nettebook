@@ -359,6 +359,18 @@ qDebug() << "looking for" << fileName << "in" << documentDir << "which started w
     }
 }
 
+bool MainWindow::isLoaded(QString urlString)
+{
+    QUrl url = QUrl::fromUserInput(urlString);
+    QUrl loadedUrl(ui->urlField->text());
+    if (url.scheme() != loadedUrl.scheme())
+        return false;
+    if (url.isLocalFile() && loadedUrl.isLocalFile()) {
+        return QFileInfo(url.toLocalFile()).canonicalFilePath() == QFileInfo(loadedUrl.toLocalFile()).canonicalFilePath();
+    }
+    return url == loadedUrl;
+}
+
 bool MainWindow::on_actionSave_triggered()
 {
     qDebug() << m_mainWidget->source();

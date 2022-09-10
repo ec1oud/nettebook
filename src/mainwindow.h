@@ -55,6 +55,7 @@ public slots:
     void loadUrl(const QUrl &url);
     void loadJournal(QStringList dateAndTopics = {});
     void loadTemplate(QString name);
+    bool isLoaded(QString urlString);
     bool maybeSave();
     bool setBrowserStyle(QUrl url);
     void setEditMode(bool mode = true);

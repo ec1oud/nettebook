@@ -13,7 +13,12 @@ Application::Application(int &argc, char **argv) : QApplication(argc, argv)
 
 void Application::load(const QUrl &url)
 {
-    MainWindow *w = new MainWindow();
+    MainWindow *w = existingWindow(url.toString());
+    if (w) {
+        w->activateWindow();
+        return;
+    }
+    w = new MainWindow();
     ++m_loadCount;
     w->loadUrl(url);
     w->show();
@@ -21,13 +26,18 @@ void Application::load(const QUrl &url)
 
 MainWindow *Application::load(const QString &src, const QString &cssSource, bool editMode)
 {
-    MainWindow *w = new MainWindow();
-    ++m_loadCount;
-    if (!cssSource.isEmpty())
-        w->setBrowserStyle(cssSource);
-    w->setEditMode(editMode);
-    w->load(src);
-    w->show();
+    MainWindow *w = existingWindow(src);
+    if (w) {
+        w->activateWindow();
+    } else {
+        w = new MainWindow();
+        ++m_loadCount;
+        if (!cssSource.isEmpty())
+            w->setBrowserStyle(cssSource);
+        w->setEditMode(editMode);
+        w->load(src);
+        w->show();
+    }
     return w;
 }
 
@@ -41,7 +51,12 @@ void Application::loadJournal(QStringList dateAndTopics)
 
 void Application::loadKanban(const QString &src)
 {
-    MainWindow *w = load(src, QString(), true);
+    MainWindow *w = existingWindow(src);
+    if (w) {
+        w->activateWindow();
+        return;
+    }
+    w = load(src, QString(), true);
     w->on_actionKanban_triggered();
 }
 
@@ -51,6 +66,17 @@ void Application::loadTemplate(QString name)
     ++m_loadCount;
     w->loadTemplate(name);
     w->show();
+}
+
+MainWindow *Application::existingWindow(const QString &urlString)
+{
+    const QList<QWidget *> topLevelWidgets = QApplication::topLevelWidgets();
+    for (QWidget *widget : topLevelWidgets) {
+        MainWindow *mainWin = qobject_cast<MainWindow *>(widget);
+        if (mainWin && mainWin->isLoaded(urlString))
+            return mainWin;
+    }
+    return nullptr;
 }
 
 void Application::newWindow(const QString &cssSource, bool editMode)

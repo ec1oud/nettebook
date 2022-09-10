@@ -20,6 +20,7 @@ public slots:
 //    void loadJson(const QUrl &url);
     void loadKanban(const QString &src);
     void loadTemplate(QString name);
+    MainWindow* existingWindow(const QString &urlString);
     void newWindow(const QString &cssSource, bool editMode);
 
     int loadCount() const { return m_loadCount; }

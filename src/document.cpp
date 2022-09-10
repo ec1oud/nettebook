@@ -10,6 +10,7 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QLoggingCategory>
 #include <QNetworkAccessManager>
 #include <QNetworkRequest>
 #include <QNetworkReply>
@@ -31,6 +32,8 @@ static const auto httpScheme = "http"_L1;
 static const auto ipfsScheme = "ipfs"_L1;
 //static const auto fileScheme = "file"_L1;
 
+Q_LOGGING_CATEGORY(lcRes, "org.nettebook.document.resources")
+
 struct BlockUserData : public QTextBlockUserData {
     ~BlockUserData() { }
 
@@ -46,7 +49,7 @@ Document::Document(QObject *parent) : QTextDocument(parent)
 
 QVariant Document::loadResource(int t, const QUrl &name)
 {
-//qDebug() << t << name;
+    qCDebug(lcRes) << t << name;
     QTextDocument::ResourceType type = static_cast<QTextDocument::ResourceType>(t);
     if (m_status >= NullStatus && (type == ResourceType::HtmlResource || type == ResourceType::MarkdownResource))
         setStatus(LoadingMain);
@@ -58,14 +61,14 @@ QVariant Document::loadResource(int t, const QUrl &name)
         if (url.adjusted(QUrl::RemoveFilename).path().isEmpty())
             url.setPath(QLatin1Char('/') + url.path());
     } else if (url.isRelative()) {
-        qDebug() << "resolving relative URL" << url << "base" << baseUrl() << "meta" << metaInformation(DocumentUrl);
+        qCDebug(lcRes) << "resolving relative URL" << url << "base" << baseUrl() << "meta" << metaInformation(DocumentUrl);
         url = baseUrl().resolved(url);
     }
 #ifndef NETTEBOOK_NO_KIO
     if (m_resourceLoaders.contains(name))
         return QVariant(); // still waiting
     else if (!m_loadedResources.contains(name))
-        qDebug() << type << name << url;
+        qCDebug(lcRes) << type << name << url;
     if (url.fileName().isEmpty()) {
         if (!m_fileList.isEmpty()) {
             QByteArray ret = fileListMarkdown();
@@ -97,7 +100,7 @@ QVariant Document::loadResource(int t, const QUrl &name)
                 if (main && m_mainFile.scheme().isEmpty()) {
                     m_mainFile = m_mainFile.fromLocalFile(url.path());
                     emit contentSourceChanged(m_mainFile);
-                    qDebug() << "assuming missing local file" << m_mainFile;
+                    qCDebug(lcRes) << "assuming missing local file" << m_mainFile;
                 }
             }
             emit resourceLoaded(name);
@@ -129,7 +132,7 @@ QVariant Document::loadResource(int t, const QUrl &name)
         }
 #else
         KIO::Job* job = KIO::get(url);
-qDebug() << "GET" << name << job;
+        qCDebug(lcRes) << "GET" << name << job;
         connect (job, SIGNAL(data(KIO::Job *, const QByteArray &)),
                  this, SLOT(resourceDataReceived(KIO::Job *, const QByteArray &)));
         connect (job, SIGNAL(result(KJob*)), this, SLOT(resourceReceiveDone(KJob*)));
@@ -154,7 +157,7 @@ void Document::resourceDataReceived(KIO::Job *job, const QByteArray & data)
 {
     QUrl url = m_resourceLoaders.key(job);
     // TODO check data for error messages
-//qDebug() << job << "received" << data.size() << url;
+//qCDebug(lcRes) << job << "received" << data.size() << url;
     if (m_loadedResources.contains(url))
         m_loadedResources[url].append(data);
     else
@@ -164,14 +167,14 @@ void Document::resourceDataReceived(KIO::Job *job, const QByteArray & data)
 void Document::resourceReceiveDone(KJob *job)
 {
     QUrl url = m_resourceLoaders.key(job);
-    qDebug() << "for" << url.toString() << "got" << m_loadedResources.value(url).size() << "bytes";
+    qCDebug(lcRes) << "for" << url.toString() << "got" << m_loadedResources.value(url).size() << "bytes";
     if (!m_loadedResources.value(url).size()) {
         if (m_status == LoadingMain)
             setStatus(ErrorEmpty);
         m_loadedResources[url].append(QByteArray());
     } else {
         QMimeType type = QMimeDatabase().mimeTypeForFileNameAndData(url.fileName(), m_loadedResources[url]);
-        qDebug() << "detected mime type" << type.name();
+        qCDebug(lcRes) << "detected mime type" << type.name();
         if (type.name().contains(QLatin1String("html")))
             m_saveType = HtmlResource;
         if (m_status == LoadingMain)
@@ -186,7 +189,7 @@ void Document::resourceReceiveDone(KJob *job)
     emit resourceLoaded(url);
     if (m_resourceLoaders.isEmpty()) {
         emit allResourcesLoaded();
-        qDebug() << "all resources loaded";
+        qCDebug(lcRes) << "all resources loaded";
     }
 }
 
@@ -204,7 +207,7 @@ void Document::fileListReceived(KIO::Job *job, const KIO::UDSEntryList &list)
         } else {
             setStatus(Ready);
         }
-        qDebug() << "got file list" << list.count() << m_fileList;
+        qCDebug(lcRes) << "got file list" << list.count() << m_fileList;
     }
     m_resourceLoaders.remove(url);
     emit resourceLoaded(url);
@@ -226,7 +229,7 @@ QByteArray Document::fileListMarkdown()
 //                "|" + f.stringValue(KIO::UDSEntry::UDS_MIME_TYPE) +
                 "|\n").toUtf8();
     }
-    qDebug() << ret;
+    qCDebug(lcRes) << ret;
     return ret;
 }
 #endif

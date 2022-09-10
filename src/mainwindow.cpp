@@ -127,7 +127,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_actionQuit_triggered()
 {
-    close();
+    qApp->quit();
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
@@ -258,8 +258,18 @@ void MainWindow::load(QString url)
     }
 }
 
+void MainWindow::loadUrl(const QUrl &url)
+{
+    m_mainWidget->setSource(url);
+    updateUrlField(url);
+}
+
 void MainWindow::loadJournal(QStringList dateAndTopics)
 {
+    // TODO
+    // if (Settings::instance()->boolOrDefault(Settings::journalGroup, Settings::journalUsesTemplates, true))
+    // loadTemplate("journal"_L1);
+
     QString dateString = dateAndTopics.isEmpty() ? QString() : dateAndTopics.first();
     QDate date = (dateString.isEmpty() ? QDate::currentDate() : QDate::fromString(dateString, Qt::ISODate));
     if (!date.isValid()) {

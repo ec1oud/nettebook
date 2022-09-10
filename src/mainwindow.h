@@ -52,6 +52,7 @@ public:
 
 public slots:
     void load(QString url);
+    void loadUrl(const QUrl &url);
     void loadJournal(QStringList dateAndTopics = {});
     void loadTemplate(QString name);
     bool maybeSave();

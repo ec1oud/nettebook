@@ -1,6 +1,5 @@
 # bugs
 
-- [ ] task cut & paste loses the checkbox (QTBUG-103714)
 - [ ] never word-wrap on non-whitespace characters; e.g. don't break up long
   ipfs://bafybei... URLs even if the markdown parser doesn't recognize them as
   URLs
@@ -40,7 +39,7 @@
 - [ ] IPFS features without KIO (?)
 - [ ] link & anchor shapes
 - [ ] support text ranges in fragment identifiers
-- [ ] SDI: multiple docs in multiple windows; open links in new windows
+- [ ] SDI: open links in new windows
 
 # doing
 
@@ -57,6 +56,8 @@
   sync
 - [x] automatically check tasks when moved to the done column
 - [x] saving resources to doc dir instead of the resource dir
+- [x] SDI: multiple docs in multiple windows
+- [x] task cut & paste loses the checkbox (QTBUG-103714)
 
 # research
 

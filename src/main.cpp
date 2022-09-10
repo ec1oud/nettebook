@@ -16,21 +16,16 @@
 ****************************************************************************/
 
 #include "application.h"
-#include "mainwindow.h"
-#include "settings.h"
-#include <QApplication>
 #include <QCommandLineOption>
 #include <QCommandLineParser>
 #include <QDebug>
 #include <QUrl>
 
+using namespace Qt::StringLiterals;
+
 int main(int argc, char *argv[])
 {
     Application app(argc, argv);
-
-    app.setApplicationName("NetteBook");
-    app.setOrganizationDomain("nettebook.org");
-    QCoreApplication::setApplicationVersion("0.0.1"_L1);
 
     QCommandLineParser parser;
     const QCommandLineOption helpOption = parser.addHelpOption();
@@ -55,7 +50,7 @@ int main(int argc, char *argv[])
     parser.addOption(journalOption);
 
     QCommandLineOption kanbanOption(QStringLiteral("kanban"),
-            QCoreApplication::translate("main", "Open the file in kanban mode."));
+            QCoreApplication::translate("main", "Open the file(s) in kanban mode."));
     parser.addOption(kanbanOption);
 
     parser.addPositionalArgument("[url]"_L1, QCoreApplication::translate("main", "Optional filename or URL to open"));
@@ -69,36 +64,21 @@ int main(int argc, char *argv[])
     if (parser.isSet(helpOption))
         parser.showHelp();
 
-    MainWindow w;
-    w.connect(&app, &Application::load, &w, &MainWindow::load);
-    if (parser.isSet(editOption))
-        w.setEditMode(true);
-    bool preloadCss = false;
-    if (parser.positionalArguments().count() > 0) {
-        QString toLoad = parser.positionalArguments().constLast();
-        if (toLoad.endsWith(".html"_L1) && parser.isSet(cssOption)) {
-            preloadCss = true;
-            w.setBrowserStyle(QUrl::fromLocalFile(parser.value(cssOption)));
-        }
-        if (parser.isSet(journalOption))
-            w.loadJournal(parser.positionalArguments());
+    const QStringList posArgs = parser.positionalArguments();
+    for (const QString &url : posArgs) {
+        if (parser.isSet(kanbanOption))
+            app.loadKanban(url);
         else
-            w.load(toLoad);
-    } else {
-        if (parser.isSet(journalOption))
-            w.loadJournal();
+            app.load(url, parser.value(cssOption), parser.isSet(editOption));
     }
-    if (parser.isSet(templateOption))
-        w.loadTemplate(parser.value(templateOption));
-    else if (parser.isSet(journalOption) && w.isEmpty() &&
-             Settings::instance()->boolOrDefault(Settings::journalGroup, Settings::journalUsesTemplates, true))
-        w.loadTemplate("journal"_L1);
-    w.show();
-    if (!preloadCss && parser.isSet(cssOption))
-        w.setBrowserStyle(QUrl::fromLocalFile(parser.value(cssOption)));
 
-    if (parser.isSet(kanbanOption))
-        w.on_actionKanban_triggered();
+    if (parser.isSet(journalOption))
+        app.loadJournal();
+    if (parser.isSet(templateOption))
+        app.loadTemplate(parser.value(templateOption));
+
+    if (!app.loadCount())
+        app.newWindow(parser.value(cssOption), parser.isSet(editOption));
 
     return app.exec();
 }

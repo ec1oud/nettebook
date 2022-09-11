@@ -659,11 +659,13 @@ void MainWindow::on_actionMonospace_toggled(bool a)
 void MainWindow::on_actionToggle_Checkbox_triggered(bool checked)
 {
     QTextBlock block = m_mainWidget->textCursor().block();
+    const bool wasInList = block.textList();
     if (m_mainWidget->textCursor().blockFormat().marker() == QTextBlockFormat::MarkerType::NoMarker)
         on_styleCB_activated(int(Style::Unchecked));
     else
         on_styleCB_activated(int(checked ? Style::Checked : Style::Unchecked));
-    m_document->onTaskItemToggled(block, checked);
+    if (wasInList)
+        m_document->onTaskItemToggled(block, checked);
 }
 
 void MainWindow::on_styleCB_activated(int index)

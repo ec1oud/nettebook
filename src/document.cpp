@@ -354,7 +354,8 @@ void Document::onTaskItemToggled(QTextBlock &block, bool checked)
                 }
             }
         }
-        if (!movedToSpecificList && settings->boolOrDefault(settings->tasksGroup, settings->moveTasksToBottom, false)) {
+        if (!movedToSpecificList && settings->boolOrDefault(settings->tasksGroup, settings->moveTasksToBottom, false)
+                && block.textList()->count() > 1) {
             // Just move it to the bottom of the same list
             moveListItem(block, block.textList());
         }

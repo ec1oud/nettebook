@@ -3,14 +3,10 @@
 - [ ] never word-wrap on non-whitespace characters; e.g. don't break up long
   ipfs://bafybei... URLs even if the markdown parser doesn't recognize them as
   URLs
-- [ ] crash on ctrl-k sometimes
-- [ ] moving checkbox items from current list to done list seems to be triggering
-  even when it's not initially checked (control-k to convert bullet item)
 - [ ] Document::saveResources(): come up with a better way to find them all
 
 # todo
 
-- [ ] don't change indent when converting bullet point to checkbox list item
 - [ ] deal with nested lists (indented subtasks)
 - [ ] make new lists when needed (when dragging to a column corresponding to an
   empty heading)
@@ -23,11 +19,7 @@
 - [ ] kanban creation wizard to select common columns and ordering
 - [ ] kanban view in main window as alternative to QTextBrowser view (tabs?)
 - [ ] come up with plugin architecture, make kanban-mode a plugin?
-- [ ] transplant immediately when checked/unchecked
-  (on_actionToggle_Checkbox_toggled isn't the best place because it doesn't
-  change state until the cursor moves after clicking the checkbox)
 - [ ] transactional undo
-- [ ] fix paragraph spacing
 - [ ] attempt quote styling (just draw lines in editor subclass?)
 - [ ] todo.txt format support: should look like kanban with only 2 columns (todo
   and done); support DnD between both kinds of lists
@@ -44,6 +36,15 @@
 
 - [ ] automatically move tasks to the done column when checked
 
+# disappeared (or fixed in Qt)
+
+- [x] don't change indent when converting bullet point to checkbox list item
+- [x] transplant immediately when checked/unchecked
+  (on_actionToggle_Checkbox_toggled isn't the best place because it doesn't
+  change state until the cursor moves after clicking the checkbox)
+- [x] fix paragraph spacing
+- [x] task cut & paste loses the checkbox (QTBUG-103714)
+
 # done
 
 - [x] arbitrary columns in kanban view (treeview for every heading)
@@ -56,8 +57,10 @@
 - [x] automatically check tasks when moved to the done column
 - [x] saving resources to doc dir instead of the resource dir
 - [x] SDI: multiple docs in multiple windows
-- [x] task cut & paste loses the checkbox (QTBUG-103714)
 - [x] SDI: open links in new windows
+- [x] crash on ctrl-k sometimes
+- [x] moving checkbox items from current list to done list seems to be triggering
+  even when it's not initially checked (control-k to convert bullet item)
 
 # research
 

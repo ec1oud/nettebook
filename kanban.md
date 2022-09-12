@@ -31,6 +31,8 @@
 - [ ] IPFS features without KIO (?)
 - [ ] link & anchor shapes
 - [ ] support text ranges in fragment identifiers
+- [ ] find / search (control-F)
+- [ ] syntax highlighting (plugins?)
 
 # doing
 

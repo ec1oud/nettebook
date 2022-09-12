@@ -131,6 +131,7 @@
      <property name="title">
       <string>&amp;New</string>
      </property>
+     <addaction name="actionNewDocument"/>
      <addaction name="actionNewPageSeries"/>
     </widget>
     <addaction name="menu_New"/>
@@ -619,6 +620,20 @@
   <action name="actionKanban">
    <property name="text">
     <string>Kanban</string>
+   </property>
+  </action>
+  <action name="actionNewDocument">
+   <property name="text">
+    <string>&amp;Document</string>
+   </property>
+   <property name="iconText">
+    <string>New</string>
+   </property>
+   <property name="toolTip">
+    <string>Create a new document</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+N</string>
    </property>
   </action>
  </widget>

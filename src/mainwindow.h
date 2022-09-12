@@ -108,6 +108,7 @@ private slots:
     void on_action_Redo_triggered();
     void on_actionConvert_Table_triggered();
 
+    void on_actionNewDocument_triggered();
     void on_actionNewPageSeries_triggered();
 
     void on_action_Raw_DAG_node_triggered();

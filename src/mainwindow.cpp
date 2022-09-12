@@ -1009,6 +1009,11 @@ void MainWindow::convertToTable(QStringList lines, int columns, int rows, QListV
     cursor.endEditBlock();
 }
 
+void MainWindow::on_actionNewDocument_triggered()
+{
+    static_cast<Application *>(qApp)->newWindow({}, true);
+}
+
 void MainWindow::on_actionNewPageSeries_triggered()
 {
     newPageSeries();

@@ -21,6 +21,7 @@
 #include "settings.h"
 #include <QDebug>
 #include <QApplication>
+#include <QClipboard>
 #include <QMenu>
 #include <QMessageBox>
 #include <QThread>
@@ -126,11 +127,15 @@ void MarkdownBrowser::contextMenuEvent(QContextMenuEvent *event)
     QMenu *menu = createStandardContextMenu(event->pos());
     if (!isReadOnly() && !textCursor().charFormat().anchorHref().isEmpty()) {
         menu->addSeparator();
-        QAction *editLinkAction = menu->addAction(tr("Edit Link"));
+        QAction *copyLinkAction = menu->addAction(tr("Copy &Link Location"));
+        connect(copyLinkAction, &QAction::triggered, this, [this]() {
+            QGuiApplication::clipboard()->setText(textCursor().charFormat().anchorHref());
+        });
+        QAction *editLinkAction = menu->addAction(tr("&Edit Link"));
         connect(editLinkAction, &QAction::triggered, this, [this]() {
             emit MarkdownBrowser::editLink();
         });
-        QAction *unlinkAction = menu->addAction(tr("Unlink"));
+        QAction *unlinkAction = menu->addAction(tr("U&nlink"));
         connect(unlinkAction, &QAction::triggered, this, [this]() {
             emit MarkdownBrowser::unlink();
         });

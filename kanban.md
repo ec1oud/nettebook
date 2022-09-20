@@ -4,6 +4,9 @@
   ipfs://bafybei... URLs even if the markdown parser doesn't recognize them as
   URLs
 - [ ] Document::saveResources(): come up with a better way to find them all
+- [ ] treating Save like Save As, opening file dialog every time, if it was started
+  with an empty document initially; reload doesn't work in that case either
+- [ ] what happened to the link dialog's insert button?
 
 # todo
 
@@ -33,6 +36,21 @@
 - [ ] support text ranges in fragment identifiers
 - [ ] find / search (control-F)
 - [ ] syntax highlighting (plugins?)
+- [ ] underscore toolbar button and action
+- [ ] json/ipld editor: type actual json with syntax completion, but it shows up
+  graphically otherwise (tree, list etc.) like mcd for json
+- [ ] same thing for yaml?
+- [ ] typeahead search for emoji and symbols, like if you start typing :gui` (as a
+  word) you get 🎸 and 🦮 in a popup combobox; probably just convert to unicode
+  symbols on the spot, rather than depending on the markdown parser to convert
+  `:guitar:` later (that would have to be a feature in Qt, therefore probably in
+  md4c, therefore should be a published markdown extension) 
+  https://www.webfx.com/tools/emoji-cheat-sheet/
+- [ ] try to detect and remove rendundant text inside an href when dropping a link
+  from a browser (example: from a patch from my dashboard on codereview)
+- [ ] detect pasted links and make autolinks of them
+- [ ] try building on wasm
+- [ ] get it working with the KF6 version of KIO
 
 # doing
 

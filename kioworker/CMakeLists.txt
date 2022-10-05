@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(kioslave-ipfs)
+project(kioworker-ipfs)
 
-configure_file(config-kioslave-ipfs.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config-kioslave-ipfs.h )
+configure_file(config-kioworker-ipfs.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config-kioworker-ipfs.h )
 
 set(kio_ipfs_PART_SRCS
 ipfs.cpp
@@ -19,7 +19,7 @@ target_link_libraries(kio_ipfs Qt5::Network KF5::KIOCore KF5::I18n)
 set_target_properties(kio_ipfs PROPERTIES OUTPUT_NAME "ipfs")
 set_target_properties(kio_ipfs PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/kf5/kio")
 set_target_properties(kio_ipfs PROPERTIES PREFIX "")
-#install(TARGETS kio_ipfs  DESTINATION ${KDE_INSTALL_PLUGINDIR}/kf5/kio)
+#install(TARGETS kio_ipfs  DESTINATION ${KDE_INSTALL_PLUGINDIR}/kf${QT_MAJOR_VERSION}/kio)
 # doesn't work, cmake says it doesn't exist even though it does
 #install(TARGETS ${CMAKE_SOURCE_DIR}/ipfs.protocol DESTINATION /usr/share/kservices5)
 # Ubuntu

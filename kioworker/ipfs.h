@@ -15,8 +15,8 @@
 **
 ****************************************************************************/
 
-#ifndef IPFSSLAVE_H
-#define IPFSSLAVE_H
+#ifndef IPFSWORKER_H
+#define IPFSWORKER_H
 
 #include <KIO/SlaveBase>
 #include <QEventLoop>
@@ -27,11 +27,11 @@ namespace KIO {
 class TransferJob;
 }
 
-class IpfsSlave : public QObject, public KIO::SlaveBase
+class IpfsWorker : public QObject, public KIO::SlaveBase
 {
     Q_OBJECT
 public:
-    IpfsSlave(const QByteArray &pool, const QByteArray &app);
+    IpfsWorker(const QByteArray &pool, const QByteArray &app);
     void get(const QUrl &url) override;
     void listDir(const QUrl &url) override;
     void stat(const QUrl &url) override;
@@ -61,4 +61,4 @@ private:
     bool m_newObject = false;
 };
 
-#endif // IPFSSLAVE_H
+#endif // IPFSWORKER_H

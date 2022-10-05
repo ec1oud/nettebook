@@ -12,7 +12,7 @@ Since QTextDocument supports Markdown task lists, a Kanban mode is under
 development.
 
 - requires Qt 5.14 or newer (Qt 6 is OK) to build the main application (in src/)
-- includes code for a KIO slave for reading and writing via IPFS, which also
+- includes code for a KIO worker for reading and writing via IPFS, which also
   enables KDE applications like [kate](https://kate-editor.org) and 
   [dolphin](https://kde.org/applications/system/org.kde.dolphin) to see the
   files on your local MFS/unixfs instance or at a particular IPFS hash.  This

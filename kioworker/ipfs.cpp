@@ -50,18 +50,18 @@ extern "C" Q_DECL_EXPORT int kdemain(int argc, char **argv)
         exit(-1);
     }
 
-    IpfsSlave slave(argv[2], argv[3]);
-    slave.dispatchLoop();
+    IpfsWorker worker(argv[2], argv[3]);
+    worker.dispatchLoop();
     return 0;
 }
 
-IpfsSlave::IpfsSlave(const QByteArray &pool, const QByteArray &app) :
+IpfsWorker::IpfsWorker(const QByteArray &pool, const QByteArray &app) :
     KIO::SlaveBase("ipfs", pool, app)
 {
     qDebug() << Q_FUNC_INFO << pool << app;
 }
 
-void IpfsSlave::get(const QUrl &url)
+void IpfsWorker::get(const QUrl &url)
 {
     m_fileUrl = url;
     QString urlString = apiPath(url);
@@ -80,11 +80,11 @@ void IpfsSlave::get(const QUrl &url)
     req.setHeader(QNetworkRequest::ContentTypeHeader, m_defaultContentType);
     req.setHeader(QNetworkRequest::UserAgentHeader, m_userAgent);
     m_reply = m_nam.post(req, QByteArray());
-    connect(m_reply, &QNetworkReply::finished, this, &IpfsSlave::onCatReceiveDone);
+    connect(m_reply, &QNetworkReply::finished, this, &IpfsWorker::onCatReceiveDone);
     m_eventLoop.exec();
 }
 
-void IpfsSlave::listDir(const QUrl &url)
+void IpfsWorker::listDir(const QUrl &url)
 {
     m_fileUrl = url;
     QString urlString = apiPath(url);
@@ -102,11 +102,11 @@ void IpfsSlave::listDir(const QUrl &url)
     req.setHeader(QNetworkRequest::ContentTypeHeader, m_defaultContentType);
     req.setHeader(QNetworkRequest::UserAgentHeader, m_userAgent);
     m_reply = m_nam.post(req, QByteArray());
-    connect(m_reply, &QNetworkReply::finished, this, &IpfsSlave::onLsReceiveDone);
+    connect(m_reply, &QNetworkReply::finished, this, &IpfsWorker::onLsReceiveDone);
     m_eventLoop.exec();
 }
 
-void IpfsSlave::stat(const QUrl &url)
+void IpfsWorker::stat(const QUrl &url)
 {
     m_fileUrl = url;
     QString urlString = apiPath(url);
@@ -127,11 +127,11 @@ void IpfsSlave::stat(const QUrl &url)
     req.setHeader(QNetworkRequest::ContentTypeHeader, m_defaultContentType);
     req.setHeader(QNetworkRequest::UserAgentHeader, m_userAgent);
     m_reply = m_nam.post(req, QByteArray());
-    connect(m_reply, &QNetworkReply::finished, this, &IpfsSlave::onStatReceiveDone);
+    connect(m_reply, &QNetworkReply::finished, this, &IpfsWorker::onStatReceiveDone);
     m_eventLoop.exec();
 }
 
-void IpfsSlave::put(const QUrl &url, int permissions, KIO::JobFlags flags)
+void IpfsWorker::put(const QUrl &url, int permissions, KIO::JobFlags flags)
 {
     m_fileUrl = url;
     QString urlString = apiPath(url);
@@ -192,11 +192,11 @@ qDebug() << url << urlString << permissions << flags;
     multiPart->append(textPart);
     m_reply = m_nam.post(req, multiPart);
     multiPart->setParent(m_reply); // delete the multiPart with the reply
-    connect(m_reply, &QNetworkReply::finished, this, &IpfsSlave::onPutDone);
+    connect(m_reply, &QNetworkReply::finished, this, &IpfsWorker::onPutDone);
     m_eventLoop.exec();
 }
 
-void IpfsSlave::onCatReceiveDone()
+void IpfsWorker::onCatReceiveDone()
 {
     m_eventLoop.exit();
     if (m_reply->error()) {
@@ -214,7 +214,7 @@ void IpfsSlave::onCatReceiveDone()
     finished();
 }
 
-void IpfsSlave::onLsReceiveDone()
+void IpfsWorker::onLsReceiveDone()
 {
     m_eventLoop.exit();
     if (m_reply->error()) {
@@ -255,7 +255,7 @@ void IpfsSlave::onLsReceiveDone()
     finished();
 }
 
-void IpfsSlave::onStatReceiveDone()
+void IpfsWorker::onStatReceiveDone()
 {
     m_eventLoop.exit();
     if (m_reply->error()) {
@@ -291,7 +291,7 @@ void IpfsSlave::onStatReceiveDone()
     finished();
 }
 
-void IpfsSlave::onPutDone()
+void IpfsWorker::onPutDone()
 {
     if (m_reply->error()) {
         qWarning() << Q_FUNC_INFO << m_reply->errorString();
@@ -313,7 +313,7 @@ void IpfsSlave::onPutDone()
     m_eventLoop.exit();
 }
 
-QString IpfsSlave::ipnsLookup(const QString &path)
+QString IpfsWorker::ipnsLookup(const QString &path)
 {
     m_apiUrl = m_baseUrl;
     // http://localhost:5001/api/v0/name/resolve?arg=<name>&recursive=true&nocache=<value>&dht-record-count=<value>&dht-timeout=<value>&stream=<value>
@@ -336,7 +336,7 @@ QString IpfsSlave::ipnsLookup(const QString &path)
     return ret.toString();
 }
 
-QString IpfsSlave::apiPath(const QUrl &url)
+QString IpfsWorker::apiPath(const QUrl &url)
 {
     QString urlString = url.toString(QUrl::RemoveScheme);
     int ipnsPrefixIndex = urlString.indexOf(ipnsPrefix);

@@ -592,6 +592,7 @@ void Document::prepareWriteBuffer(QByteArray &dest)
     }
 }
 
+#ifdef NETTEBOOK_NO_KIO
 void Document::resourceDataReceived(QNetworkReply *reply)
 {
 //    qDebug() << reply->url() << reply->rawHeaderList();
@@ -602,7 +603,7 @@ void Document::resourceDataReceived(QNetworkReply *reply)
         emit allResourcesLoaded();
 }
 
-#ifndef NETTEBOOK_NO_KIO
+#else // if not NETTEBOOK_NO_KIO
 void Document::onSaveDataReq(KIO::Job *job, QByteArray &dest)
 {
     Q_UNUSED(job)
@@ -634,4 +635,4 @@ void Document::onSaveDone(KJob *job)
     m_transferJob = nullptr;
     m_saveUrl.clear();
 }
-#endif
+#endif // NETTEBOOK_NO_KIO

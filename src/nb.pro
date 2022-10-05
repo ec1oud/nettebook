@@ -9,8 +9,6 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 CONFIG += c++11
-# qmake -config no_kio
-no_kio: DEFINES += NETTEBOOK_NO_KIO
 
 SOURCES += \
     application.cpp \
@@ -79,9 +77,13 @@ mac {
 	ICON = resources/nettebook.icns
 }
 
-INCLUDEPATH += /usr/include/KF5/KIOCore ../deps/QJsonModel
-!no_kio: INCLUDEPATH += /usr/include/KF5/KCoreAddons
-!no_kio: LIBS += -L/usr/lib/kf5 -lKF5KIOCore -lKF5CoreAddons
+# qmake -config no_kio
+no_kio: DEFINES += NETTEBOOK_NO_KIO
+else {
+	KF6_PREFIX=/home/rutledge/src/kde/usr
+	INCLUDEPATH += $${KF6_PREFIX}/include/KF6/KIOCore $${KF6_PREFIX}/include/KF6/KCoreAddons ../deps/QJsonModel
+	LIBS += -L$${KF6_PREFIX}/lib -lKF5KIOCore -lKF5CoreAddons -lKF5Service -lKF5ConfigCore
+}
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

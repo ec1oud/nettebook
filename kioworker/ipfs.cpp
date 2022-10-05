@@ -24,7 +24,6 @@
 #include <QHttpPart>
 #include <QNetworkReply>
 #include <KIO/TransferJob>
-#include <KConfigGroup>
 #include <KJobUiDelegate>
 
 static const QString base58HashPrefix = QStringLiteral("Qm");
@@ -201,7 +200,7 @@ void IpfsWorker::onCatReceiveDone()
     m_eventLoop.exit();
     if (m_reply->error()) {
         qDebug() << Q_FUNC_INFO << m_reply->errorString();
-        error(KIO::ERR_SLAVE_DEFINED, m_reply->errorString());
+        error(KIO::ERR_WORKER_DEFINED, m_reply->errorString());
         return;
     }
     QByteArray buf = m_reply->readAll();
@@ -219,7 +218,7 @@ void IpfsWorker::onLsReceiveDone()
     m_eventLoop.exit();
     if (m_reply->error()) {
         qDebug() << Q_FUNC_INFO << m_reply->errorString();
-        error(KIO::ERR_SLAVE_DEFINED, m_reply->errorString());
+        error(KIO::ERR_WORKER_DEFINED, m_reply->errorString());
         return;
     }
     QJsonDocument jdoc = QJsonDocument::fromJson(m_reply->readAll());
@@ -260,7 +259,7 @@ void IpfsWorker::onStatReceiveDone()
     m_eventLoop.exit();
     if (m_reply->error()) {
         qDebug() << Q_FUNC_INFO << m_reply->errorString();
-        error(KIO::ERR_SLAVE_DEFINED, m_reply->errorString());
+        error(KIO::ERR_WORKER_DEFINED, m_reply->errorString());
         return;
     }
     QJsonObject jo = QJsonDocument::fromJson(m_reply->readAll()).object();
@@ -274,7 +273,7 @@ void IpfsWorker::onStatReceiveDone()
             error(KIO::ERR_IS_DIRECTORY, msg.toString());
             return;
         default:
-            error(KIO::ERR_SLAVE_DEFINED, msg.toString());
+            error(KIO::ERR_WORKER_DEFINED, msg.toString());
             return;
         }
     }
@@ -295,7 +294,7 @@ void IpfsWorker::onPutDone()
 {
     if (m_reply->error()) {
         qWarning() << Q_FUNC_INFO << m_reply->errorString();
-        error(KIO::ERR_SLAVE_DEFINED, m_reply->errorString());
+        error(KIO::ERR_WORKER_DEFINED, m_reply->errorString());
     } else {
         qDebug() << Q_FUNC_INFO << m_reply->rawHeaderPairs(); // << m_reply->rawHeaderList();
         for (auto h : m_reply->rawHeaderList())

@@ -37,7 +37,6 @@
 - [ ] IPFS features without KIO (?)
 - [ ] link & anchor shapes
 - [ ] support text ranges in fragment identifiers
-- [ ] find / search (control-F)
 - [ ] syntax highlighting (plugins?)
 - [ ] underscore toolbar button and action
 - [ ] json/ipld editor: type actual json with syntax completion, but it shows up
@@ -84,6 +83,7 @@
 - [x] crash on ctrl-k sometimes
 - [x] moving checkbox items from current list to done list seems to be triggering
   even when it's not initially checked (control-k to convert bullet item)
+- [x] find / search (control-F)
 
 # research
 

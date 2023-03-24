@@ -112,6 +112,38 @@
     <item>
      <widget class="MarkdownBrowser" name="browser"/>
     </item>
+    <item>
+     <layout class="QHBoxLayout" name="searchToolbarStuff">
+      <item>
+       <widget class="QLineEdit" name="searchField">
+        <property name="placeholderText">
+         <string>Find in document</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="searchHighlightAllCB">
+        <property name="text">
+         <string>Highlight All</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="searchMatchCaseCB">
+        <property name="text">
+         <string>Match Case</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="searchWholeWordsCB">
+        <property name="text">
+         <string>Whole Words</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
    </layout>
   </widget>
   <widget class="QMenuBar" name="menuBar">
@@ -184,8 +216,17 @@
     <addaction name="actionInsert_Horizontal_Rule"/>
     <addaction name="actionInsert_Table"/>
    </widget>
+   <widget class="QMenu" name="menuSearch">
+    <property name="title">
+     <string>Search</string>
+    </property>
+    <addaction name="actionFind"/>
+    <addaction name="actionFindNext"/>
+    <addaction name="actionFindPrevious"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
+   <addaction name="menuSearch"/>
    <addaction name="menuView"/>
    <addaction name="menuTools"/>
    <addaction name="menuInsert"/>
@@ -239,6 +280,19 @@
      </item>
     </layout>
    </widget>
+  </widget>
+  <widget class="QToolBar" name="searchToolBar">
+   <property name="windowTitle">
+    <string>toolBar</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>BottomToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actionFindPrevious"/>
+   <addaction name="actionFindNext"/>
   </widget>
   <action name="actionOpen">
    <property name="icon">
@@ -634,6 +688,51 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+N</string>
+   </property>
+  </action>
+  <action name="actionFind">
+   <property name="icon">
+    <iconset theme="edit-find" resource="resources/resources.qrc">
+     <normaloff>:/32/edit-find.png</normaloff>:/32/edit-find.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Find</string>
+   </property>
+   <property name="toolTip">
+    <string>Find text in this document</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+F</string>
+   </property>
+  </action>
+  <action name="actionFindNext">
+   <property name="icon">
+    <iconset theme="go-down" resource="resources/resources.qrc">
+     <normaloff>:/32/go-down-search.png</normaloff>:/32/go-down-search.png</iconset>
+   </property>
+   <property name="text">
+    <string>Find Next</string>
+   </property>
+   <property name="toolTip">
+    <string>Find the next occurrence</string>
+   </property>
+   <property name="shortcut">
+    <string>F3</string>
+   </property>
+  </action>
+  <action name="actionFindPrevious">
+   <property name="icon">
+    <iconset theme="go-up" resource="resources/resources.qrc">
+     <normaloff>:/32/go-up-search.png</normaloff>:/32/go-up-search.png</iconset>
+   </property>
+   <property name="text">
+    <string>Find Previous</string>
+   </property>
+   <property name="toolTip">
+    <string>Find the previous occurrence</string>
+   </property>
+   <property name="shortcut">
+    <string>Shift+F3</string>
    </property>
   </action>
  </widget>

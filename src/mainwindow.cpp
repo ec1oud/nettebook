@@ -42,6 +42,7 @@
 #include <QNetworkReply>
 #include <QPrintDialog>
 #include <QPrinter>
+#include <QShortcut>
 #include <QStandardPaths>
 #include <QTextDocumentFragment>
 #include <QTextEdit>
@@ -117,6 +118,21 @@ MainWindow::MainWindow(QWidget *parent) :
 
     on_actionToggleEditMode_toggled(false);
     ui->thumbnailsDock->hide();
+
+    ui->searchToolBar->insertWidget(ui->actionFindPrevious, ui->searchField);
+    while (ui->searchToolbarStuff->count()) {
+        QWidget *tw = ui->searchToolbarStuff->takeAt(0)->widget();
+        if (!tw)
+            continue;
+        tw->setAttribute(Qt::WA_AcceptTouchEvents);
+        ui->searchToolBar->addWidget(tw);
+    }
+    delete ui->searchToolbarStuff;
+    ui->searchToolbarStuff = nullptr;
+    ui->searchToolBar->hide();
+
+    connect(new QShortcut(QKeySequence(Qt::Key_Escape), this), &QShortcut::activated,
+            this, &MainWindow::escape);
 
 #if defined(QT_PRINTSUPPORT_LIB) && QT_CONFIG(printdialog)
     ui->actionPrint->setEnabled(true);
@@ -1079,4 +1095,43 @@ void MainWindow::on_actionKanban_triggered()
     KanbanColumnView *kv = new KanbanColumnView();
     kv->setDocument(m_document);
     kv->show();
+}
+
+void MainWindow::escape()
+{
+    if (ui->searchField->hasFocus())
+        ui->searchToolBar->hide();
+}
+
+void MainWindow::doSearch(bool backward)
+{
+    QTextDocument::FindFlags flags;
+    if (backward)
+        flags.setFlag(QTextDocument::FindBackward);
+    if (ui->searchMatchCaseCB->isChecked())
+        flags.setFlag(QTextDocument::FindCaseSensitively);
+    if (ui->searchWholeWordsCB->isChecked())
+        flags.setFlag(QTextDocument::FindWholeWords);
+    ui->browser->find(ui->searchField->text(), flags);
+}
+
+void MainWindow::on_actionFind_triggered()
+{
+    ui->searchToolBar->show();
+    ui->searchField->setFocus();
+}
+
+void MainWindow::on_searchField_returnPressed()
+{
+    doSearch();
+}
+
+void MainWindow::on_actionFindNext_triggered()
+{
+    doSearch();
+}
+
+void MainWindow::on_actionFindPrevious_triggered()
+{
+    doSearch(true);
 }

@@ -70,6 +70,7 @@ protected:
 private slots:
     void currentCharFormatChanged(const QTextCharFormat &format);
     void cursorPositionChanged();
+    void escape();
     void on_actionQuit_triggered();
     void on_actionOpen_triggered();
     void on_actionReload_triggered();
@@ -119,6 +120,10 @@ private slots:
 
     void on_actionPrint_triggered();
 
+    void on_actionFind_triggered();
+    void on_searchField_returnPressed();
+    void on_actionFindNext_triggered();
+    void on_actionFindPrevious_triggered();
 
 private:
     void mergeFormatOnWordOrSelection(const QTextCharFormat &format);
@@ -126,6 +131,7 @@ private:
     void newPageSeries();
     void insertLink(const QString &destination, const QString &text, const QString &title);
     void convertToTable(QStringList lines, int columns, int rows, QListView::Flow flow);
+    void doSearch(bool backward = false);
 
     // to be kept in sync with items in ui->styleCB
     enum class Style {

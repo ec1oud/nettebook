@@ -36,5 +36,7 @@
         <file>64/ipfs.png</file>
         <file>64/nettebook.png</file>
         <file>128/empty-page.png</file>
+        <file>32/go-down-search.png</file>
+        <file>32/go-up-search.png</file>
     </qresource>
 </RCC>

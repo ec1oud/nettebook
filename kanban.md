@@ -29,6 +29,9 @@
 - [ ] DnD to drop multiple files, in both reading and editing modes
 - [ ] table navigation: tab between columns, insert new rows when necessary
 - [ ] table editing features: insert and remove rows etc.
+- [ ] table should initially have a header row (with bold text etc) because
+  headerless tables are impossible
+- [ ] better table formatting
 - [ ] mini-spreadsheet?
 - [ ] dogfood the Qt 6 version
 - [ ] IPFS features without KIO (?)
@@ -97,7 +100,13 @@
 - [ ] use libgit2 to manage revisions if the file is in a git repo
   - [ ] but only if the yaml metadata says to do that, or only if it doesn't say
     not to?
+  - [ ] should be possible to define rules for when to commit in a particular
+    directory / repo: commit new files on first save? commit on each save
+    presumably? amend if the file is changed multiple times in the same day?
+    etc. Maybe use xattrs for that (or a dotfile)
+  - [ ] prompt for a commit message in the save dialog?
 - [ ] git on ipfs: follow the standard if there is one
+- [ ] optionally preserve original creation times for the file date on save
 - [ ] techtree: multiple kanban projects get organized into a long-term roadmap
 - [ ] collaboration features: share the roadmap and the kanban boards, solicit help
   from others, encourage sharing and merging of roadmaps

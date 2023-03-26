@@ -21,10 +21,10 @@ lessThan(QT_MAJOR_VERSION, 6):!no_kio {
 SOURCES += \
     application.cpp \
     cidfinder.cpp \
-    codeblockhighlighter.cpp \
     colorswatch.cpp \
     datepickerdialog.cpp \
     document.cpp \
+    highlighter.cpp \
     textlistmodel.cpp \
     ipfsagent.cpp \
     kanbancolumnview.cpp \
@@ -46,10 +46,10 @@ SOURCES += \
 HEADERS += \
     application.h \
     cidfinder.h \
-    codeblockhighlighter.h \
     colorswatch.h \
     datepickerdialog.h \
     document.h \
+    highlighter.h \
     textlistmodel.h \
     ipfsagent.h \
     kanbancolumnview.h \

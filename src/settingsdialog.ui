@@ -141,6 +141,16 @@
        <item row="0" column="1">
         <widget class="ColorSwatch" name="codeBackgroundColorSwatch" native="true"/>
        </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="searchResultBackgroundLabel">
+         <property name="text">
+          <string>Search result background</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="ColorSwatch" name="searchResultBackgroundColorSwatch" native="true"/>
+       </item>
       </layout>
      </widget>
      <widget class="QWidget" name="tasksTab">

@@ -69,7 +69,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     m_mainWidget = ui->browser;
     m_mainWidget->setDocument(m_document);
-    m_highlighter = new CodeBlockHighlighter(m_document);
+    m_highlighter = new Highlighter(m_document);
     connect(m_mainWidget, &QTextEdit::currentCharFormatChanged,
             this, &MainWindow::currentCharFormatChanged);
     connect(m_mainWidget, &QTextEdit::cursorPositionChanged,
@@ -130,6 +130,9 @@ MainWindow::MainWindow(QWidget *parent) :
     delete ui->searchToolbarStuff;
     ui->searchToolbarStuff = nullptr;
     ui->searchToolBar->hide();
+    connect(ui->searchMatchCaseCB, &QCheckBox::stateChanged, m_highlighter, &Highlighter::setSearchCaseSensitive);
+    ui->searchHighlightAllCB->setChecked(Settings::instance()->boolOrDefault(
+                                          Settings::behaviorGroup, Settings::searchHighlightAll, true));
 
     connect(new QShortcut(QKeySequence(Qt::Key_Escape), this), &QShortcut::activated,
             this, &MainWindow::escape);
@@ -1135,3 +1138,16 @@ void MainWindow::on_actionFindPrevious_triggered()
 {
     doSearch(true);
 }
+
+void MainWindow::on_searchHighlightAllCB_toggled(bool checked)
+{
+    if (checked) {
+        connect(ui->searchField, &QLineEdit::textEdited, m_highlighter, &Highlighter::setSearchText);
+        m_highlighter->setSearchText(ui->searchField->text());
+    } else {
+        disconnect(ui->searchField, &QLineEdit::textEdited, m_highlighter, &Highlighter::setSearchText);
+        m_highlighter->setSearchText({});
+    }
+    Settings::instance()->setBool(Settings::behaviorGroup, Settings::searchHighlightAll, checked);
+}
+

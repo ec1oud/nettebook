@@ -47,6 +47,9 @@ public:
     static const QString journalUsesTemplates;
     static const QString styleGroup;
     static const QString codeBlockBackground;
+    static const QString searchResultBackground;
+    static const QString behaviorGroup;
+    static const QString searchHighlightAll;
 
     const QString tasksGroup = QLatin1String("Tasks");
     const QString moveTasksUnderHeading = QLatin1String("moveTasksUnderHeading");

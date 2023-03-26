@@ -34,6 +34,9 @@ const QString Settings::journalFilenameFormat("journalFilenameFormat"_L1);
 const QString Settings::journalUsesTemplates("journalUsesTemplates"_L1);
 const QString Settings::styleGroup("Style"_L1);
 const QString Settings::codeBlockBackground("codeBlockBackground"_L1);
+const QString Settings::searchResultBackground("searchResultBackground"_L1);
+const QString Settings::behaviorGroup("Behavior"_L1);
+const QString Settings::searchHighlightAll("searchHighlightAll"_L1);
 
 Settings* Settings::instance()
 {

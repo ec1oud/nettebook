@@ -27,7 +27,7 @@
 #include <QTextBrowser>
 #include <QUrl>
 #include "markdownbrowser.h"
-#include "codeblockhighlighter.h"
+#include "highlighter.h"
 #include "ipfsagent.h"
 #include "linkdialog.h"
 #include "thumbnailscene.h"
@@ -124,6 +124,7 @@ private slots:
     void on_searchField_returnPressed();
     void on_actionFindNext_triggered();
     void on_actionFindPrevious_triggered();
+    void on_searchHighlightAllCB_toggled(bool checked);
 
 private:
     void mergeFormatOnWordOrSelection(const QTextCharFormat &format);
@@ -151,7 +152,7 @@ private:
     Ui::MainWindow *ui;
     MarkdownBrowser *m_mainWidget;
     Document *m_document;
-    CodeBlockHighlighter *m_highlighter;
+    Highlighter *m_highlighter;
     QJsonDocument m_jsonDocument;
     ThumbnailScene *m_thumbs = nullptr;
     LinkDialog *m_linkDialog = nullptr;

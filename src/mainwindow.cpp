@@ -136,6 +136,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(new QShortcut(QKeySequence(Qt::Key_Escape), this), &QShortcut::activated,
             this, &MainWindow::escape);
+    connect(new QShortcut(QKeySequence::ZoomIn, this), &QShortcut::activated,  [this]() { ui->browser->zoomIn(); });
+    connect(new QShortcut(QKeySequence::ZoomOut, this), &QShortcut::activated,  [this]() { ui->browser->zoomOut(); });
 
 #if defined(QT_PRINTSUPPORT_LIB) && QT_CONFIG(printdialog)
     ui->actionPrint->setEnabled(true);

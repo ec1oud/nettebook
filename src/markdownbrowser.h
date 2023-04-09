@@ -44,6 +44,7 @@ protected:
     void doSetSource(const QUrl &name, QTextDocument::ResourceType type = QTextDocument::UnknownResource) override;
 #endif
     void contextMenuEvent(QContextMenuEvent *event) override;
+    void wheelEvent(QWheelEvent *event) override;
 
 private:
     void onFileChanged(const QString &path);

@@ -144,6 +144,15 @@ void MarkdownBrowser::contextMenuEvent(QContextMenuEvent *event)
     delete menu;
 }
 
+void MarkdownBrowser::wheelEvent(QWheelEvent *event)
+{
+     if (event->modifiers().testFlag(Qt::ControlModifier) && !isReadOnly()) {
+        zoomInF(event->angleDelta().y() / 120.f);
+    } else {
+        QTextBrowser::wheelEvent(event);
+    }
+}
+
 void MarkdownBrowser::onFileChanged(const QString &path)
 {
     qDebug() << path << "saving?" << static_cast<Document *>(document())->saving();

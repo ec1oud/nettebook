@@ -15,11 +15,12 @@
 **
 ****************************************************************************/
 #include "ipfsagent.h"
+#include "kio/transferjob.h"
 #include <QHttpPart>
 #include <QNetworkReply>
 
 #ifndef NETTEBOOK_NO_KIO
-#include <KIO/Job>
+#include <KIO/TransferJob>
 #endif
 
 using namespace Qt::StringLiterals;

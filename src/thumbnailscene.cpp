@@ -20,6 +20,7 @@
 ****************************************************************************/
 #include "thumbnailscene.h"
 #include "ipfsagent.h"
+#include <KIO/TransferJob>
 #include <QDebug>
 #include <QJsonDocument>
 #include <QJsonArray>

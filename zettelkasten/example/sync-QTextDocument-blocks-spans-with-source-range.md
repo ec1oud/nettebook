@@ -1,5 +1,5 @@
 ---
-birth: !timestamp '2024-01-09 20:04:55.674714507 -0700'
+birth: !timestamp '2024-01-09T20:04:55.674714507-0700'
 ---
 https://bugreports.qt.io/browse/QTCREATORBUG-29756 asks for the ability to sync
 scrolling in a [two-pane editor](two-pane-markdown-editor.md). It seems to me

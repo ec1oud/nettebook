@@ -1,5 +1,5 @@
 ---
-birth: !timestamp '2024-01-09 19:58:17.324717822 -0700'
+birth: !timestamp '2024-01-09T19:58:17.324717822-0700'
 ---
 It should be possible to link to specific parts of documents, in general.  At
 least linking to headings is a good start.  See

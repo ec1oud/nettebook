@@ -3,6 +3,7 @@
 
 import QtQuick
 import Qt.labs.folderlistmodel
+import org.nettebook.zettelkasten
 
 Window {
     id: surface
@@ -64,6 +65,15 @@ Window {
                     anchors.right: parent.right
                     anchors.margins: 3
                 }
+
+                Text {
+                    id: birthTime
+                    text: Qt.formatDateTime(yaml.birth, Locale.LongFormat)
+                    font.pointSize: 7
+                    anchors.top: parent.top
+                    anchors.left: parent.left
+                    anchors.margins: 3
+                }
             }
 
             Rectangle {
@@ -101,10 +111,17 @@ Window {
                     id: edit
                     width: flick.width
                     textDocument.source: notepage.fileUrl
+                    // textFormat: TextEdit.MarkdownText
                     wrapMode: TextEdit.WordWrap
                     onLinkActivated: (link) => Qt.openUrlExternally(link) // TODO navigate internal links
                     onActiveFocusChanged: if (!activeFocus && textDocument.modified) textDocument.save()
                 }
+            }
+
+            YamlDocument {
+                id: yaml
+                document: edit.textDocument
+                source: notepage.fileUrl
             }
 
             Rectangle {

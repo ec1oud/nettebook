@@ -15,7 +15,7 @@ int main(int argc, char *argv[])
         &app,
         []() { QCoreApplication::exit(-1); },
         Qt::QueuedConnection);
-    engine.loadFromModule("zettelkasten", "Main");
+    engine.loadFromModule("org.nettebook.zettelkasten", "Main");
 
     return app.exec();
 }

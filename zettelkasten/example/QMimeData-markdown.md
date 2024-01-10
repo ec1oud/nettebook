@@ -1,5 +1,5 @@
 ---
-birth: !timestamp '2024-01-09 19:53:12.834720246 -0700'
+birth: !timestamp '2024-01-09T19:53:12.834720246-0700'
 ---
 
 [https://bugreports.qt.io/browse/QTBUG-76105](https://bugreports.qt.io/browse/QTBUG-76105)

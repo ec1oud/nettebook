@@ -34,11 +34,11 @@ Window {
             objectName: "frame-" + fileName
             color: "lightyellow"
             width: 320; height: 240
-            clip: true
 
             Rectangle {
                 id: ribbon
-                width: parent.width
+                x: 1; y: 1
+                width: parent.width - 2
                 height: title.implicitHeight + modTime.implicitHeight + 2
                 color: "papayawhip"
                 z: 1
@@ -51,7 +51,7 @@ Window {
                 Text {
                     id: title
                     text: notepage.fileName
-                    x: 2; width: parent.width - 4
+                    x: 3; width: parent.width - 5
                     anchors.bottom: parent.bottom
                     font.bold: true
                 }
@@ -60,18 +60,31 @@ Window {
                     id: modTime
                     text: Qt.formatDateTime(notepage.fileModified, Locale.LongFormat)
                     font.pointSize: 7
+                    anchors.top: parent.top
                     anchors.right: parent.right
-                    anchors.margins: 2
+                    anchors.margins: 3
                 }
+            }
+
+            Rectangle {
+                id: focusRect
+                z: 2
+                anchors.fill: parent
+                anchors.margins: 1
+                color: "transparent"
+                border.color: "saddlebrown"
+                border.width: 2
+                visible: edit.activeFocus
             }
 
             Flickable {
                 id: flick
                 anchors.fill: parent
-                anchors.margins: 2
-                anchors.topMargin: ribbon.height + 4
+                anchors.margins: 5
+                anchors.topMargin: ribbon.height
                 contentWidth: edit.contentWidth
                 contentHeight: edit.contentHeight
+                clip: true
 
                 function ensureVisible(r) {
                     if (contentX >= r.x)
@@ -90,6 +103,7 @@ Window {
                     textDocument.source: notepage.fileUrl
                     wrapMode: TextEdit.WordWrap
                     onLinkActivated: (link) => Qt.openUrlExternally(link) // TODO navigate internal links
+                    onActiveFocusChanged: if (!activeFocus && textDocument.modified) textDocument.save()
                 }
             }
 

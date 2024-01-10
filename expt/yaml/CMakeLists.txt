@@ -8,14 +8,14 @@ find_package(yaml-cpp REQUIRED)
 
 include_directories(${YAML_INCLUDE_DIRS})
 
-add_executable(getbirth "")
-target_sources(getbirth
+add_executable(birth2xattr "")
+target_sources(birth2xattr
   PRIVATE
-    getbirth.cpp)
+    birth2xattr.cpp)
 
 message(${YAML_CPP_LIBRARIES})
 
-target_link_libraries(getbirth
+target_link_libraries(birth2xattr
 	${YAML_CPP_LIBRARIES}
 )
 set(CMAKE_VERBOSE_MAKEFILE ON)

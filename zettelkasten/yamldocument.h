@@ -22,6 +22,8 @@ public:
     QQuickTextDocument *document() const;
     void setDocument(QQuickTextDocument *document);
 
+    Q_INVOKABLE void saveToDocument();
+
     QUrl source() const;
     void setSource(const QUrl &newSource);
 

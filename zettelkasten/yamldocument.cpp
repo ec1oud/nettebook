@@ -63,6 +63,18 @@ void YamlDocument::parse()
     }
 }
 
+void YamlDocument::saveToDocument()
+{
+    YAML::Node meta;
+    meta["birth"] = m_birth.toString(Qt::ISODateWithMs).toStdString();
+    std::stringstream ss;
+    ss << "---" << std::endl;
+    ss << meta << std::endl;
+    ss << "---" << std::endl;
+    m_document->textDocument()->setMetaInformation(QTextDocument::FrontMatter,
+                                                   QString::fromStdString(ss.str()));
+}
+
 QDateTime YamlDocument::birth() const
 {
     return m_birth;

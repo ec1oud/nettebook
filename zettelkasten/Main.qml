@@ -114,7 +114,10 @@ Window {
                     // textFormat: TextEdit.MarkdownText
                     wrapMode: TextEdit.WordWrap
                     onLinkActivated: (link) => Qt.openUrlExternally(link) // TODO navigate internal links
-                    onActiveFocusChanged: if (!activeFocus && textDocument.modified) textDocument.save()
+                    onActiveFocusChanged: if (!activeFocus && textDocument.modified) {
+                                              yaml.saveToDocument()
+                                              textDocument.save()
+                                          }
                 }
             }
 

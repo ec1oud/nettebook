@@ -1,6 +1,10 @@
 #include "highlighter.h"
 #include "settings.h"
 
+#include <QLoggingCategory>
+
+Q_LOGGING_CATEGORY(lcHgl, "org.nettebook.highlight")
+
 Highlighter::Highlighter(QTextDocument *parent)
   : QSyntaxHighlighter(parent)
 {
@@ -15,6 +19,8 @@ void Highlighter::highlightBlock(const QString &text)
                                      Settings::styleGroup, Settings::codeBlockBackground, "#EEE")));
         QTextCursor cur(currentBlock());
         cur.setBlockFormat(fmt);
+    } else if (fmt.hasProperty(QTextFormat::BlockQuoteLevel)) {
+        qCDebug(lcHgl) << "BQ" << fmt.property(QTextFormat::BlockQuoteLevel) << text;
     }
 
     if (!m_searchText.isEmpty()) {

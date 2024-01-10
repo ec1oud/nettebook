@@ -16,7 +16,7 @@
 ****************************************************************************/
 
 #include "settings.h"
-#include <QApplication>
+#include <QCoreApplication>
 #include <QDebug>
 #include <QDir>
 #include <QStandardPaths>
@@ -48,7 +48,7 @@ Settings::Settings(QObject* parent) :
 #ifdef Q_OS_LINUX
     // correct for QTBUG-82888
     QSettings(QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation) + QDir::separator() +
-              QApplication::applicationName() + ".conf"_L1, QSettings::NativeFormat, parent)
+              QCoreApplication::applicationName() + ".conf"_L1, QSettings::NativeFormat, parent)
 #else
     QSettings(parent)
 #endif

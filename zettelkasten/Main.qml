@@ -38,6 +38,15 @@ Window {
                 color: "lightyellow"
                 width: 320; height: 240
 
+                function addPendingLink() {
+                    var component = Qt.createComponent("PendingLink.qml");
+                    component.createObject(ribbonRightRow, {
+                                               text: edit.selectedText,
+                                               linkUrl: Utils.rangedAnchorUrl(notepage.fileUrl,
+                                                                              edit.selectedText)
+                                           })
+                }
+
                 Rectangle {
                     id: ribbon
                     x: 1; y: 1
@@ -57,6 +66,13 @@ Window {
                         x: 3; width: parent.width - 5
                         anchors.bottom: parent.bottom
                         font.bold: true
+                    }
+
+                    Row {
+                        id: ribbonRightRow
+                        anchors.right: parent.right
+                        anchors.bottom: parent.bottom
+                        anchors.margins: 1
                     }
 
                     Text {
@@ -171,6 +187,7 @@ Window {
                 console.log(text, "context menu on", ctxItem, ctxEdit)
                 if (text === "🔗" && ctxEdit !== undefined) {
                     ctxEdit.lastSelection = [ctxEdit.selectionStart, ctxEdit.selectedText, ctxEdit.selectionEnd]
+                    ctxItem.addPendingLink()
                     console.log("linky", ctxEdit.lastSelection)
                 }
             }

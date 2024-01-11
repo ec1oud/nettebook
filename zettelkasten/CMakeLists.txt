@@ -18,8 +18,10 @@ qt_add_qml_module(zk
     VERSION 1.0
     QML_FILES
         Main.qml
+        PendingLink.qml
         QuadPieMenu.qml
     SOURCES
+        utils.cpp
         yamldocument.cpp
     RESOURCES
         resources/gridsquare.png

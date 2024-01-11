@@ -6,6 +6,7 @@
 
 #include <QObject>
 #include <QQmlEngine>
+#include <QtQuick/QQuickTextDocument>
 
 class Utils : public QObject
 {
@@ -17,6 +18,9 @@ public:
     explicit Utils(QObject *parent = nullptr);
 
     Q_INVOKABLE QUrl rangedAnchorUrl(const QUrl &source, const QString &text);
+
+    Q_INVOKABLE bool insertLink(QQuickTextDocument *doc1, const QUrl &u1,
+                                QQuickTextDocument *doc2, const QUrl &u2);
 };
 
 #endif // UTILS_H

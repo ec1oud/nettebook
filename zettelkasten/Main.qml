@@ -43,7 +43,8 @@ Window {
                     component.createObject(ribbonRightRow, {
                                                text: edit.selectedText,
                                                linkUrl: Utils.rangedAnchorUrl(notepage.fileUrl,
-                                                                              edit.selectedText)
+                                                                              edit.selectedText),
+                                               textEdit: edit
                                            })
                 }
 

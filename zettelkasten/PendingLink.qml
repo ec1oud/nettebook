@@ -4,12 +4,20 @@ DropArea {
     id: root
     property string text
     property url linkUrl
+    property TextEdit textEdit: null
 
     width: Math.max(icon.implicitWidth, 16)
     height: Math.max(icon.implicitHeight, 16)
 
-    onEntered: (ev) => { console.log("entered", ev, ev?.drag, ev?.text, ev?.urls) }
-    onDropped: (ev) => { console.log("dropped", ev, ev?.drag, ev?.text, ev?.urls) }
+    onEntered: (ev) => { console.log("entered", ev, ev.text, ev.urls, "from", root.drag.source) }
+    onDropped:
+        (ev) => {
+            console.log("dropped", ev, ev.text, ev.urls, "from", root.drag.source, root.drag.source.textDocument,
+                        "onto", root.linkUrl, "in", root.textEdit.textDocument)
+
+            Utils.insertLink(root.drag.source.textDocument, root.linkUrl,
+                             root.textEdit.textDocument, ev.urls[0])
+        }
 
     Rectangle {
         id: draggable
@@ -30,6 +38,7 @@ DropArea {
             "text/plain": root.text,
             "text/uri-list": [root.linkUrl]
         }
+        Drag.source: root.textEdit
         border.color: Drag.active ? "tomato" : root.containsDrag ? "green" : "black"
         radius: 2
 

@@ -16,7 +16,9 @@ qt_add_executable(zk
 qt_add_qml_module(zk
     URI org.nettebook.zettelkasten
     VERSION 1.0
-    QML_FILES Main.qml
+    QML_FILES
+        Main.qml
+        QuadPieMenu.qml
     SOURCES
         yamldocument.cpp
     RESOURCES

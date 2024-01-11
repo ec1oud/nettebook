@@ -38,7 +38,7 @@ Window {
                 id: notepage
                 objectName: "frame: " + fileName
                 color: "lightyellow"
-                width: 320; height: 240
+                width: Math.max(320, title.implicitWidth); height: 240
 
                 function addPendingLink() {
                     var component = Qt.createComponent("PendingLink.qml");
@@ -66,6 +66,9 @@ Window {
                     Text {
                         id: title
                         text: notepage.fileName
+                        font.pointSize: 10 / Math.min(1, surface.scale * 1.5)
+                        style: Text.Outline
+                        styleColor: ribbon.color
                         x: 3; width: parent.width - 5
                         anchors.bottom: parent.bottom
                         font.bold: true
@@ -85,6 +88,7 @@ Window {
                         anchors.top: parent.top
                         anchors.right: parent.right
                         anchors.margins: 3
+                        visible: surface.scale > 0.7
                     }
 
                     Text {
@@ -94,6 +98,7 @@ Window {
                         anchors.top: parent.top
                         anchors.left: parent.left
                         anchors.margins: 3
+                        visible: surface.scale > 0.7
                     }
                 }
 
@@ -130,6 +135,7 @@ Window {
 
                     TextEdit {
                         id: edit
+                        visible: surface.scale > 0.25
                         width: flick.width
                         textDocument.source: notepage.fileUrl
                         // textFormat: TextEdit.MarkdownText

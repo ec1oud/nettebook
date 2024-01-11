@@ -7,6 +7,12 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(Qt6 6.5 REQUIRED COMPONENTS Quick)
 find_package(yaml-cpp REQUIRED)
 
+message("yaml-cpp: ${YAML_CPP_LIBRARY_DIR} ${YAML_CPP_LIBRARIES} ${YAML_CPP_INCLUDE_DIR}")
+
+include_directories(${YAML_CPP_INCLUDE_DIR})
+
+link_directories(${YAML_CPP_LIBRARY_DIR})
+
 qt_standard_project_setup(REQUIRES 6.5)
 
 qt_add_executable(zk
@@ -37,8 +43,6 @@ set_target_properties(zk PROPERTIES
     MACOSX_BUNDLE TRUE
     WIN32_EXECUTABLE TRUE
 )
-
-include_directories(${YAML_INCLUDE_DIRS})
 
 target_link_libraries(zk
     PRIVATE Qt6::Quick

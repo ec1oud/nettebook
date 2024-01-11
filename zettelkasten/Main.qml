@@ -25,10 +25,9 @@ Window {
 
         Repeater {
             id: peter
-            model: FolderListModel {
+            model: ZkModel {
                 id: folderModel
                 folder: "file:example"
-                showDirs: false
             }
 
             delegate: Rectangle {

@@ -27,8 +27,9 @@ qt_add_qml_module(zk
         PendingLink.qml
         QuadPieMenu.qml
     SOURCES
-        utils.cpp
-        yamldocument.cpp
+        utils.h utils.cpp
+        yamldocument.h yamldocument.cpp
+        zkmodel.h zkmodel.cpp
     RESOURCES
         resources/gridsquare.png
 )

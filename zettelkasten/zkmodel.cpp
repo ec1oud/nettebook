@@ -3,7 +3,9 @@
 
 #include "zkmodel.h"
 
+#include <QQuickTextDocument>
 #include <QRegularExpression>
+#include <QTextFragment>
 
 static QRegularExpression SpaceReplacementRE("[_-]");
 static QRegularExpression SpaceRE("\\s+");
@@ -29,7 +31,7 @@ QHash<int, QByteArray> ZkModel::roleNames() const
         { int(Role::FileName), "fileName" },
         { int(Role::FileLastModified), "fileModified" },
         { int(Role::Url), "fileUrl" },
-        { int(Role::Links), "links" },
+        { int(Role::LinkedIndices), "linkedIndices" },
     };
     return roles;
 }
@@ -68,6 +70,9 @@ QVariant ZkModel::data(const QModelIndex &index, int role) const
     }
     case int(Role::Title):
         return fi.baseName().replace(SpaceReplacementRE, " ");
+    case int(Role::LinkedIndices):
+        // return getLinkedIndices(index.row()); // how to get it into QVariant? QStringList?
+        return {};
     }
 
     return QVariant();
@@ -121,6 +126,59 @@ void ZkModel::onFileChanged(const QString &path)
 {
     qDebug() << "fileChanged" << path;
     // TODO look up which row that applies to and emit dataChanged()
+}
+
+QQuickTextDocument *ZkModel::getDocument(int row)
+{
+    if (m_documentProvider.isCallable()) {
+        auto const args = QJSValueList() << QJSValue(row);
+        auto doc = m_documentProvider.call(args).toQObject();
+        return qobject_cast<QQuickTextDocument *>(doc);
+    }
+    return nullptr;
+}
+
+QList<int> ZkModel::getLinkedIndices(int row) const
+{
+    QList<int> ret;
+    QStringList files = m_dir.entryList(QDir::Files);
+    auto doc = const_cast<ZkModel *>(this)->getDocument(row);
+    if (!doc || !doc->textDocument()) {
+        qWarning() << "no document for row" << row << files.at(row);
+        return ret;
+    }
+    QTextDocument *qtd = doc->textDocument();
+    // qDebug() << "row" << row << "has doc" << doc->source() << qtd;
+    // QTextCursor cur(qtd);
+    auto firstBlock = qtd->firstBlock();
+    for (QTextBlock::iterator it = firstBlock.begin(); !(it.atEnd()); ++it) {
+        QTextFragment currentFragment = it.fragment();
+        QTextCharFormat fmt = currentFragment.charFormat();
+        if (fmt.hasProperty(QTextFormat::AnchorHref)) {
+            QUrl ref(fmt.anchorHref());
+            if (ref.scheme().isEmpty() || ref.isLocalFile()) {
+                int index = files.indexOf(ref.fileName());
+                qDebug() << "    found local link" << ref << ref.fileName() << fmt.anchorNames() << "@" << index
+                         << "on" << currentFragment.text();
+                if (index >= 0)
+                    ret << index;
+            }
+        }
+    }
+    return ret;
+}
+
+QJSValue ZkModel::documentProvider() const
+{
+    return m_documentProvider;
+}
+
+void ZkModel::setDocumentProvider(const QJSValue &newDocumentProvider)
+{
+    if (newDocumentProvider.strictlyEquals(m_documentProvider))
+        return;
+    m_documentProvider = newDocumentProvider;
+    emit documentProviderChanged();
 }
 
 void ZkModel::onDirectoryChanged(const QString &path)

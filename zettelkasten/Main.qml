@@ -28,9 +28,11 @@ Window {
             model: ZkModel {
                 id: folderModel
                 folder: "file:example"
+                documentProvider: (index) => { return peter.itemAt(index)?.edit?.textDocument; }
             }
 
             delegate: Rectangle {
+                required property int index
                 required property date fileModified
                 required property string fileName
                 required property url fileUrl
@@ -45,6 +47,8 @@ Window {
                 y: yaml.position.y
                 onXChanged: yaml.position.x = x
                 onYChanged: yaml.position.y = y
+
+                property var linkedIndices: folderModel.getLinkedIndices(index)
 
                 function addPendingLink() {
                     var component = Qt.createComponent("PendingLink.qml");
@@ -120,6 +124,14 @@ Window {
                         anchors.left: parent.left
                         anchors.margins: 3
                         visible: surface.scale > 0.7
+                    }
+
+                    Text {
+                        anchors.bottom: parent.bottom
+                        anchors.right: parent.right
+                        font.pointSize: 7
+                        textFormat: Text.MarkdownText
+                        text: "**" + index + "**: links to " + notepage.linkedIndices
                     }
                 }
 

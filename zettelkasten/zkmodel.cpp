@@ -9,6 +9,11 @@ ZkModel::ZkModel(QObject *parent)
     // m_roles.insert(int(Role::Url), QByteArrayLiteral("fileUrl"));
     // m_roles.insert(int(Role::FileLastModified), QByteArrayLiteral("fileModified"));
     qDebug() << roleNames();
+
+    connect(&m_watcher, &QFileSystemWatcher::directoryChanged,
+            this, &ZkModel::onDirectoryChanged);
+    connect(&m_watcher, &QFileSystemWatcher::fileChanged,
+            this, &ZkModel::onFileChanged);
 }
 
 QHash<int, QByteArray> ZkModel::roleNames() const
@@ -73,9 +78,24 @@ void ZkModel::setFolder(const QUrl &newFolder)
     m_folder = newFolder;
 
     m_dir = QDir(newFolder.toLocalFile());
+    m_watcher.addPath(m_dir.absolutePath());
     qDebug() << Q_FUNC_INFO << QDir::currentPath() << newFolder << newFolder.toLocalFile() << m_dir.absolutePath();
     qDebug() << "found" << rowCount();
     emit folderChanged();
 }
+
+void ZkModel::onFileChanged(const QString &path)
+{
+    qDebug() << "fileChanged" << path;
+    // TODO look up which row that applies to and emit dataChanged()
+}
+
+void ZkModel::onDirectoryChanged(const QString &path)
+{
+    qDebug() << "directoryChanged" << path;
+    beginResetModel();
+    endResetModel();
+}
+
 
 #include "moc_zkmodel.cpp"

@@ -6,6 +6,7 @@
 
 #include <QAbstractTableModel>
 #include <QDir>
+#include <QFileSystemWatcher>
 #include <QQmlEngine>
 
 class ZkModel : public QAbstractTableModel
@@ -44,9 +45,14 @@ signals:
     void folderChanged();
 
 private:
+    void onDirectoryChanged(const QString &path);
+    void onFileChanged(const QString &path);
+
+private:
     // QHash<int, QByteArray> m_roles;
     QUrl m_folder;
     QDir m_dir;
+    QFileSystemWatcher m_watcher;
 };
 
 #endif // ZKMODEL_H

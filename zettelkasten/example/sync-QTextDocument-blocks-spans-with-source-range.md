@@ -1,8 +1,8 @@
 ---
 birth: 2024-01-09T20:04:55.675-07:00
 position:
-  x: 49408.464957458869
-  y: 49622.842785730696
+  x: 49974.586051208869
+  y: 49790.924816980696
 ---
 <https://bugreports.qt.io/browse/QTCREATORBUG-29756> asks for the ability to
 sync scrolling in a 

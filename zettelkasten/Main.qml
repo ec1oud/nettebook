@@ -243,6 +243,14 @@ Window {
     }
 
     Shortcut {
+        sequence: StandardKey.Save
+        onActivated: {
+            for (var i = 0; i < peter.count; ++i)
+                peter.itemAt(i).save()
+        }
+    }
+
+    Shortcut {
         sequence: "Ctrl+Alt+A" // Arrange
         onActivated: {
             for (var i = 0; i < peter.count; ++i) {

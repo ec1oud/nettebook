@@ -1,8 +1,8 @@
 ---
 birth: ""
 position:
-  x: 48636.959001821218
-  y: 49124.968135932155
+  x: 49364.719466697519
+  y: 49478.545077783259
 ---
 An old way of organizing and linking small notes together, which has gotten
 trendy lately.  Some links:

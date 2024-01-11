@@ -1,8 +1,8 @@
 ---
 birth: 2024-01-09T19:58:17.325-07:00
 position:
-  x: 49513.210898697325
-  y: 49242.61237350903
+  x: 50075.438829971317
+  y: 49531.337520929766
 ---
 It should be possible to link to [specific parts of](file:example/something new
 from Obsidian.md#write_some_text) documents, in general.  At least linking to

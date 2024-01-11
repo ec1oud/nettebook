@@ -185,6 +185,11 @@ Window {
         WheelHandler {
             property: "scale"
         }
+
+        PinchHandler {
+            minimumRotation: 0
+            maximumRotation: 1
+        }
     }
 
 

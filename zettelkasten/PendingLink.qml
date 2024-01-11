@@ -9,14 +9,16 @@ DropArea {
     width: Math.max(icon.implicitWidth, 16)
     height: Math.max(icon.implicitHeight, 16)
 
-    onEntered: (ev) => { console.log("entered", ev, ev.text, ev.urls, "from", root.drag.source) }
+    onEntered: (ev) => { console.log("entered with", ev.urls) }
     onDropped:
         (ev) => {
-            console.log("dropped", ev, ev.text, ev.urls, "from", root.drag.source, root.drag.source.textDocument,
-                        "onto", root.linkUrl, "in", root.textEdit.textDocument)
+            console.log("dropped", ev.urls, "from", root.drag.source.textDocument.source,
+                        "onto", root.linkUrl, "in", root.textEdit.textDocument.source)
 
-            Utils.insertLink(root.drag.source.textDocument, root.linkUrl,
-                             root.textEdit.textDocument, ev.urls[0])
+            root.drag.source.cursorSelection.linkTo(root.linkUrl)
+            root.drag.source.textDocument.save()
+            root.textEdit.cursorSelection.linkTo(ev.urls[0])
+            root.textEdit.textDocument.save()
         }
 
     Rectangle {

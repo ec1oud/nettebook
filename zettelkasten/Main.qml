@@ -133,7 +133,6 @@ Window {
                         // textFormat: TextEdit.MarkdownText
                         wrapMode: TextEdit.WordWrap
                         onLinkActivated: (link) => Qt.openUrlExternally(link) // TODO navigate internal links
-                        property var lastSelection: []
                         onActiveFocusChanged:
                             if (!activeFocus && textDocument.modified) {
                                 yaml.saveToDocument()
@@ -186,11 +185,8 @@ Window {
                 var ctxEdit = ctxItem?.edit
                 // surfaceWindow.contentItem.dumpItemTree()
                 console.log(text, "context menu on", ctxItem, ctxEdit)
-                if (text === "🔗" && ctxEdit !== undefined) {
-                    ctxEdit.lastSelection = [ctxEdit.selectionStart, ctxEdit.selectedText, ctxEdit.selectionEnd]
+                if (text === "🔗" && ctxEdit !== undefined)
                     ctxItem.addPendingLink()
-                    console.log("linky", ctxEdit.lastSelection)
-                }
             }
     }
 

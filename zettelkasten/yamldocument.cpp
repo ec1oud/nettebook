@@ -4,6 +4,7 @@
 #include "yamldocument.h"
 
 #include <QDebug>
+#include <QFileInfo>
 #include <QLoggingCategory>
 #include <QTextDocument>
 
@@ -51,7 +52,8 @@ void YamlDocument::parse()
 {
     static QString yaml;
     QString yfm = m_document->textDocument()->metaInformation(QTextDocument::FrontMatter);
-    if (yfm != yaml) {
+    bool changeValid = yfm != yaml && !yfm.isEmpty();
+    if (changeValid) {
         YAML::Node meta = YAML::Load(yfm.toStdString());
         if (meta["birth"]) {
             QString bds = QString::fromStdString(meta["birth"].as<std::string>());
@@ -66,6 +68,16 @@ void YamlDocument::parse()
         }
         yaml = yfm;
     }
+    if (m_birth.isNull()) {
+        QFileInfo fi(m_source.fileName());
+        QDateTime fdt = QDateTime::fromString(fi.baseName(), Qt::ISODateWithMs);
+        if (fdt.isValid()) {
+            m_birth = fdt;
+            qCDebug(lcYml) << m_source.fileName() << "birth from filename" << m_birth;
+        }
+    }
+    if (changeValid)
+        emit parsed();
 }
 
 void YamlDocument::saveToDocument()

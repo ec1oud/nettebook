@@ -106,6 +106,17 @@ void ZkModel::rename(const QUrl &filename, const QString &newTitle)
     QFile::rename(old.absoluteFilePath(), fi.absoluteFilePath());
 }
 
+QString ZkModel::makeNew()
+{
+    QDateTime now = QDateTime::currentDateTime();
+    QString name = now.toString(Qt::ISODateWithMs) + ".md";
+    QFile f(m_dir.filePath(name));
+    qDebug() << ">>> new" << f.fileName();
+    f.open(QIODevice::WriteOnly | QIODevice::NewOnly); // touch it
+    f.close();
+    return f.fileName();
+}
+
 void ZkModel::onFileChanged(const QString &path)
 {
     qDebug() << "fileChanged" << path;
@@ -118,6 +129,5 @@ void ZkModel::onDirectoryChanged(const QString &path)
     beginResetModel();
     endResetModel();
 }
-
 
 #include "moc_zkmodel.cpp"

@@ -15,6 +15,7 @@ class YamlDocument : public QObject
     Q_PROPERTY(QUrl source READ source WRITE setSource NOTIFY sourceChanged FINAL)
     Q_PROPERTY(QDateTime birth READ birth WRITE setBirth NOTIFY birthChanged FINAL)
     Q_PROPERTY(QPointF position READ position WRITE setPosition NOTIFY positionChanged FINAL)
+    Q_PROPERTY(bool positionSet READ isPositionSet NOTIFY positionChanged FINAL)
     QML_ELEMENT
 
 public:
@@ -33,8 +34,10 @@ public:
 
     QPointF position() const;
     void setPosition(QPointF newPosition);
+    bool isPositionSet() const { return !m_position.isNull(); }
 
 signals:
+    void parsed();
     void sourceChanged();
     void documentChanged();
     void birthChanged();

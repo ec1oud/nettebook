@@ -36,6 +36,7 @@ Window {
                 required property url fileUrl
                 required property string title
                 property alias edit: edit
+                property alias yaml: yaml
                 id: notepage
                 objectName: "frame: " + fileName
                 color: "lightyellow"
@@ -60,6 +61,17 @@ Window {
                     edit.textDocument.save()
                 }
 
+                function setRandomPosition() {
+                    console.log(notepage.fileName, notepage.x, notepage.y, "getting randomized")
+                    notepage.x = Math.random() * (surfaceWindow.width - notepage.width) / 2 + (surface.width - surfaceWindow.width) / 2
+                    notepage.y = Math.random() * (surfaceWindow.height - notepage.height) / 2 + (surface.height - surfaceWindow.height) / 2
+                }
+
+                DragHandler {
+                    enabled: !flick.visible
+                    onActiveChanged: if (active) notepage.z = ++surface.highestZ
+                }
+
                 Rectangle {
                     id: ribbon
                     x: 1; y: 1
@@ -77,7 +89,7 @@ Window {
                         id: title
                         text: notepage.title
                         font.pointSize: 10 / Math.min(1, surface.scale * 1.5)
-                        x: 3; width: parent.width - 5
+                        x: 3
                         anchors.bottom: parent.bottom
                         font.bold: true
                         onAccepted: folderModel.rename(fileUrl, title.text)
@@ -130,6 +142,7 @@ Window {
                     contentWidth: edit.contentWidth
                     contentHeight: edit.contentHeight
                     clip: true
+                    visible: surface.scale > 0.25
 
                     function ensureVisible(r) {
                         if (contentX >= r.x)
@@ -144,7 +157,6 @@ Window {
 
                     TextEdit {
                         id: edit
-                        visible: surface.scale > 0.25
                         width: flick.width
                         textDocument.source: notepage.fileUrl
                         textDocument.onError: (message) => toastMessage.text += message + "\n"
@@ -161,6 +173,10 @@ Window {
                     id: yaml
                     document: edit.textDocument
                     source: notepage.fileUrl
+                    onParsed: {
+                        if (!positionSet)
+                            notepage.setRandomPosition()
+                    }
                 }
 
                 Rectangle {
@@ -244,6 +260,11 @@ Window {
     }
 
     Shortcut {
+        sequence: StandardKey.New
+        onActivated: folderModel.makeNew()
+    }
+
+    Shortcut {
         sequence: StandardKey.Save
         onActivated: {
             for (var i = 0; i < peter.count; ++i)
@@ -254,11 +275,8 @@ Window {
     Shortcut {
         sequence: "Ctrl+Alt+A" // Arrange
         onActivated: {
-            for (var i = 0; i < peter.count; ++i) {
-                var note = peter.itemAt(i)
-                note.x = Math.random() * (surfaceWindow.width - note.width) / 2 + (surface.width - surfaceWindow.width) / 2
-                note.y = Math.random() * (surfaceWindow.height - note.height) / 2 + (surface.height - surfaceWindow.height) / 2
-            }
+            for (var i = 0; i < peter.count; ++i)
+                peter.itemAt(i).setRandomPosition()
         }
     }
 }

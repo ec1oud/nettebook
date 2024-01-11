@@ -146,6 +146,7 @@ Window {
                         visible: surface.scale > 0.25
                         width: flick.width
                         textDocument.source: notepage.fileUrl
+                        textDocument.onError: (message) => toastMessage.text += message + "\n"
                         // textFormat: TextEdit.MarkdownText
                         wrapMode: TextEdit.WordWrap
                         onLinkActivated: (link) => Qt.openUrlExternally(link) // TODO navigate internal links
@@ -192,6 +193,30 @@ Window {
         }
     }
 
+    Rectangle {
+        border.color: "tomato"
+        border.width: 2
+        radius: 6
+        color: "#CCFFEEDD"
+        width: toastMessage.implicitWidth + 20
+        height: toastMessage.implicitHeight + 20
+        visible: toastMessage.text !== ""
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        anchors.margins: 10
+
+        Timer {
+            id: hideErrorsTimer
+            interval: 5000
+            onTriggered: toastMessage.text = ""
+        }
+
+        Text {
+            id: toastMessage
+            anchors.centerIn: parent
+            onTextChanged: hideErrorsTimer.start()
+        }
+    }
 
     QuadPieMenu {
         id: pieMenu

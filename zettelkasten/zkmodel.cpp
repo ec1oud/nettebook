@@ -3,6 +3,10 @@
 
 #include "zkmodel.h"
 
+#include <QRegularExpression>
+
+static QRegularExpression SpaceReplacementRE("[_-]");
+
 ZkModel::ZkModel(QObject *parent)
     : QAbstractTableModel(parent) //, m_roles(QAbstractTableModel::roleNames())
 {
@@ -51,7 +55,7 @@ QVariant ZkModel::data(const QModelIndex &index, int role) const
 
     QFileInfo fi = m_dir.entryInfoList(QDir::Files).at(index.row());
 
-    qDebug() << index << fi << QUrl::fromLocalFile(m_dir.filePath(fi.fileName())) << fi.lastModified();
+    qDebug() << index << "role" << roleNames()[role] << fi << QUrl::fromLocalFile(m_dir.filePath(fi.fileName())) << fi.lastModified();
 
     switch (role) {
     case int(Role::Url):
@@ -61,6 +65,8 @@ QVariant ZkModel::data(const QModelIndex &index, int role) const
     case int(Role::FileLastModified): {
         return fi.lastModified();
     }
+    case int(Role::Title):
+        return fi.baseName().replace(SpaceReplacementRE, " ");
     }
 
     return QVariant();

@@ -34,6 +34,7 @@ Window {
                 required property date fileModified
                 required property string fileName
                 required property url fileUrl
+                required property string title
                 property alias edit: edit
                 id: notepage
                 objectName: "frame: " + fileName
@@ -74,7 +75,7 @@ Window {
 
                     Text {
                         id: title
-                        text: notepage.fileName
+                        text: notepage.title
                         font.pointSize: 10 / Math.min(1, surface.scale * 1.5)
                         x: 3; width: parent.width - 5
                         anchors.bottom: parent.bottom

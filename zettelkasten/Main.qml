@@ -17,7 +17,9 @@ Window {
         property int highestZ: 0
 
         id: surface
-        anchors.fill: parent
+        x: (parent.width - width) / 2
+        y: (parent.height - height) / 2
+        width: 100000; height: 100000
         source: "resources/gridsquare.png"
         fillMode: Image.Tile
 
@@ -167,10 +169,14 @@ Window {
                 }
 
                 Component.onCompleted: {
-                    x = Math.random() * (surfaceWindow.width - width) / 2
-                    y = Math.random() * (surfaceWindow.height - height) / 2
+                    x = Math.random() * (surfaceWindow.width - width) / 2 + (surface.width - surfaceWindow.width) / 2
+                    y = Math.random() * (surfaceWindow.height - height) / 2 + (surface.height - surfaceWindow.height) / 2
                 }
             }
+        } // Repeater
+
+        WheelHandler {
+            property: "scale"
         }
     }
 
@@ -180,7 +186,7 @@ Window {
         labels: [ "", "🔗", "", "" ]
         onTriggered:
             (text) => {
-                const p = pieMenu.point.scenePosition
+                const p = surface.mapFromItem(pieMenu.parent, pieMenu.point.position)
                 const ctxItem = surface.childAt(p.x, p.y)
                 var ctxEdit = ctxItem?.edit
                 // surfaceWindow.contentItem.dumpItemTree()

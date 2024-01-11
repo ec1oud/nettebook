@@ -59,6 +59,11 @@ void YamlDocument::parse()
             qCDebug(lcYml) << m_source.fileName() << "birth" << bds << m_birth;
             emit birthChanged();
         }
+        if (meta["position"]) {
+            auto map = meta["position"].as<std::map<std::string, double>>();
+            qCDebug(lcYml) << m_source.fileName() << "pos" << map;
+            setPosition(QPointF(map["x"], map["y"]));
+        }
         yaml = yfm;
     }
 }
@@ -67,6 +72,10 @@ void YamlDocument::saveToDocument()
 {
     YAML::Node meta;
     meta["birth"] = m_birth.toString(Qt::ISODateWithMs).toStdString();
+    YAML::Node pos;
+    pos["x"] = m_position.x();
+    pos["y"] = m_position.y();
+    meta["position"] = pos;
     std::stringstream ss;
     ss << "---" << std::endl;
     ss << meta << std::endl;
@@ -86,6 +95,19 @@ void YamlDocument::setBirth(const QDateTime &newBirth)
         return;
     m_birth = newBirth;
     emit birthChanged();
+}
+
+QPointF YamlDocument::position() const
+{
+    return m_position;
+}
+
+void YamlDocument::setPosition(QPointF newPosition)
+{
+    if (m_position == newPosition)
+        return;
+    m_position = newPosition;
+    emit positionChanged();
 }
 
 #include "moc_yamldocument.cpp"

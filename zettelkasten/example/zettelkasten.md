@@ -1,3 +1,9 @@
+---
+birth: ""
+position:
+  x: 48636.959001821218
+  y: 49124.968135932155
+---
 An old way of organizing and linking small notes together, which has gotten
 trendy lately.  Some links:
 

@@ -1,14 +1,15 @@
 ---
-birth: !timestamp '2024-01-09T19:53:12.834720246-0700'
+birth: 2024-01-09T19:53:12.835-07:00
+position:
+  x: 49898.645463818386
+  y: 49301.184622189961
 ---
-
-[https://bugreports.qt.io/browse/QTBUG-76105](https://bugreports.qt.io/browse/QTBUG-76105)
+<https://bugreports.qt.io/browse/QTBUG-76105>
 
 What's left is QMimeData::markdown() and setMarkdown()
 
-
-[https://codereview.qt-project.org/c/qt/qtbase/+/417465](https://codereview.qt-project.org/c/qt/qtbase/+/417465)
-Volker raises questions about standardization on 2022-07-15:
+<https://codereview.qt-project.org/c/qt/qtbase/+/417465> Volker raises
+questions about standardization on 2022-07-15:
 
 > Following up on the previous discussion: formats that QMimeData supports
 > should at least be useful within a Qt application. For widgets, that seems to
@@ -21,14 +22,15 @@ Volker raises questions about standardization on 2022-07-15:
 > And ideally they also improve interoperability with other applications. Do
 > other applications produce or consume or produce markdown?
 
-> FWIW, 
-> [https://www.rfc-editor.org/rfc/rfc7763](https://www.rfc-editor.org/rfc/rfc7763)
-> states that
+> FWIW, <https://www.rfc-editor.org/rfc/rfc7763> states that
 
-> - charset is required (also see 
->   [https://www.rfc-editor.org/rfc/rfc6838#section-4.2.1)](https://www.rfc-editor.org/rfc/rfc6838#section-4.2.1)
->   ) , so we should set it and parse it
-> - variant is optional
+- > charset is required (also see
+
+> 
+> [https://www.rfc-editor.org/rfc/rfc6838#section-4.2.1)](https://www.rfc-editor.org/rfc/rfc6838#section-4.2.1)
+> ) , so we should set it and parse it
+
+- > variant is optional
 
 > But perhaps 'variant' is something we should specify when we produce the
 > payload, and interpret if we receive a payload with a variant (or a charset)?

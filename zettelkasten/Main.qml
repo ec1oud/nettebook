@@ -24,6 +24,7 @@ Window {
         fillMode: Image.Tile
 
         Repeater {
+            id: peter
             model: FolderListModel {
                 id: folderModel
                 folder: "file:example"
@@ -39,6 +40,10 @@ Window {
                 objectName: "frame: " + fileName
                 color: "lightyellow"
                 width: Math.max(320, title.implicitWidth); height: 240
+                x: yaml.position.x
+                y: yaml.position.y
+                onXChanged: yaml.position.x = x
+                onYChanged: yaml.position.y = y
 
                 function addPendingLink() {
                     var component = Qt.createComponent("PendingLink.qml");
@@ -48,6 +53,11 @@ Window {
                                                                               edit.selectedText),
                                                textEdit: edit
                                            })
+                }
+
+                function save() {
+                    yaml.saveToDocument()
+                    edit.textDocument.save()
                 }
 
                 Rectangle {
@@ -67,8 +77,6 @@ Window {
                         id: title
                         text: notepage.fileName
                         font.pointSize: 10 / Math.min(1, surface.scale * 1.5)
-                        style: Text.Outline
-                        styleColor: ribbon.color
                         x: 3; width: parent.width - 5
                         anchors.bottom: parent.bottom
                         font.bold: true
@@ -142,10 +150,8 @@ Window {
                         wrapMode: TextEdit.WordWrap
                         onLinkActivated: (link) => Qt.openUrlExternally(link) // TODO navigate internal links
                         onActiveFocusChanged:
-                            if (!activeFocus && textDocument.modified) {
-                                yaml.saveToDocument()
-                                textDocument.save()
-                            }
+                            if (!activeFocus && textDocument.modified)
+                                notepage.save()
                     }
                 }
 
@@ -173,11 +179,6 @@ Window {
                         text: edit.hoveredLink
                     }
                 }
-
-                Component.onCompleted: {
-                    x = Math.random() * (surfaceWindow.width - width) / 2 + (surface.width - surfaceWindow.width) / 2
-                    y = Math.random() * (surfaceWindow.height - height) / 2 + (surface.height - surfaceWindow.height) / 2
-                }
             }
         } // Repeater
 
@@ -202,5 +203,23 @@ Window {
             }
     }
 
-    Shortcut { sequence: StandardKey.Quit; onActivated: Qt.quit() }
+    Shortcut {
+        sequence: StandardKey.Quit
+        onActivated: {
+            for (var i = 0; i < peter.count; ++i)
+                peter.itemAt(i).save()
+            Qt.quit()
+        }
+    }
+
+    Shortcut {
+        sequence: "Ctrl+Alt+A" // Arrange
+        onActivated: {
+            for (var i = 0; i < peter.count; ++i) {
+                var note = peter.itemAt(i)
+                note.x = Math.random() * (surfaceWindow.width - note.width) / 2 + (surface.width - surfaceWindow.width) / 2
+                note.y = Math.random() * (surfaceWindow.height - note.height) / 2 + (surface.height - surfaceWindow.height) / 2
+            }
+        }
+    }
 }

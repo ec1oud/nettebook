@@ -73,13 +73,14 @@ Window {
                         onActiveChanged: if (active) notepage.z = ++surface.highestZ
                     }
 
-                    Text {
+                    TextInput {
                         id: title
                         text: notepage.title
                         font.pointSize: 10 / Math.min(1, surface.scale * 1.5)
                         x: 3; width: parent.width - 5
                         anchors.bottom: parent.bottom
                         font.bold: true
+                        onAccepted: folderModel.rename(fileUrl, title.text)
                     }
 
                     Row {

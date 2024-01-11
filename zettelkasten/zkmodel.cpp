@@ -6,6 +6,7 @@
 #include <QRegularExpression>
 
 static QRegularExpression SpaceReplacementRE("[_-]");
+static QRegularExpression SpaceRE("\\s+");
 
 ZkModel::ZkModel(QObject *parent)
     : QAbstractTableModel(parent) //, m_roles(QAbstractTableModel::roleNames())
@@ -88,6 +89,21 @@ void ZkModel::setFolder(const QUrl &newFolder)
     qDebug() << Q_FUNC_INFO << QDir::currentPath() << newFolder << newFolder.toLocalFile() << m_dir.absolutePath();
     qDebug() << "found" << rowCount();
     emit folderChanged();
+}
+
+void ZkModel::rename(const QUrl &filename, const QString &newTitle)
+{
+    QString newFilename = newTitle.trimmed();
+    newFilename.replace(SpaceRE, "-"); // kebab case
+    QFileInfo old(filename.toLocalFile());
+    if (!old.exists()) {
+        qWarning() << "can't find" << old;
+        return;
+    }
+    newFilename += "." + old.suffix();
+    QFileInfo fi(m_dir, newFilename);
+    qDebug() << "rename" << old.absoluteFilePath() << fi.absoluteFilePath();
+    QFile::rename(old.absoluteFilePath(), fi.absoluteFilePath());
 }
 
 void ZkModel::onFileChanged(const QString &path)

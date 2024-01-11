@@ -41,6 +41,8 @@ public:
     QUrl folder() const;
     void setFolder(const QUrl &newFolder);
 
+    Q_INVOKABLE void rename(const QUrl &filename, const QString &newTitle);
+
 signals:
     void folderChanged();
 

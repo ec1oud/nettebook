@@ -24,12 +24,22 @@ Window {
         source: "resources/gridsquare.png"
         fillMode: Image.Tile
 
+        ZkModel {
+            id: folderModel
+            folder: "file:example"
+            documentProvider: (index) => { return peter.itemAt(index)?.edit?.textDocument; }
+            watcherEnabled: false // UI is too crash-prone for now
+        }
+
         Repeater {
             id: peter
-            model: ZkModel {
-                id: folderModel
-                folder: "file:example"
-                documentProvider: (index) => { return peter.itemAt(index)?.edit?.textDocument; }
+            model: folderModel
+
+            function saveAndReload() {
+                for (var i = 0; i < peter.count; ++i)
+                    peter.itemAt(i).save()
+                peter.model = null
+                peter.model = folderModel
             }
 
             delegate: Rectangle {
@@ -109,11 +119,7 @@ Window {
 
                 DragHandler {
                     enabled: !flick.visible
-                    onActiveChanged:
-                        if (active) {
-                            folderModel.watcherEnabled = true // workaround for crash: delay model reset a while
-                            notepage.z = ++surface.highestZ
-                        }
+                    onActiveChanged: if (active) notepage.z = ++surface.highestZ
                 }
 
                 Rectangle {
@@ -313,16 +319,15 @@ Window {
 
     Shortcut {
         sequence: StandardKey.New
-        onActivated: folderModel.makeNew()
+        onActivated: {
+            folderModel.makeNew()
+            peter.saveAndReload()
+        }
     }
 
     Shortcut {
         sequence: StandardKey.Save
-        onActivated: {
-            folderModel.watcherEnabled = false // workaround for crash: delay model reset a while
-            for (var i = 0; i < peter.count; ++i)
-                peter.itemAt(i).save()
-        }
+        onActivated: peter.saveAndReload()
     }
 
     Shortcut {

@@ -109,7 +109,11 @@ Window {
 
                 DragHandler {
                     enabled: !flick.visible
-                    onActiveChanged: if (active) notepage.z = ++surface.highestZ
+                    onActiveChanged:
+                        if (active) {
+                            folderModel.watcherEnabled = true // workaround for crash: delay model reset a while
+                            notepage.z = ++surface.highestZ
+                        }
                 }
 
                 Rectangle {
@@ -315,6 +319,7 @@ Window {
     Shortcut {
         sequence: StandardKey.Save
         onActivated: {
+            folderModel.watcherEnabled = false // workaround for crash: delay model reset a while
             for (var i = 0; i < peter.count; ++i)
                 peter.itemAt(i).save()
         }

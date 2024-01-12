@@ -99,6 +99,24 @@ void ZkModel::setFolder(const QUrl &newFolder)
     emit folderChanged();
 }
 
+bool ZkModel::watcherEnabled() const
+{
+    return m_watcherEnabled;
+}
+
+void ZkModel::setWatcherEnabled(bool newWatcherEnabled)
+{
+    if (m_watcherEnabled == newWatcherEnabled)
+        return;
+    m_watcherEnabled = newWatcherEnabled;
+    emit watcherEnabledChanged();
+    if (m_watcherMissedReset) {
+        m_watcherMissedReset = false;
+        beginResetModel();
+        endResetModel();
+    }
+}
+
 void ZkModel::rename(const QUrl &filename, const QString &newTitle)
 {
     QString newFilename = newTitle.trimmed();
@@ -123,12 +141,6 @@ QString ZkModel::makeNew()
     f.open(QIODevice::WriteOnly | QIODevice::NewOnly); // touch it
     f.close();
     return f.fileName();
-}
-
-void ZkModel::onFileChanged(const QString &path)
-{
-    qDebug() << "fileChanged" << path;
-    // TODO look up which row that applies to and emit dataChanged()
 }
 
 QQuickTextDocument *ZkModel::getDocument(int row)
@@ -184,11 +196,21 @@ void ZkModel::setDocumentProvider(const QJSValue &newDocumentProvider)
     emit documentProviderChanged();
 }
 
+void ZkModel::onFileChanged(const QString &path)
+{
+    qCDebug(lcZkm) << "fileChanged" << path;
+    // TODO look up which row that applies to and emit dataChanged()
+}
+
 void ZkModel::onDirectoryChanged(const QString &path)
 {
-    qDebug() << "directoryChanged" << path;
-    beginResetModel();
-    endResetModel();
+    qCDebug(lcZkm) << "directoryChanged" << path;
+    if (m_watcherEnabled) {
+        beginResetModel();
+        endResetModel();
+    } else {
+        m_watcherMissedReset = true;
+    }
 }
 
 #include "moc_zkmodel.cpp"

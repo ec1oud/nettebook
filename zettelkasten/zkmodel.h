@@ -16,6 +16,7 @@ class ZkModel : public QAbstractTableModel
     Q_OBJECT
     Q_PROPERTY(QUrl folder READ folder WRITE setFolder NOTIFY folderChanged FINAL)
     Q_PROPERTY(QJSValue documentProvider READ documentProvider WRITE setDocumentProvider NOTIFY documentProviderChanged FINAL)
+    Q_PROPERTY(bool watcherEnabled READ watcherEnabled WRITE setWatcherEnabled NOTIFY watcherEnabledChanged FINAL)
     QML_ELEMENT
 
 public:
@@ -51,9 +52,14 @@ public:
     Q_INVOKABLE QString makeNew();
     Q_INVOKABLE QList<int> getLinkedIndices(int row) const;
 
+    bool watcherEnabled() const;
+    void setWatcherEnabled(bool newWatcherEnabled);
+
 signals:
     void folderChanged();
     void documentProviderChanged();
+
+    void watcherEnabledChanged();
 
 private:
     void onDirectoryChanged(const QString &path);
@@ -66,6 +72,8 @@ private:
     QDir m_dir;
     QFileSystemWatcher m_watcher;
     QJSValue m_documentProvider;
+    bool m_watcherEnabled = true;
+    bool m_watcherMissedReset = false;
 };
 
 #endif // ZKMODEL_H

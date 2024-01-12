@@ -288,15 +288,24 @@ Flipable {
             }
 
         }
-        Text {
-            anchors.top: parent.bottom
-            anchors.left: parent.right
-            anchors.margins: 4
-            text: "✎"
-            font.pointSize: 18
-            color: "white"
-            TapHandler {
-                onTapped: notepage.flipped = false
+        Rectangle {
+            color: "#333"
+            border.color: "black"
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
+            anchors.margins: 1
+            width: flipBackIcon.implicitHeight + 4
+            height: width
+            topLeftRadius: 8
+            Text {
+                id: flipBackIcon
+                anchors.centerIn: parent
+                text: "✎"
+                font.pointSize: 18
+                color: "lightgreen"
+                TapHandler {
+                    onTapped: notepage.flipped = false
+                }
             }
         }
     } // back

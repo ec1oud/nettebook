@@ -42,6 +42,11 @@ Window {
                 peter.model = folderModel
             }
 
+            function reload() {
+                peter.model = null
+                peter.model = folderModel
+            }
+
             delegate: Rectangle {
                 required property int index
                 required property date fileModified
@@ -68,6 +73,11 @@ Window {
                                                                               edit.selectedText),
                                                textEdit: edit
                                            })
+                }
+
+                function remove() {
+                    folderModel.deleteFile(fileUrl)
+                    peter.reload()
                 }
 
                 function save() {
@@ -295,16 +305,17 @@ Window {
 
     QuadPieMenu {
         id: pieMenu
-        labels: [ "", "🔗", "", "" ]
+        labels: [ "", "🔗", "🗑️", "" ]
         onTriggered:
             (text) => {
                 const p = surface.mapFromItem(pieMenu.parent, pieMenu.point.position)
                 const ctxItem = surface.childAt(p.x, p.y)
-                var ctxEdit = ctxItem?.edit
                 // surfaceWindow.contentItem.dumpItemTree()
-                console.log(text, "context menu on", ctxItem, ctxEdit)
-                if (text === "🔗" && ctxEdit !== undefined)
+                console.log(text, "context menu on", ctxItem)
+                if (text === "🔗")
                     ctxItem.addPendingLink()
+                else if (text === "🗑️")
+                    ctxItem.remove()
             }
     }
 

@@ -48,6 +48,7 @@ public:
     QJSValue documentProvider() const;
     void setDocumentProvider(const QJSValue &newDocumentProvider);
 
+    Q_INVOKABLE void deleteFile(const QUrl &filename);
     Q_INVOKABLE void rename(const QUrl &filename, const QString &newTitle);
     Q_INVOKABLE QString makeNew();
     Q_INVOKABLE QList<int> getLinkedIndices(int row) const;

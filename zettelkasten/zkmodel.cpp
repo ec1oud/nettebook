@@ -117,6 +117,17 @@ void ZkModel::setWatcherEnabled(bool newWatcherEnabled)
     }
 }
 
+void ZkModel::deleteFile(const QUrl &filename)
+{
+    QFileInfo fi(filename.toLocalFile());
+    if (!fi.exists()) {
+        qWarning() << "can't find" << fi;
+        return;
+    }
+    QFile f(fi.absoluteFilePath());
+    f.remove();
+}
+
 void ZkModel::rename(const QUrl &filename, const QString &newTitle)
 {
     QString newFilename = newTitle.trimmed();

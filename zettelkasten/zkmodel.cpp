@@ -61,7 +61,7 @@ QVariant ZkModel::data(const QModelIndex &index, int role) const
 
     QFileInfo fi = m_dir.entryInfoList(QDir::Files).at(index.row());
 
-    qCDebug(lcZkm) << index << "role" << roleNames()[role] << fi << QUrl::fromLocalFile(m_dir.filePath(fi.fileName())) << fi.lastModified();
+    // qCDebug(lcZkm) << index << "role" << roleNames()[role] << fi << QUrl::fromLocalFile(m_dir.filePath(fi.fileName())) << fi.lastModified();
 
     switch (role) {
     case int(Role::Url):

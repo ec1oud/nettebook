@@ -9,5 +9,6 @@ So far I've focused on wysiwyg; but some people like seeing
 .  (In fact `QTextMarkdownWriter` still has enough bugs that I have to do some
 kinds of editing operations in non-Qt applications.)
 
-I'll try to have a flip-over view of markdown syntax in this zettelkasten.
+There's a flip-over view of raw markdown syntax in this zettelkasten, with
+independent documents loading the same files.
 

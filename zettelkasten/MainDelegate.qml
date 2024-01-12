@@ -6,7 +6,7 @@ import QtQuick.Shapes
 import Qt.labs.folderlistmodel
 import org.nettebook.zettelkasten
 
-Rectangle {
+Flipable {
     required property int index
     required property date fileModified
     required property string fileName
@@ -17,7 +17,6 @@ Rectangle {
     property point position: Qt.point(x, y)
     id: notepage
     objectName: "frame: " + fileName
-    color: "lightyellow"
     width: Math.max(360, title.implicitWidth); height: 240
     x: yaml.position.x
     y: yaml.position.y
@@ -40,8 +39,12 @@ Rectangle {
     }
 
     function save() {
-        yaml.saveToDocument()
-        edit.textDocument.save()
+        if (flipped) {
+            sourceEdit.textDocument.save()
+        } else {
+            yaml.saveToDocument()
+            edit.textDocument.save()
+        }
     }
 
     function setRandomPosition() {
@@ -50,178 +53,271 @@ Rectangle {
         notepage.y = Math.random() * (surfaceWindow.height - notepage.height) / 2 + (surface.height - surfaceWindow.height) / 2
     }
 
-    property list<int> linkedIndices: folderModel.getLinkedIndices(index)
+    front: Rectangle {
+        anchors.fill: parent
+        color: "lightyellow"
 
-    Repeater {
-        model: notepage.linkedIndices
+        property list<int> linkedIndices: folderModel.getLinkedIndices(index)
 
-        delegate: Shape {
-            required property int modelData     // index in folderModel
-            property Item otherPage: peter.itemAt(modelData)
-            property point otherPos: visible ? surface.mapToItem(notepage, otherPage.position) : startPoint
-            property bool otherBelow: otherPos.y > notepage.height / 2
-            property point startPoint: Qt.point(notepage.width / 2, notepage.height / 2)
-            property point endPoint: visible ? Qt.point(otherPos.x + otherPage.width / 2,
-                                                        otherPos.y + otherPage.height / 2) : startPoint
-            id: transpointer
-            opacity: 0.5
-            visible: otherPage
-            z: -1
+        Repeater {
+            model: notepage.linkedIndices
 
-            ShapePath {
-                id: linkPath
-                strokeWidth: ribbon.height
-                strokeColor: "cyan"
-                fillColor: "transparent"
-                startX: transpointer.startPoint.x
-                startY: transpointer.startPoint.y
+            delegate: Shape {
+                required property int modelData     // index in folderModel
+                property Item otherPage: peter.itemAt(modelData)
+                property point otherPos: visible ? surface.mapToItem(notepage, otherPage.position) : startPoint
+                property bool otherBelow: otherPos.y > notepage.height / 2
+                property point startPoint: Qt.point(notepage.width / 2, notepage.height / 2)
+                property point endPoint: visible ? Qt.point(otherPos.x + otherPage.width / 2,
+                                                            otherPos.y + otherPage.height / 2) : startPoint
+                id: transpointer
+                opacity: 0.5
+                visible: otherPage
+                z: -1
 
-                PathQuad {
-                    x: endPoint.x
-                    y: endPoint.y
-                    relativeControlX: (x - linkPath.startX) / 2
-                    relativeControlY: (y - linkPath.startY) / -2
+                ShapePath {
+                    id: linkPath
+                    strokeWidth: ribbon.height
+                    strokeColor: "cyan"
+                    fillColor: "transparent"
+                    startX: transpointer.startPoint.x
+                    startY: transpointer.startPoint.y
+
+                    PathQuad {
+                        x: endPoint.x
+                        y: endPoint.y
+                        relativeControlX: (x - linkPath.startX) / 2
+                        relativeControlY: (y - linkPath.startY) / -2
+                    }
                 }
             }
         }
-    }
-
-    DragHandler {
-        enabled: !flick.visible
-        onActiveChanged: if (active) notepage.z = ++surface.highestZ
-    }
-
-    Rectangle {
-        id: ribbon
-        x: 1; y: 1
-        width: parent.width - 2
-        height: title.implicitHeight + modTime.implicitHeight + 2
-        color: "papayawhip"
-        z: 1
 
         DragHandler {
-            target: notepage
+            enabled: !flick.visible
             onActiveChanged: if (active) notepage.z = ++surface.highestZ
         }
 
-        TextInput {
-            id: title
-            text: notepage.title
-            font.pointSize: 10 / Math.min(1, surface.scale * 1.5)
-            x: 3
-            anchors.bottom: parent.bottom
-            font.bold: true
-            onAccepted: folderModel.rename(fileUrl, title.text)
+        Rectangle {
+            id: ribbon
+            x: 1; y: 1
+            width: parent.width - 2
+            height: title.implicitHeight + modTime.implicitHeight + 2
+            color: "papayawhip"
+            z: 1
+
+            DragHandler {
+                target: notepage
+                onActiveChanged: if (active) notepage.z = ++surface.highestZ
+            }
+
+            TextInput {
+                id: title
+                text: notepage.title
+                font.pointSize: 10 / Math.min(1, surface.scale * 1.5)
+                x: 3
+                anchors.bottom: parent.bottom
+                font.bold: true
+                onAccepted: folderModel.rename(fileUrl, title.text)
+            }
+
+            Row {
+                id: ribbonRightRow
+                anchors.right: parent.right
+                anchors.bottom: parent.bottom
+                anchors.margins: 1
+            }
+
+            Text {
+                id: modTime
+                text: Qt.formatDateTime(notepage.fileModified, Locale.LongFormat)
+                font.pointSize: 7
+                anchors.top: parent.top
+                anchors.right: parent.right
+                anchors.margins: 3
+                visible: surface.scale > 0.7
+            }
+
+            Text {
+                id: birthTime
+                text: Qt.formatDateTime(yaml.birth, Locale.LongFormat)
+                font.pointSize: 7
+                anchors.top: parent.top
+                anchors.left: parent.left
+                anchors.margins: 3
+                visible: surface.scale > 0.7
+            }
+
+            Text {
+                anchors.bottom: parent.bottom
+                anchors.right: parent.right
+                font.pointSize: 7
+                textFormat: Text.MarkdownText
+                text: "**" + index + "**: links to " + notepage.linkedIndices
+            }
         }
 
-        Row {
-            id: ribbonRightRow
-            anchors.right: parent.right
-            anchors.bottom: parent.bottom
+        Rectangle {
+            id: focusRect
+            z: 2
+            anchors.fill: parent
             anchors.margins: 1
+            color: "transparent"
+            border.color: "saddlebrown"
+            border.width: 2
+            visible: edit.activeFocus
         }
 
-        Text {
-            id: modTime
-            text: Qt.formatDateTime(notepage.fileModified, Locale.LongFormat)
-            font.pointSize: 7
-            anchors.top: parent.top
+        Flickable {
+            id: flick
+            anchors.fill: parent
+            anchors.margins: 5
+            anchors.topMargin: ribbon.height
+            contentWidth: edit.contentWidth
+            contentHeight: edit.contentHeight
+            clip: true
+            visible: surface.scale > 0.25
+
+            function ensureVisible(r) {
+                if (contentX >= r.x)
+                    contentX = r.x;
+                else if (contentX+width <= r.x+r.width)
+                    contentX = r.x+r.width-width;
+                if (contentY >= r.y)
+                    contentY = r.y;
+                else if (contentY+height <= r.y+r.height)
+                    contentY = r.y+r.height-height;
+            }
+
+            TextEdit {
+                id: edit
+                width: flick.width
+                // textDocument.source: notepage.fileUrl // racy
+                textDocument.onError: (message) => toastMessage.text += message + "\n"
+                textFormat: TextEdit.MarkdownText
+                wrapMode: TextEdit.WordWrap
+                onCursorRectangleChanged: flick.ensureVisible(cursorRectangle)
+                onLinkActivated: (link) => Qt.openUrlExternally(link) // TODO navigate internal links
+                onActiveFocusChanged:
+                    if (!activeFocus && textDocument.modified)
+                        notepage.save()
+                Component.onCompleted: edit.textDocument.source = notepage.fileUrl // workaround for QTBUG-120772
+            }
+        }
+
+        YamlDocument {
+            id: yaml
+            document: edit.textDocument
+            source: notepage.fileUrl
+            onParsed: {
+                if (!positionSet)
+                    notepage.setRandomPosition()
+            }
+        }
+
+        Rectangle {
+            id: brTip
+            color: "#88FFFFFF"
+            border.color: "#55220000"
+            anchors.bottom: parent.bottom
             anchors.right: parent.right
-            anchors.margins: 3
-            visible: surface.scale > 0.7
-        }
+            width: brText.implicitWidth + 4
+            height: brText.implicitHeight + 4
+            visible: brText.text.length > 0
 
-        Text {
-            id: birthTime
-            text: Qt.formatDateTime(yaml.birth, Locale.LongFormat)
-            font.pointSize: 7
-            anchors.top: parent.top
-            anchors.left: parent.left
-            anchors.margins: 3
-            visible: surface.scale > 0.7
+            Text {
+                id: brText
+                y: 2
+                anchors.right: parent.right
+                anchors.margins: 2
+                text: edit.hoveredLink
+            }
         }
 
         Text {
             anchors.bottom: parent.bottom
             anchors.right: parent.right
-            font.pointSize: 7
-            textFormat: Text.MarkdownText
-            text: "**" + index + "**: links to " + notepage.linkedIndices
+            anchors.rightMargin: 4
+            text: "⚙"
+            font.pointSize: 18
+            TapHandler {
+                onTapped: notepage.flipped = true
+            }
         }
-    }
+    } // front
 
-    Rectangle {
-        id: focusRect
-        z: 2
+    back: Rectangle {
         anchors.fill: parent
-        anchors.margins: 1
-        color: "transparent"
-        border.color: "saddlebrown"
-        border.width: 2
-        visible: edit.activeFocus
-    }
+        color: "#222"
+        border.color: "lightgreen"
 
-    Flickable {
-        id: flick
-        anchors.fill: parent
-        anchors.margins: 5
-        anchors.topMargin: ribbon.height
-        contentWidth: edit.contentWidth
-        contentHeight: edit.contentHeight
-        clip: true
-        visible: surface.scale > 0.25
+        Flickable {
+            id: sourceFlick
+            anchors.fill: parent
+            anchors.margins: 5
+            contentWidth: sourceEdit.contentWidth
+            contentHeight: sourceEdit.contentHeight
+            clip: true
+            visible: surface.scale > 0.25
 
-        function ensureVisible(r) {
-            if (contentX >= r.x)
-                contentX = r.x;
-            else if (contentX+width <= r.x+r.width)
-                contentX = r.x+r.width-width;
-            if (contentY >= r.y)
-                contentY = r.y;
-            else if (contentY+height <= r.y+r.height)
-                contentY = r.y+r.height-height;
+            function ensureVisible(r) {
+                if (contentX >= r.x)
+                    contentX = r.x;
+                else if (contentX+width <= r.x+r.width)
+                    contentX = r.x+r.width-width;
+                if (contentY >= r.y)
+                    contentY = r.y;
+                else if (contentY+height <= r.y+r.height)
+                    contentY = r.y+r.height-height;
+            }
+
+            TextEdit {
+                id: sourceEdit
+                width: Math.max(flick.width, implicitWidth)
+                height: Math.max(flick.width, implicitHeight)
+                // textDocument.source: notepage.fileUrl // racy
+                textFormat: TextEdit.PlainText
+                font.family: "monospace"
+                color: "white"
+                onCursorRectangleChanged: flick.ensureVisible(cursorRectangle)
+                onActiveFocusChanged:
+                    if (!activeFocus && textDocument.modified)
+                        notepage.save()
+                Component.onCompleted: sourceEdit.textDocument.source = notepage.fileUrl // workaround for QTBUG-120772
+            }
+
         }
-
-        TextEdit {
-            id: edit
-            width: flick.width
-            textDocument.source: notepage.fileUrl
-            textDocument.onError: (message) => toastMessage.text += message + "\n"
-            // textFormat: TextEdit.MarkdownText
-            wrapMode: TextEdit.WordWrap
-            onLinkActivated: (link) => Qt.openUrlExternally(link) // TODO navigate internal links
-            onActiveFocusChanged:
-                if (!activeFocus && textDocument.modified)
-                    notepage.save()
-        }
-    }
-
-    YamlDocument {
-        id: yaml
-        document: edit.textDocument
-        source: notepage.fileUrl
-        onParsed: {
-            if (!positionSet)
-                notepage.setRandomPosition()
-        }
-    }
-
-    Rectangle {
-        id: brTip
-        color: "#88FFFFFF"
-        border.color: "#55220000"
-        anchors.bottom: parent.bottom
-        anchors.right: parent.right
-        width: brText.implicitWidth + 4
-        height: brText.implicitHeight + 4
-        visible: brText.text.length > 0
-
         Text {
-            id: brText
-            y: 2
-            anchors.right: parent.right
-            anchors.margins: 2
-            text: edit.hoveredLink
+            anchors.top: parent.bottom
+            anchors.left: parent.right
+            anchors.margins: 4
+            text: "✎"
+            font.pointSize: 18
+            color: "white"
+            TapHandler {
+                onTapped: notepage.flipped = false
+            }
         }
+    } // back
+
+    property bool flipped: false
+
+    transform: Rotation {
+        id: rotation
+        origin.x: notepage.width / 2
+        origin.y: notepage.height / 2
+        axis.x: 0; axis.y: 1; axis.z: 0     // set axis.y to 1 to rotate around y-axis
+        angle: 0    // the default angle
     }
+
+    states: State {
+        name: "back"
+        PropertyChanges { target: rotation; angle: 180 }
+        when: notepage.flipped
+    }
+
+    transitions: Transition {
+        NumberAnimation { target: rotation; property: "angle"; duration: 500 }
+    }
+
 }

@@ -74,6 +74,7 @@ Flipable {
                 opacity: 0.5
                 visible: otherPage
                 z: -1
+                preferredRendererType: Shape.CurveRenderer
 
                 ShapePath {
                     id: linkPath

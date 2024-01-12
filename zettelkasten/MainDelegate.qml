@@ -192,6 +192,7 @@ Flipable {
             TextEdit {
                 id: edit
                 width: flick.width
+                height: Math.max(flick.height, implicitHeight)
                 // textDocument.source: notepage.fileUrl // racy
                 textDocument.onError: (message) => toastMessage.text += message + "\n"
                 textFormat: TextEdit.MarkdownText
@@ -274,7 +275,7 @@ Flipable {
             TextEdit {
                 id: sourceEdit
                 width: Math.max(flick.width, implicitWidth)
-                height: Math.max(flick.width, implicitHeight)
+                height: Math.max(flick.height, implicitHeight)
                 // textDocument.source: notepage.fileUrl // racy
                 textFormat: TextEdit.PlainText
                 font.family: "monospace"

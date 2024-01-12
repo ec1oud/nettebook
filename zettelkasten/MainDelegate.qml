@@ -54,13 +54,12 @@ Flipable {
     }
 
     front: Rectangle {
+        id: yellowFront
         anchors.fill: parent
         color: "lightyellow"
 
-        property list<int> linkedIndices: folderModel.getLinkedIndices(index)
-
         Repeater {
-            model: notepage.linkedIndices
+            id: linkRepeater
 
             delegate: Shape {
                 required property int modelData     // index in folderModel
@@ -148,14 +147,6 @@ Flipable {
                 anchors.margins: 3
                 visible: surface.scale > 0.7
             }
-
-            Text {
-                anchors.bottom: parent.bottom
-                anchors.right: parent.right
-                font.pointSize: 7
-                textFormat: Text.MarkdownText
-                text: "**" + index + "**: links to " + notepage.linkedIndices
-            }
         }
 
         Rectangle {
@@ -195,6 +186,10 @@ Flipable {
                 width: flick.width
                 height: Math.max(flick.height, implicitHeight)
                 // textDocument.source: notepage.fileUrl // racy
+                textDocument.onModifiedChanged:
+                    if (!textDocument.modified) { // loading is done
+                        linkRepeater.model = folderModel.getLinkedIndices(notepage.index)
+                    }
                 textDocument.onError: (message) => toastMessage.text += message + "\n"
                 textFormat: TextEdit.MarkdownText
                 wrapMode: TextEdit.WordWrap
@@ -203,7 +198,10 @@ Flipable {
                 onActiveFocusChanged:
                     if (!activeFocus && textDocument.modified)
                         notepage.save()
-                Component.onCompleted: edit.textDocument.source = notepage.fileUrl // workaround for QTBUG-120772
+                Component.onCompleted: {
+                    linkRepeater.model = null
+                    edit.textDocument.source = notepage.fileUrl // workaround for QTBUG-120772
+                }
             }
         }
 

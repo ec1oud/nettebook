@@ -3,9 +3,12 @@
 
 #include "zkmodel.h"
 
+#include <QLoggingCategory>
 #include <QQuickTextDocument>
 #include <QRegularExpression>
 #include <QTextFragment>
+
+Q_LOGGING_CATEGORY(lcZkm, "org.nettebook.zettelkasten.model")
 
 static QRegularExpression SpaceReplacementRE("[_-]");
 static QRegularExpression SpaceRE("\\s+");
@@ -15,7 +18,7 @@ ZkModel::ZkModel(QObject *parent)
 {
     // m_roles.insert(int(Role::Url), QByteArrayLiteral("fileUrl"));
     // m_roles.insert(int(Role::FileLastModified), QByteArrayLiteral("fileModified"));
-    qDebug() << roleNames();
+    qCDebug(lcZkm) << roleNames();
 
     connect(&m_watcher, &QFileSystemWatcher::directoryChanged,
             this, &ZkModel::onDirectoryChanged);
@@ -58,7 +61,7 @@ QVariant ZkModel::data(const QModelIndex &index, int role) const
 
     QFileInfo fi = m_dir.entryInfoList(QDir::Files).at(index.row());
 
-    qDebug() << index << "role" << roleNames()[role] << fi << QUrl::fromLocalFile(m_dir.filePath(fi.fileName())) << fi.lastModified();
+    qCDebug(lcZkm) << index << "role" << roleNames()[role] << fi << QUrl::fromLocalFile(m_dir.filePath(fi.fileName())) << fi.lastModified();
 
     switch (role) {
     case int(Role::Url):
@@ -91,8 +94,8 @@ void ZkModel::setFolder(const QUrl &newFolder)
 
     m_dir = QDir(newFolder.toLocalFile());
     m_watcher.addPath(m_dir.absolutePath());
-    qDebug() << Q_FUNC_INFO << QDir::currentPath() << newFolder << newFolder.toLocalFile() << m_dir.absolutePath();
-    qDebug() << "found" << rowCount();
+    qCDebug(lcZkm) << Q_FUNC_INFO << QDir::currentPath() << newFolder << newFolder.toLocalFile() << m_dir.absolutePath();
+    qCDebug(lcZkm) << "found" << rowCount();
     emit folderChanged();
 }
 
@@ -107,7 +110,7 @@ void ZkModel::rename(const QUrl &filename, const QString &newTitle)
     }
     newFilename += "." + old.suffix();
     QFileInfo fi(m_dir, newFilename);
-    qDebug() << "rename" << old.absoluteFilePath() << fi.absoluteFilePath();
+    qCDebug(lcZkm) << "rename" << old.absoluteFilePath() << fi.absoluteFilePath();
     QFile::rename(old.absoluteFilePath(), fi.absoluteFilePath());
 }
 
@@ -116,7 +119,7 @@ QString ZkModel::makeNew()
     QDateTime now = QDateTime::currentDateTime();
     QString name = now.toString(Qt::ISODateWithMs) + ".md";
     QFile f(m_dir.filePath(name));
-    qDebug() << ">>> new" << f.fileName();
+    qCDebug(lcZkm) << ">>> new" << f.fileName();
     f.open(QIODevice::WriteOnly | QIODevice::NewOnly); // touch it
     f.close();
     return f.fileName();
@@ -148,7 +151,7 @@ QList<int> ZkModel::getLinkedIndices(int row) const
         return ret;
     }
     QTextDocument *qtd = doc->textDocument();
-    // qDebug() << "row" << row << "has doc" << doc->source() << qtd;
+    // qCDebug(lcZkm) << "row" << row << "has doc" << doc->source() << qtd;
     // QTextCursor cur(qtd);
     auto firstBlock = qtd->firstBlock();
     for (QTextBlock::iterator it = firstBlock.begin(); !(it.atEnd()); ++it) {
@@ -158,7 +161,7 @@ QList<int> ZkModel::getLinkedIndices(int row) const
             QUrl ref(fmt.anchorHref());
             if (ref.scheme().isEmpty() || ref.isLocalFile()) {
                 int index = files.indexOf(ref.fileName());
-                qDebug() << "    found local link" << ref << ref.fileName() << fmt.anchorNames() << "@" << index
+                qCDebug(lcZkm) << "    found local link" << ref << ref.fileName() << fmt.anchorNames() << "@" << index
                          << "on" << currentFragment.text();
                 if (index >= 0)
                     ret << index;

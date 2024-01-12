@@ -17,7 +17,5 @@ trendy lately.  Some links:
 
 <https://obsidian.md/>
 
-This Qt Quick 
-[version](file:example/QQuickTextSelection-programmatic-linking.md#this_zettelkasten)
-uses one markdown file per "zettel", with a yaml header.
+This Qt Quick version uses one markdown file per "zettel", with a yaml header.
 

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 import QtQuick
+import QtQuick.Shapes
 import Qt.labs.folderlistmodel
 import org.nettebook.zettelkasten
 
@@ -39,16 +40,15 @@ Window {
                 required property string title
                 property alias edit: edit
                 property alias yaml: yaml
+                property point position: Qt.point(x, y)
                 id: notepage
                 objectName: "frame: " + fileName
                 color: "lightyellow"
-                width: Math.max(320, title.implicitWidth); height: 240
+                width: Math.max(360, title.implicitWidth); height: 240
                 x: yaml.position.x
                 y: yaml.position.y
                 onXChanged: yaml.position.x = x
                 onYChanged: yaml.position.y = y
-
-                property var linkedIndices: folderModel.getLinkedIndices(index)
 
                 function addPendingLink() {
                     var component = Qt.createComponent("PendingLink.qml");
@@ -69,6 +69,53 @@ Window {
                     console.log(notepage.fileName, notepage.x, notepage.y, "getting randomized")
                     notepage.x = Math.random() * (surfaceWindow.width - notepage.width) / 2 + (surface.width - surfaceWindow.width) / 2
                     notepage.y = Math.random() * (surfaceWindow.height - notepage.height) / 2 + (surface.height - surfaceWindow.height) / 2
+                }
+
+                property list<int> linkedIndices: folderModel.getLinkedIndices(index)
+
+                Repeater {
+                    model: notepage.linkedIndices
+                    // delegate: Text {
+                    //     z: 100
+                    //     required property int index // index in linkedIndices
+                    //     required property int modelData  // index in folderModel
+                    //     property Item otherPage: peter.itemAt(modelData)
+                    //     // property point otherPosOnSurface: surface.mapFromItem(otherPage, Qt.point())
+                    //     // property point otherPos: notepage.mapFromItem(otherPage, Qt.point())
+                    //     property point otherPos: surface.mapToItem(notepage, otherPage?.position)
+
+                    //     // parent: notepage
+                    //     color: "red"
+                    //     font.pointSize: 12
+                    //     text: index + ": " + modelData + " " + otherPos + " " + otherPage?.objectName
+                    //     anchors.bottom: parent.bottom
+                    // }
+
+                    delegate: Shape {
+                        required property int index // index in linkedIndices
+                        required property int modelData  // index in folderModel
+                        property Item otherPage: peter.itemAt(modelData)
+                        property point startPoint: Qt.point(notepage.width, ribbon.height / 2)
+                        property point otherPos: visible ? surface.mapToItem(notepage, otherPage.position) : startPoint
+                        opacity: 0.5
+                        visible: otherPage
+
+                        ShapePath {
+                            id: linkPath
+                            strokeWidth: 4
+                            strokeColor: "cyan"
+                            fillColor: "transparent"
+                            startX: notepage.width
+                            startY: ribbon.height / 2
+
+                            PathQuad {
+                                x: otherPos.x
+                                y: otherPos.y
+                                relativeControlX: (otherPos.x - linkPath.startX) / 2
+                                relativeControlY: -Math.abs((otherPos.y - linkPath.startY) / 2)
+                            }
+                        }
+                    }
                 }
 
                 DragHandler {

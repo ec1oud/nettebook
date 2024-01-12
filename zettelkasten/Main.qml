@@ -77,30 +77,31 @@ Window {
                     model: notepage.linkedIndices
 
                     delegate: Shape {
-                        required property int index // index in linkedIndices
-                        required property int modelData  // index in folderModel
+                        required property int modelData     // index in folderModel
                         property Item otherPage: peter.itemAt(modelData)
                         property point otherPos: visible ? surface.mapToItem(notepage, otherPage.position) : startPoint
                         property bool otherBelow: otherPos.y > notepage.height / 2
-                        property point startPoint: Qt.point(otherPos.x > notepage.width ? notepage.width : 0,
-                                                            otherBelow ? notepage.height : ribbon.height / 2)
+                        property point startPoint: Qt.point(notepage.width / 2, notepage.height / 2)
+                        property point endPoint: visible ? Qt.point(otherPos.x + otherPage.width / 2,
+                                                                    otherPos.y + otherPage.height / 2) : startPoint
                         id: transpointer
                         opacity: 0.5
                         visible: otherPage
+                        z: -1
 
                         ShapePath {
                             id: linkPath
-                            strokeWidth: 4
+                            strokeWidth: ribbon.height
                             strokeColor: "cyan"
                             fillColor: "transparent"
                             startX: transpointer.startPoint.x
                             startY: transpointer.startPoint.y
 
                             PathQuad {
-                                x: otherPos.x
-                                y: otherPos.y
-                                relativeControlX: (otherPos.x - linkPath.startX) / 2
-                                relativeControlY: (otherBelow ? 1 : -1) * Math.abs((otherPos.y - linkPath.startY) / 2)
+                                x: endPoint.x
+                                y: endPoint.y
+                                relativeControlX: (x - linkPath.startX) / 2
+                                relativeControlY: (y - linkPath.startY) / -2
                             }
                         }
                     }

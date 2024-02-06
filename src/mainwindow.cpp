@@ -506,7 +506,7 @@ void MainWindow::currentCharFormatChanged(const QTextCharFormat &format)
     ui->actionStrongEmphasis->setChecked(format.font().bold());
     ui->actionEmphasis->setChecked(format.font().italic());
     ui->actionStrikeOut->setChecked(format.font().strikeOut());
-    ui->actionMonospace->setChecked(QFontInfo(format.font()).fixedPitch());
+    ui->actionMonospace->setChecked(QFontInfo(format.font()).fixedPitch() || format.fontFixedPitch());
 //    ui->actionUnderline->setChecked(format.font().underline());
     m_programmaticUiSetting = false;
 }
@@ -674,6 +674,7 @@ void MainWindow::on_actionMonospace_toggled(bool a)
     if (a)
         f.setFamily(m_monoFont.family());
     fmt.setFont(f);
+    fmt.setFontFixedPitch(a);
     mergeFormatOnWordOrSelection(fmt);
 }
 

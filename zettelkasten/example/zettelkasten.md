@@ -11,7 +11,9 @@ trendy lately.  Some links:
 
 <https://www.universitylibrarian.com/blog/the-zettelkasten-method-of-notetaking>
 
+
 <https://medium.com/@fairylights_io/the-zettelkasten-method-examples-to-help-you-get-started-8f8a44fa9ae6>
+
 
 <https://writingcooperative.com/zettelkasten-how-one-german-scholar-was-so-freakishly-productive-997e4e0ca125>
 

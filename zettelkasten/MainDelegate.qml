@@ -190,7 +190,7 @@ Flipable {
                     if (!textDocument.modified) { // loading is done
                         linkRepeater.model = folderModel.getLinkedIndices(notepage.index)
                     }
-                textDocument.onError: (message) => toastMessage.text += message + "\n"
+                textDocument.onErrorStringChanged: (str) => { if (str !== "") toastMessage.text += message + "\n" }
                 textFormat: TextEdit.MarkdownText
                 wrapMode: TextEdit.WordWrap
                 onCursorRectangleChanged: flick.ensureVisible(cursorRectangle)

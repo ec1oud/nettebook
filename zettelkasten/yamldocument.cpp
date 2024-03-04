@@ -89,9 +89,7 @@ void YamlDocument::saveToDocument()
     pos["y"] = m_position.y();
     meta["position"] = pos;
     std::stringstream ss;
-    ss << "---" << std::endl;
     ss << meta << std::endl;
-    ss << "---" << std::endl;
     m_document->textDocument()->setMetaInformation(QTextDocument::FrontMatter,
                                                    QString::fromStdString(ss.str()));
 }

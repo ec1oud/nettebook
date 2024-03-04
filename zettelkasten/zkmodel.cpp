@@ -210,7 +210,8 @@ void ZkModel::setDocumentProvider(const QJSValue &newDocumentProvider)
 void ZkModel::onFileChanged(const QString &path)
 {
     qCDebug(lcZkm) << "fileChanged" << path;
-    // TODO look up which row that applies to and emit dataChanged()
+    // TODO if this ever happens, look up which row that applies to and emit dataChanged()
+    // but QFileSystemWatcher doesn't emit fileChanged() unless we are watching files individually
 }
 
 void ZkModel::onDirectoryChanged(const QString &path)

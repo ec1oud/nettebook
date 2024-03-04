@@ -28,29 +28,19 @@ void YamlDocument::setDocument(QQuickTextDocument *document)
         return;
 
     if (m_document)
-        disconnect(m_document->textDocument(), &QTextDocument::contentsChanged, this, &YamlDocument::parse);
+        disconnect(m_document, &QQuickTextDocument::statusChanged, this, &YamlDocument::parse);
     m_document = document;
     if (m_document)
-        connect(m_document->textDocument(), &QTextDocument::contentsChanged, this, &YamlDocument::parse);
+        connect(m_document, &QQuickTextDocument::statusChanged, this, &YamlDocument::parse);
     emit documentChanged();
-}
-
-QUrl YamlDocument::source() const
-{
-    return m_source;
-}
-
-void YamlDocument::setSource(const QUrl &newSource)
-{
-    if (m_source == newSource)
-        return;
-    m_source = newSource;
-    emit sourceChanged();
 }
 
 void YamlDocument::parse()
 {
+    if (m_document->status() != QQuickTextDocument::Status::Loaded)
+        return;
     static QString yaml;
+    const QString src = m_document->source().fileName();
     QString yfm = m_document->textDocument()->metaInformation(QTextDocument::FrontMatter);
     bool changeValid = yfm != yaml && !yfm.isEmpty();
     if (changeValid) {
@@ -58,23 +48,27 @@ void YamlDocument::parse()
         if (meta["birth"]) {
             QString bds = QString::fromStdString(meta["birth"].as<std::string>());
             m_birth = QDateTime::fromString(bds, Qt::ISODateWithMs);
-            qCDebug(lcYml) << m_source.fileName() << "birth" << bds << m_birth;
+            qCDebug(lcYml) << src << "birth" << bds << m_birth;
             emit birthChanged();
         }
         if (meta["position"]) {
             auto map = meta["position"].as<std::map<std::string, double>>();
-            qCDebug(lcYml) << m_source.fileName() << "pos" << map;
+            qCDebug(lcYml) << src << "pos" << map;
             setPosition(QPointF(map["x"], map["y"]));
         }
         yaml = yfm;
     }
     if (m_birth.isNull()) {
-        QFileInfo fi(m_source.fileName());
+        QFileInfo fi(src);
         QDateTime fdt = QDateTime::fromString(fi.baseName(), Qt::ISODateWithMs);
         if (fdt.isValid()) {
             m_birth = fdt;
-            qCDebug(lcYml) << m_source.fileName() << "birth from filename" << m_birth;
+            qCDebug(lcYml) << src << "birth from filename" << m_birth;
         }
+    }
+    if (m_position.isNull()) {
+        qCDebug(lcYml) << src << "position not set";
+        emit needsPosition();
     }
     if (changeValid)
         emit parsed();

@@ -12,7 +12,6 @@ class YamlDocument : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(QQuickTextDocument *document READ document WRITE setDocument NOTIFY documentChanged)
-    Q_PROPERTY(QUrl source READ source WRITE setSource NOTIFY sourceChanged FINAL)
     Q_PROPERTY(QDateTime birth READ birth WRITE setBirth NOTIFY birthChanged FINAL)
     Q_PROPERTY(QPointF position READ position WRITE setPosition NOTIFY positionChanged FINAL)
     Q_PROPERTY(bool positionSet READ isPositionSet NOTIFY positionChanged FINAL)
@@ -26,9 +25,6 @@ public:
 
     Q_INVOKABLE void saveToDocument();
 
-    QUrl source() const;
-    void setSource(const QUrl &newSource);
-
     QDateTime birth() const;
     void setBirth(const QDateTime &newBirth);
 
@@ -38,7 +34,7 @@ public:
 
 signals:
     void parsed();
-    void sourceChanged();
+    void needsPosition();
     void documentChanged();
     void birthChanged();
     void positionChanged();
@@ -49,7 +45,6 @@ private:
 private:
     QQuickTextDocument *m_document = nullptr;
     QDateTime m_birth;
-    QUrl m_source;
     QPointF m_position;
 };
 

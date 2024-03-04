@@ -208,11 +208,7 @@ Flipable {
         YamlDocument {
             id: yaml
             document: edit.textDocument
-            source: notepage.fileUrl
-            onParsed: {
-                if (!positionSet)
-                    notepage.setRandomPosition()
-            }
+            onNeedsPosition: notepage.setRandomPosition()
         }
 
         Rectangle {

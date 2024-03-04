@@ -24,12 +24,9 @@ questions about standardization on 2022-07-15:
 > 
 > FWIW, <https://www.rfc-editor.org/rfc/rfc7763> states that
 > 
-> - charset is required (also see
-> 
-> 
-> [https://www.rfc-editor.org/rfc/rfc6838#section-4.2.1)](https://www.rfc-editor.org/rfc/rfc6838#section-4.2.1)
-> ) , so we should set it and parse it
-> 
+> - charset is required (also see 
+>   [https://www.rfc-editor.org/rfc/rfc6838#section-4.2.1)](https://www.rfc-editor.org/rfc/rfc6838#section-4.2.1)
+>   ) , so we should set it and parse it
 > - variant is optional
 > 
 > But perhaps 'variant' is something we should specify when we produce the
